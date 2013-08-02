@@ -2,11 +2,11 @@ Vagrant + DSpace = vagrant-dspace
 =================================
 
 [Vagrant](http://vagrantup.com) can be used to spin up a temporary Virtual Machine (VM) in a variety of providers (VirtualBox, VMWare, AWS, etc).
-The Vagrantfile in this folder (along with associated shell scripts) configures a DSpace development environment via Vagrant. 
+The `Vagrantfile` in this folder (along with associated provision scripts) configures a DSpace development environment via Vagrant (and Puppet). 
 
-Advantages for DSpace Development: 
+Some Advantages for DSpace Development: 
 * Using Vagrant would allow someone to spin up an "offline" copy of DSpace on your local machine/laptop for development or demo purposes.
-* Vagrant VMs are "throwaway". Can easily destroy and recreate at will for testing purposes (e.g. vagrant destroy; vagrant up)
+* Vagrant VMs are "throwaway". Can easily destroy and recreate at will for testing purposes or as needs arise (e.g. vagrant destroy; vagrant up)
 
 _BIG WARNING: THIS IS STILL A WORK IN PROGRESS. YOUR MILEAGE MAY VARY. NEVER USE THIS IN PRODUCTION._
 
