@@ -93,7 +93,7 @@ Vagrant.configure("2") do |config|
   # Borrowed from https://github.com/hashicorp/puppet-bootstrap/
   config.vm.provision :shell, :path => "puppet-bootstrap-ubuntu.sh"
   
-  # Call our Puppet initiatialization script
+  # Call our Puppet initialization script
   config.vm.provision :puppet do |puppet|
     # Set some custom "facts" for Puppet manifest(s)/modules to use.
     puppet.facter = {
