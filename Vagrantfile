@@ -79,7 +79,7 @@ Vagrant.configure("2") do |config|
     if Vagrant::Util::Platform.windows?
         # MORE SECURE HACK. You MUST have a ~/.ssh/github_rsa (GitHub specific) SSH key to copy to VM
         # (ensures we are not just copying all your local SSH keys to a VM)
-        if File.exists?(File.join(Dir.home, ".ssh", "github_rsad"))
+        if File.exists?(File.join(Dir.home, ".ssh", "github_rsa"))
             # Read local machine's GitHub SSH Key (~/.ssh/github_rsa)
             github_ssh_key = File.read(File.join(Dir.home, ".ssh", "github_rsa"))
             # Copy it to VM as the /root/.ssh/id_rsa key
