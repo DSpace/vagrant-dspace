@@ -14,7 +14,8 @@ What Works
 ----------
 
 * Spins up am Ubuntu VM using Vagrant (VirtualBox backend is only one tested so far.)
-* Sync your local Git settings and SSH keys to the VM
+* Setup SSH Forwarding, so that you can use your SSH key(s) on VM (for GitHub clones/commits)
+* Sync your local Git settings (name & email) to VM
 * Install some of the basic prerequisites for DSpace Development (namely: Git, Java, Maven)
 * Clone DSpace source from GitHub to `~/dspace-src/` (under the default 'vagrant' user account)
 
@@ -35,7 +36,7 @@ How To Use vagrant-dspace
 
 1. Install [Vagrant](http://vagrantup.com) (I've only tested with the [VirtualBox](https://www.virtualbox.org/) provider so far)
 2. Clone a copy of 'vagrant-dspace' to your local computer
-3. (WINDOWS ONLY) Any users of Vagrant from Windows MUST create a GitHub-specific SSH Key (at `~/.ssh/github_rsa`) which is then connected to your GitHub Account. There are two easy ways to do this:
+3. _WINDOWS ONLY_ : Any users of Vagrant from Windows MUST create a GitHub-specific SSH Key (at `~/.ssh/github_rsa`) which is then connected to your GitHub Account. There are two easy ways to do this:
    * Install [GitHub for Windows](http://windows.github.com/) - this will automatically generate a new `~/.ssh/github_rsa` key.
    * OR, manually generate a new `~/.ssh/github_rsa` key and associate it with your GitHub Account. [GitHub has detailed instructions on how to do this.](https://help.github.com/articles/generating-ssh-keys)
 4. `cd [vagrant-dspace]/`
