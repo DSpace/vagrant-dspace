@@ -37,67 +37,19 @@ exec {"apt-get-update":
   refreshonly => true, # only run if notified
 }
 
-#-----------------
-# dspace_prereqs
-# Class which initializes the server with the base DSpace prerequisites
-#-----------------
-class dspace_prereqs($java_version = "7")
-{
-  # If the global fact "java_version" doesn't exist, default to value passed in
-  # NOTE: $jdk_version should end up being set to just "7" (default) or "6"
-  if $::java_version == undef {
-    $jdk_version = $java_version
-  }
-  else { # Otherwise, use the value of the "java_version" global fact
-    $jdk_version = $::java_version
-  }
-
-  # Install Java, based on set $java_version (passed to Puppet in VagrantFile)
-  package { "java":
-    name => "openjdk-${jdk_version}-jdk",  # Install OpenJDK package (as Oracle JDK tends to require a more complex manual download & unzip)
-  }
-
-  # Set Java defaults to point at our Java package
-  # NOTE: $architecture is a "fact" automatically set by Puppet's 'facter'.
-  exec { "Update alternatives to Java ${jdk_version}":
-    command => "update-java-alternatives --set java-1.${jdk_version}.0-openjdk-${architecture}",
-    unless => "test \$(readlink /etc/alternatives/java) = '/usr/lib/jvm/java-${jdk_version}-openjdk-${architecture}/jre/bin/java'",
-    require => [Package["java"], Package["maven"]],   # Run *after* Maven is installed, since Maven install sometimes changes the java alternative!
-    path => "/usr/bin:/usr/sbin:/bin",
-  }
-
-  # Install Maven & Ant
-  package { "maven": 
-    require => Package["java"],
-  }
-  package { "ant":
-    require => Package["java"],
-  }
+# Install DSpace pre-requisites (from DSpace module's init.pp)
+# If the global fact "java_version" doesn't exist, use default value in 'dspace' module
+if $::java_version == undef {
+    include dspace
+}
+else { # Otherwise, pass the value of $::java_version to the 'dspace' module
+    class { 'dspace':
+       java_version => $::java_version,
+    }
 }
 
-#------------
-# dspace_src
-# Class to obtain DSpace Source Code from Git
-#------------
-class dspace_src
-{  
-  # Install Git
-  package { "git":
-  }
 
-  # Check if our SSH connection to GitHub works. This verifies that SSH forwarding is working right.
-  exec { "Verify SSH connection to GitHub works?" :
-    command => "ssh -T -oStrictHostKeyChecking=no git@github.com",
-    returns => 1,   # If this succeeds, it actually returns '1'. If it fails, it returns '255'
-  }
-
-  # Clone DSpace GitHub to ~/dspace-src
-  exec { "git clone git@github.com:DSpace/DSpace.git /home/vagrant/dspace-src": 
-    require => [Package["git"], Exec["Verify SSH connection to GitHub works?"]],
-    logoutput => true,
-  }
+# Kickoff a DSpace installation for the 'vagrant' default user
+dspace::install { vagrant-dspace:
+   owner => "vagrant",
 }
-
-# actually run the classes
-include dspace_prereqs
-include dspace_src
