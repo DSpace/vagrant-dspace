@@ -35,8 +35,11 @@ How To Use vagrant-dspace
 
 1. Install [Vagrant](http://vagrantup.com) (I've only tested with the [VirtualBox](https://www.virtualbox.org/) provider so far)
 2. Clone a copy of 'vagrant-dspace' to your local computer
-3. `cd [vagrant-dspace]/`
-4. `vagrant up`
+3. (WINDOWS ONLY) Any users of Vagrant from Windows MUST create a GitHub-specific SSH Key (at `~/.ssh/github_rsa`) which is then connected to your GitHub Account. There are two easy ways to do this:
+   * Install [GitHub for Windows](http://windows.github.com/) - this will automatically generate a new `~/.ssh/github_rsa` key.
+   * OR, manually generate a new `~/.ssh/github_rsa` key and associate it with your GitHub Account. [GitHub has detailed instructions on how to do this.](https://help.github.com/articles/generating-ssh-keys)
+4. `cd [vagrant-dspace]/`
+5. `vagrant up`
 
 The `vagrant up` command will initialize a new VM based on the settings in the `Vagrantfile` in that directory.  
 
