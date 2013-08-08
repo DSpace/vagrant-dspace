@@ -83,7 +83,7 @@ Vagrant.configure("2") do |config|
             # Read local machine's GitHub SSH Key (~/.ssh/github_rsa)
             github_ssh_key = File.read(File.join(Dir.home, ".ssh", "github_rsa"))
             # Copy it to VM as the /root/.ssh/id_rsa key
-            config.vm.provision :shell, :inline => "echo 'Windows-specific: Copying local GitHub SSH Key to VM for provisioning...' && mkdir /root/.ssh && echo '#{github_ssh_key}' > /root/.ssh/id_rsa && chmod 600 /root/.ssh/id_rsa"
+            config.vm.provision :shell, :inline => "echo 'Windows-specific: Copying local GitHub SSH Key to VM for provisioning...' && mkdir -p /root/.ssh && echo '#{github_ssh_key}' > /root/.ssh/id_rsa && chmod 600 /root/.ssh/id_rsa"
         else
             # Else, throw a Vagrant Error. Cannot successfully startup on Windows without a GitHub SSH Key!
             raise Vagrant::Errors::VagrantError, "\n\nERROR: GitHub SSH Key not found at ~/.ssh/github_rsa (required for 'vagrant-dspace' on Windows).\nYou can generate this key manually OR by installing GitHub for Windows (http://windows.github.com/)\n\n"
@@ -106,6 +106,11 @@ Vagrant.configure("2") do |config|
     # Shell script to initialize latest Puppet on VM
     # Borrowed from https://github.com/hashicorp/puppet-bootstrap/
     config.vm.provision :shell, :path => "puppet-bootstrap-ubuntu.sh"
+
+    # This shell provisioner installs librarian-puppet and runs it to install
+    # puppet modules. This has to be done before the puppet provisioning so that
+    # the modules are available when puppet tries to parse its manifests.
+    config.vm.provision :shell, :path => "librarian-puppet-bootstrap.sh"
 
     # Call our Puppet initialization script
     config.vm.provision :puppet do |puppet|
@@ -146,5 +151,11 @@ Vagrant.configure("2") do |config|
 
         # Use VBoxManage to ensure Virtual Machine only has access to 50% of host CPU
         #vb.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
+
+        # This allows symlinks to be created within the /vagrant root directory,
+        # which is something librarian-puppet needs to be able to do. This might
+        # be enabled by default depending on what version of VirtualBox is used.
+        # Borrowed from https://github.com/purple52/librarian-puppet-vagrant/
+        vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
     end
 end
