@@ -48,30 +48,32 @@ else { # Otherwise, pass the value of $::java_version to the 'dspace' module
     }
 }
 
-
-# Kickoff a DSpace installation for the 'vagrant' default user
-dspace::install { vagrant-dspace:
-   owner => "vagrant",
-}
-
-# start PostgreSQL
+# Install PostgreSQL
 class { 'postgresql':
   charset => 'UTF8',
 }
 
+# Setup/Configure PostgreSQL server
 class { 'postgresql::server':
   config_hash => {
     'listen_addresses'           => '*',
     'ip_mask_deny_postgres_user' => '0.0.0.0/32',
-    'ip_mask_allow_all_users'      => '0.0.0.0/0',
+    'ip_mask_allow_all_users'    => '0.0.0.0/0',
     'manage_redhat_firewall'     => true,
     'manage_pg_hba_conf'         => true,
     'postgres_password'          => 'dspace',
   },
 }
 
+# Create a 'dspace' database
 postgresql::db { 'dspace':
   user     => 'dspace',
   password => 'dspace'
+}
+
+# Kickoff a DSpace installation for the 'vagrant' default user
+dspace::install { vagrant-dspace:
+   owner   => "vagrant",
+   require => Postgresql::Db['dspace'],  # Require that PostgreSQL DB is setup
 }
 

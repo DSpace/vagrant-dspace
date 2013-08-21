@@ -13,18 +13,18 @@ _BIG WARNING: THIS IS STILL A WORK IN PROGRESS. YOUR MILEAGE MAY VARY. NEVER USE
 What Works
 ----------
 
-* Spins up am Ubuntu VM using Vagrant (VirtualBox backend is only one tested so far.)
+* Spins up an Ubuntu VM using Vagrant (VirtualBox backend is only one tested so far.)
 * Setup SSH Forwarding, so that you can use your SSH key(s) on VM (for GitHub clones/commits)
 * Sync your local Git settings (name & email) to VM
 * Install some of the basic prerequisites for DSpace Development (namely: Git, Java, Maven)
 * Clone DSpace source from GitHub to `~/dspace-src/` (under the default 'vagrant' user account)
+* Install/Configure PostgreSQL (Thanks to hpottinger!)
 
 What Doesn't Work (Yet)
 ---------------------------
 
-* Installing/configuring PostgreSQL
 * Installing/configuring Tomcat
-* Actually compiling/installing/configuring DSpace
+* Actually compiling/installing/configuring DSpace to run on Tomcat & PostgreSQL
 
 I hope that all of these will be coming at some point...but they aren't here yet.
 
