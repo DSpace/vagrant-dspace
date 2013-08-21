@@ -48,7 +48,7 @@ else { # Otherwise, pass the value of $::java_version to the 'dspace' module
     }
 }
 
-# Install PostgreSQL
+# Install PostgreSQL package
 class { 'postgresql':
   charset => 'UTF8',
 }
@@ -71,9 +71,17 @@ postgresql::db { 'dspace':
   password => 'dspace'
 }
 
+# Install Tomcat package
+include tomcat
+
+# Create a new Tomcat instance at ~vagrant/tomcat
+tomcat::instance { 'dspace':
+   owner   => "vagrant",
+   appBase => "/home/vagrant/dspace/webapps",  # Tell Tomcat to load webapps from this directory 
+}
+
 # Kickoff a DSpace installation for the 'vagrant' default user
 dspace::install { vagrant-dspace:
    owner   => "vagrant",
-   require => Postgresql::Db['dspace'],  # Require that PostgreSQL DB is setup
+   require => [Postgresql::Db['dspace'],Tomcat::Instance['dspace']]  # Require that PostgreSQL and Tomcat are setup
 }
-
