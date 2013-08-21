@@ -19,17 +19,20 @@ What Works
 * Install some of the basic prerequisites for DSpace Development (namely: Git, Java, Maven)
 * Clone DSpace source from GitHub to `~/dspace-src/` (under the default 'vagrant' user account)
 * Install/Configure PostgreSQL (Thanks to hpottinger!)
+   * Uses [librarian-puppet](http://librarian-puppet.com/) to install [puppetlabs/postgresql](http://forge.puppetlabs.com/puppetlabs/postgresql) Puppet module
+   * Then uses that Puppet module to install PostgreSQL
+ * Installs Tomcat
+   * Uses [librarian-puppet](http://librarian-puppet.com/) to install [tdonohue/puppet-tomcat](https://github.com/tdonohue/puppet-tomcat/)
+   * Then uses that Puppet module to install Tomcat
 
 What Doesn't Work (Yet)
 ---------------------------
 
-* Installing/configuring Tomcat
 * Actually compiling/installing/configuring DSpace to run on Tomcat & PostgreSQL
 
 I hope that all of these will be coming at some point...but they aren't here yet.
 
-**If you want to help, please do.** I'd prefer solutions using [Puppet](https://puppetlabs.com/) to setup/install this software, as there are many available Puppet Modules which already claim to help setup Tomcat & PostgreSQL.
-Plus, I'm already using Puppet as part of the provisioning of this Vagrant server (see the ['dspace-init.pp'](https://github.com/tdonohue/vagrant-dspace/blob/master/dspace-init.pp) Puppet script in this codebase).
+**If you want to help, please do.** I'd prefer solutions using [Puppet](https://puppetlabs.com/).
 
 How To Use vagrant-dspace
 --------------------------
