@@ -15,14 +15,8 @@ mod "tomcat",
 #  :git => "git://github.com/puppetlabs/puppetlabs-apt.git"
 #
 #mod "stdlib",
-<<<<<<< Updated upstream
-#  :git => "git://github.com/puppetlabs/puppetlabs-stdlib.git"
-||||||| merged common ancestors
-#  :git => "git://github.com/puppetlabs/puppetlabs-stdlib.git"
-=======
 #  :git => "git://github.com/puppetlabs/puppetlabs-stdlib.git"
 
 # add tomcat
 include tomcat::debian
 
->>>>>>> Stashed changes
