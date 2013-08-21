@@ -21,7 +21,7 @@ What Works
 * Install/Configure PostgreSQL (Thanks to hpottinger!)
    * Uses [librarian-puppet](http://librarian-puppet.com/) to install [puppetlabs/postgresql](http://forge.puppetlabs.com/puppetlabs/postgresql) Puppet module
    * Then uses that Puppet module to install PostgreSQL
- * Installs Tomcat
+* Installs Tomcat
    * Uses [librarian-puppet](http://librarian-puppet.com/) to install [tdonohue/puppet-tomcat](https://github.com/tdonohue/puppet-tomcat/)
    * Then uses that Puppet module to install Tomcat
 
