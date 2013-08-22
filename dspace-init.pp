@@ -71,6 +71,15 @@ postgresql::db { 'dspace':
   password => 'dspace'
 }
 
+# add tomcat
+include tomcat
+
+tomcat::instance {"dspace":
+  ensure    => present,
+  http_port => "8080",
+}
+
+
 # Kickoff a DSpace installation for the 'vagrant' default user
 dspace::install { vagrant-dspace:
    owner   => "vagrant",
