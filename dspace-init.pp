@@ -74,10 +74,9 @@ postgresql::db { 'dspace':
 # Install Tomcat package
 include tomcat
 
-# Create a new Tomcat instance at ~vagrant/tomcat
+# Create a new Tomcat instance
 tomcat::instance { 'dspace':
-   owner   => "vagrant",
-   appBase => "/home/vagrant/dspace/webapps",  # Tell Tomcat to load webapps from this directory 
+   ensure    => present,
 }
 
 # Kickoff a DSpace installation for the 'vagrant' default user
