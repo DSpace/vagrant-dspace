@@ -54,13 +54,15 @@ Vagrant.configure("2") do |config|
     # Hostname for virtual machine
     config.vm.hostname = "dspace-dev"
 
-    # Turn on SSH forwarding (so that 'vagrant ssh' has access to your local SSH keys, and you can use your local SSH keys to access GitHub, etc.)
+     # Create a forwarded port mapping which allows access to a specific port
+    # within the machine from a port on the host machine. In the example below,
+    # accessing "localhost:8080" will access port 8080 on the VM.
+    config.vm.network :forwarded_port, guest: 8080, host: 8080,
+      auto_correct: true
+
+   # Turn on SSH forwarding (so that 'vagrant ssh' has access to your local SSH keys, and you can use your local SSH keys to access GitHub, etc.)
     config.ssh.forward_agent = true
 
-    # Create a forwarded port mapping which allows access to a specific port
-    # within the machine from a port on the host machine. In the example below,
-    # accessing "localhost:8090" will access port 8080 on the VM.
-    config.vm.network :forwarded_port, guest: 8080, host: 8090
 
     # THIS NEXT PART IS TOTAL HACK (only necessary for running Vagrant on Windows)
     # Windows currently doesn't support SSH Forwarding when running Vagrant's "Provisioning scripts" 
