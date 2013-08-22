@@ -18,12 +18,13 @@ What Works
 * Sync your local Git settings (name & email) to VM
 * Install some of the basic prerequisites for DSpace Development (namely: Git, Java, Maven)
 * Clone DSpace source from GitHub to `~/dspace-src/` (under the default 'vagrant' user account)
-* Install/Configure PostgreSQL (Thanks to hpottinger!)
-   * Uses [librarian-puppet](http://librarian-puppet.com/) to install [puppetlabs/postgresql](http://forge.puppetlabs.com/puppetlabs/postgresql) Puppet module
-   * Then uses that Puppet module to install PostgreSQL
-* Installs Tomcat
-   * Uses [librarian-puppet](http://librarian-puppet.com/) to install [tdonohue/puppet-tomcat](https://github.com/tdonohue/puppet-tomcat/)
-   * Then uses that Puppet module to install Tomcat
+* Install/Configure PostgreSQL (Thanks to [hardyoyo](https://github.com/hardyoyo/)!)
+   * We install [puppetlabs/postgresql](http://forge.puppetlabs.com/puppetlabs/postgresql) (via [librarian-puppet](http://librarian-puppet.com/)),
+     and then use that Puppet module to setup PostgreSQL
+* Installs Tomcat (Thanks to [hardyoyo](https://github.com/hardyoyo/)!)
+   * We install [camptocamp/puppet-tomcat](https://github.com/camptocamp/puppet-tomcat/) (via [librarian-puppet](http://librarian-puppet.com/)),
+     and then use that Puppet module to setup Tomcat
+   * WARNING: We are just pulling down the latest "master" code from camptocamp/puppet-tomcat at this time.
 
 What Doesn't Work (Yet)
 ---------------------------
