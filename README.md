@@ -6,7 +6,7 @@ The `Vagrantfile` in this folder (along with associated provision scripts) confi
 
 Some Advantages for DSpace Development: 
 * Using Vagrant would allow someone to spin up an "offline" copy of DSpace on your local machine/laptop for development or demo purposes.
-* Vagrant VMs are "throwaway". Can easily destroy and recreate at will for testing purposes or as needs arise (e.g. vagrant destroy; vagrant up)
+* Vagrant VMs are "throwaway". Can easily destroy and recreate at will for testing purposes or as needs arise (e.g. `vagrant destroy; vagrant up`)
 
 _BIG WARNING: THIS IS STILL A WORK IN PROGRESS. YOUR MILEAGE MAY VARY. NEVER USE THIS IN PRODUCTION._
 
@@ -22,16 +22,11 @@ What Works
    * We install [puppetlabs/postgresql](http://forge.puppetlabs.com/puppetlabs/postgresql) (via [librarian-puppet](http://librarian-puppet.com/)),
      and then use that Puppet module to setup PostgreSQL
 * Installs Tomcat (Thanks to [hardyoyo](https://github.com/hardyoyo/)!)
-   * We install [camptocamp/puppet-tomcat](https://github.com/camptocamp/puppet-tomcat/) (via [librarian-puppet](http://librarian-puppet.com/)),
+   * We install [tdonohue/puppet-tomcat](https://github.com/tdonohue/puppet-tomcat/) (via [librarian-puppet](http://librarian-puppet.com/)),
      and then use that Puppet module to setup Tomcat
-   * WARNING: We are just pulling down the latest "master" code from camptocamp/puppet-tomcat at this time.
+   * WARNING: We are just pulling down the latest "master" code from tdonohue/puppet-tomcat at this time.
 
-What Doesn't Work (Yet)
----------------------------
 
-* Actually compiling/installing/configuring DSpace to run on Tomcat & PostgreSQL
-
-I hope that all of these will be coming at some point...but they aren't here yet.
 
 **If you want to help, please do.** I'd prefer solutions using [Puppet](https://puppetlabs.com/).
 
@@ -52,12 +47,52 @@ The `vagrant up` command will initialize a new VM based on the settings in the `
 In a few minutes, you'll have a fresh Ubuntu VM that you can SSH into by simply typing `vagrant ssh`. Since SSH Forwarding is enabled,
 that Ubuntu VM should have access to your local SSH keys, which allows you to immediately use Git/GitHub.
 
-_Of course, there's not much to look at (yet)._ You'll just have a fresh Ubuntu virtual server with DSpace GitHub cloned (at `~/dspace-src`) and Java/Maven/Ant/Git installed.
-Still, it's enough to get you started with developing/building DSpace (or debug issues with the DSpace build process, if any pop up).
+What will you get?
+------------------
+
+* a running instance of DSpace master, on top of PostgreSQL and Tomcat 7 
+
+You can visit this instance at http://localhost:8080/jspui or http://localhost:8080/xmlui. If you install and configure the Landrush plugin for Vagrant, you can go to http://dspace.vagrant.dev:8080/jspui or http://dspace.vagrant.dev:8080/xmlui.
+
+* a fresh Ubuntu virtual server with DSpace GitHub cloned (at `~/dspace-src`) and Java/Maven/Ant/Git installed.
+
+* all "out of the box" DSpace webapps running out of ~/dspace
+
+* a Tomcat 7 instance installed at ~/tomcat
+
+* enough to get you started with developing/building/using DSpace (or debug issues with the DSpace build process, if any pop up)
+
+* a very handy playground for testing multiple-machine configurations of DSpace, and software that might utilize DSpace as a service
+
+
+It'll be up to you to [continue the setup](https://wiki.duraspace.org/display/DSDOC3x/Installation#Installation-InstallationInstructions). The base install creates an administrator for you. The email is dspacedemo+admin@gmail.com and the password is the name of this handy tool you're trying to use, all lower case. But, your first step after typing `vagrant ssh` should still probably be to create an administrator:
+
+    ~dspace/bin/dspace create-administrator
 
 It's also worth noting that you can tweak the default [`Vagrantfile`](https://github.com/tdonohue/vagrant-dspace/blob/master/Vagrantfile) to better match your own development environment. There's even a few quick settings there to get you started.
 
 If you want to destroy the VM at anytime (and start fresh again), just run `vagrant destroy`. No worries, you can always recreate a new VM with another `vagrant up`.
+
+As you develop with vagrant-dspace, from time to time you may want to run a `vagrant destroy` cycle, just to confirm that the Vagrant setup is still doing exactly what you want it to do. This cleans out any old experiments and starts fresh with a new base image. If you're just using vagrant-dspace for dspace development, this isn't advice for you. But, if you're working on contributing back to vagrant-dspace, do try this from time to time, just to sanity-check your Vagrant and Puppet scripts.
+
+Plugins
+-------
+
+The following Vagrant plugins are not necessarily required, but they do make using Vagrant more enjoyable.
+
+* Land Rush: https://github.com/phinze/landrush
+* Vagrant-Cachier: https://github.com/fgrehm/vagrant-cachier
+* Vagrant-Proxyconf: http://vagrantplugins.com/plugins/vagrant-proxyconf/
+* Vagrant-VBox-Snapshot: http://vagrantplugins.com/plugins/vagrant-vbox-snapshot/
+
+What's Next?
+------------
+
+Here are a few things we'd like to explore in future version of vagrant-dspace:
+
+* use a CentOS base machine, and make all Puppet provisioning modules compatible with a Yum-based package manager. The current vagrant-dspace project relies on a package only available on Debian-based systems. We'd really like to avoid that dependency in the future.
+* Oracle database version (Hardy is busy working on this already, [contact him](https://github.com/hardyoyo/) if you'd like to help).
+* [Multi-machine](http://docs.vagrantup.com/v2/multi-machine/index.html) configuration, to demonstrate proper configuration of multi-machine installations of DSpace. One possibility would be to set up a seperate Elastic Search or Solr box, and send usage statistics to that external box. Another possibility would be to explore using an alternate UI based on the REST-API. We recommend that you use the Land Rush Vagrant plugin if you're serrious about exploring a multi-machine Vagrant setup.
 
 License
 -------

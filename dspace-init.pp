@@ -13,6 +13,11 @@ Package {
   require => Exec["apt-get-update"],
 }
 
+# Ensure the rcconf package is installed, we'll use it later to set runlevels of services
+package { "rcconf":
+  ensure => "installed"
+}
+
 # Global default path settings for all 'exec' commands
 Exec {
   path => "/usr/bin:/usr/sbin:/bin",
@@ -48,10 +53,18 @@ else { # Otherwise, pass the value of $::java_version to the 'dspace' module
     }
 }
 
+# Install Vim for a more rewarding command-line-based editor experience
+class {'vim':
+   ensure => present,
+   set_as_default => true
+}
+
 # Install PostgreSQL package
 class { 'postgresql':
   charset => 'UTF8',
 }
+
+->
 
 # Setup/Configure PostgreSQL server
 class { 'postgresql::server':
@@ -65,22 +78,37 @@ class { 'postgresql::server':
   },
 }
 
+->
+
 # Create a 'dspace' database
 postgresql::db { 'dspace':
   user     => 'dspace',
   password => 'dspace'
 }
 
-# Install Tomcat package
 include tomcat
 
 # Create a new Tomcat instance
 tomcat::instance { 'dspace':
+   owner => "vagrant",
+   appBase => "/home/vagrant/dspace/webapps", # Tell Tomcat to load webapps from this directory
    ensure    => present,
 }
+
+->
 
 # Kickoff a DSpace installation for the 'vagrant' default user
 dspace::install { vagrant-dspace:
    owner   => "vagrant",
    require => [Postgresql::Db['dspace'],Tomcat::Instance['dspace']]  # Require that PostgreSQL and Tomcat are setup
 }
+
+->
+
+# set the runlevels of tomcat7-vagrant
+# AND start the tomcat7-vagrant service
+service {"tomcat7-vagrant":
+   enable => "true",
+   ensure => "running",
+}
+

@@ -47,14 +47,38 @@ Vagrant.configure("2") do |config|
     # Every Vagrant virtual environment requires a box to build off of.
     config.vm.box = "precise64"
 
+    # BEGIN Vagrant-Cachier configuration ####################################
+    # check for the presence of the Vagrant-Cachier plugin before attempting
+    # these configurations
+    if defined? VagrantPlugins::vagrant-cachier
+       # Use a vagrant-cachier cache if one is detected
+       config.cache.auto_detect = true
+
+       # and lets specifically use the apt cache
+       config.cache.enable :apt
+    end
+    # END Vagrant-Cachie configuration #######################################
+
     # The url from where the 'config.vm.box' box will be fetched if it
     # doesn't already exist on the user's system.
     config.vm.box_url = "http://files.vagrantup.com/precise64.box"
 
     # Hostname for virtual machine
-    config.vm.hostname = "dspace-dev"
+    config.vm.hostname = "dspace.vagrant.dev"
 
-     # Create a forwarded port mapping which allows access to a specific port
+    # configure a private network and set this guest's IP to 192.168.50.2
+    config.vm.network "private_network", ip: "192.168.50.2"
+
+    # BEGIN Landrush configuration ###########################################
+
+    if defined? VagrantPlugins::Landrush
+       # enable landrush
+       config.landrush.enable
+    end
+
+    # END Landrush configuration ###########################################
+
+    # Create a forwarded port mapping which allows access to a specific port
     # within the machine from a port on the host machine. In the example below,
     # accessing "localhost:8080" will access port 8080 on the VM.
     config.vm.network :forwarded_port, guest: 8080, host: 8080,
