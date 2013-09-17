@@ -44,8 +44,9 @@ How To Use vagrant-dspace
 4. `cd [vagrant-dspace]/`
 5. `vagrant up`
    * Wait for ~15 minutes while Vagrant & Puppet do all the heavy lifting of cloning GitHub & building & installing DSpace.
+   * There may be times that vagrant will appear to "stall" for several minutes (especially during the Maven build of DSpace). But, don't worry.
 6. Once complete, visit `http://localhost:8080/xmlui/` or `http://localhost:8080/jspui/` to see if it worked! _More info below on what to expect._
-   * If for you already had something running on port 8080, Vagrant will attempt to use an open port between 2200 and 2250
+   * If you already have something running locally on port 8080, vagrant-dspace will attempt to use an open port between 8081 and 8100.
    
 The `vagrant up` command will initialize a new VM based on the settings in the `Vagrantfile` in that directory.  
 
@@ -58,20 +59,24 @@ What will you get?
 * A running instance of DSpace 'master', on top of latest PostgreSQL and Tomcat 7 (and using Java OpenJDK 7 by default)
    * You can visit this instance at `http://localhost:8080/xmlui/` or `http://localhost:8080/jspui/`. 
    * If you install and configure the [Landrush plugin](https://github.com/phinze/landrush) for Vagrant, you can instead visit http://dspace.vagrant.dev:8080/xmlui/ or http://dspace.vagrant.dev:8080/jspui/
+   * An initial Administrator account is auto-created:
+       * Login: `dspacedemo+admin@gmail.com` , Pwd: 'vagrant'
 * A fresh Ubuntu virtual server with DSpace GitHub cloned (at `~/dspace-src`) and Java/Maven/Ant/Git installed.
 * All "out of the box" DSpace webapps running out of `~/dspace/webapps/`. The full DSpace installation is at `~/dspace/`.
 * Tomcat 7 instance installed at `~/tomcat/`
     * Includes [PSI Probe](http://code.google.com/p/psi-probe/) running at `http://localhost:8080/probe/`
+       * PSI Probe Login: 'dspace', Pwd: 'vagrant'
 * Enough to get you started with developing/building/using DSpace (or debug issues with the DSpace build process, if any pop up)
 * A very handy playground for testing multiple-machine configurations of DSpace, and software that might utilize DSpace as a service
 
-It is up to you to [continue the setup](https://wiki.duraspace.org/display/DSDOC3x/Installation#Installation-InstallationInstructions). 
-The base install creates an administrator for you. The email is `dspacedemo+admin@gmail.com` and the password is the name of this handy tool you're trying to use, all lower case. 
-But, your first step after typing `vagrant ssh` should still probably be to create an administrator:
+It is up to you to [continue the DSpace setup](https://wiki.duraspace.org/display/DSDOC3x/Installation#Installation-InstallationInstructions), as needed. 
+ 
+Your first step should be to change the default password(s), and/or optionally create a new administrator:
 
+    vagrant ssh
     ~dspace/bin/dspace create-administrator
 
-It is also worth noting that you can tweak the default [`Vagrantfile`](https://github.com/tdonohue/vagrant-dspace/blob/master/Vagrantfile) to better match your own development environment. 
+It is also worth noting that you may choose to tweak the default [`Vagrantfile`](https://github.com/tdonohue/vagrant-dspace/blob/master/Vagrantfile) to better match your own development environment. 
 There's even a few quick settings there to get you started.
 
 If you want to destroy the VM at anytime (and start fresh again), just run `vagrant destroy`. 
