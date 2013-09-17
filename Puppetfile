@@ -4,7 +4,8 @@
 # Install Puppet PostgreSQL module from PuppetForge
 forge "http://forge.puppetlabs.com"
 mod "puppetlabs/postgresql"
+mod "saz/vim"
 
-# Install the Camptocamp Tomcat module from GitHub (WARNING: bleeding edge!)
+# Install Tim's simple Tomcat module from GitHub
 mod "tomcat",
-   :git => "http://github.com/camptocamp/puppet-tomcat.git"
+   :git => "http://github.com/tdonohue/puppet-tomcat.git"
