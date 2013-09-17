@@ -84,9 +84,12 @@ Vagrant.configure("2") do |config|
     config.vm.network :forwarded_port, guest: 8080, host: 8080,
       auto_correct: true
 
-   # Turn on SSH forwarding (so that 'vagrant ssh' has access to your local SSH keys, and you can use your local SSH keys to access GitHub, etc.)
-    config.ssh.forward_agent = true
+    # If a port collision occurs (i.e. port 8080 on local machine is in use),
+    # then tell Vagrant to use the next available port between 8081 and 8100
+    config.vm.usable_port_range = 8081..8100
 
+    # Turn on SSH forwarding (so that 'vagrant ssh' has access to your local SSH keys, and you can use your local SSH keys to access GitHub, etc.)
+    config.ssh.forward_agent = true
 
     # THIS NEXT PART IS TOTAL HACK (only necessary for running Vagrant on Windows)
     # Windows currently doesn't support SSH Forwarding when running Vagrant's "Provisioning scripts" 
