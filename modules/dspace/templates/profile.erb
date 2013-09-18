@@ -26,3 +26,12 @@ export JAVA_HOME="/usr/lib/jvm/java-<%=@java_version%>-openjdk-<%=@architecture%
  
 #Base path of Maven
 export MAVEN_HOME="/usr/share/maven"
+
+# change the prompt to include the git branch name, which is insanely helpful
+# Also change the prompt to include flags to indicate dirty state (*), stash state ($),
+# and indicate the presence of untracked files (%)
+export GIT_PS1_SHOWDIRTYSTATE=1
+export GIT_PS1_SHOWSTASHSTATE=1
+export GIT_PS1_SHOWUNTRACKEDFILES=1
+export PS1='[\u@\h \W$(__git_ps1 " (%s)")]\$ '
+
