@@ -118,6 +118,13 @@ Tools we use to make this all work
 * [Puppet](http://puppetlabs.com) - To actually clone, build, configure & install DSpace from GitHub
 * [Librarian-Puppet](https://github.com/rodjek/librarian-puppet) - Used to install the external Puppet Modules which setup Tomcat & PostgreSQL
 
+Reporting Bugs / Requesting Enhancements
+----------------------------------------
+
+Bugs / Issues or requests for enhancements can be reported via the [DSpace Issue Tracker](https://jira.duraspace.org/browse/DS). _Please select the "vagrant-dspace" component when creating your ticket in the issue tracker._
+
+We also encourage you to submit Pull Requests with any recommended changes/fixes. As it is, the 'vagrant-dspace' project is really just a labor of love, and we can use help in making it better.
+
 License
 --------
 
