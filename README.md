@@ -19,10 +19,12 @@ _BIG WARNING: THIS IS STILL A WORK IN PROGRESS. YOUR MILEAGE MAY VARY. NEVER USE
 How it Works
 ------------
 
+'vagrant-dspace' does all of the following for you:
+
 * Spins up an Ubuntu 12.04 VM using Vagrant
-* Install some of the basic prerequisites for DSpace Development (namely: Git, Java, Maven)
-* Clone DSpace source from GitHub to `~/dspace-src/` (under the default 'vagrant' user account)
-* Install/Configure PostgreSQL
+* Installs some of the basic prerequisites for DSpace Development (namely: Git, Java, Maven)
+* Clones DSpace source from GitHub to `~/dspace-src/` (under the default 'vagrant' user account)
+* Installs/Configures PostgreSQL
    * We install [puppetlabs/postgresql](http://forge.puppetlabs.com/puppetlabs/postgresql) (via [librarian-puppet](http://librarian-puppet.com/)),
      and then use that Puppet module to setup PostgreSQL
 * Installs Tomcat to `~/tomcat/` (under the default 'vagrant' user account)
@@ -31,8 +33,8 @@ How it Works
    * WARNING: We are just pulling down the latest "master" code from tdonohue/puppet-tomcat at this time.
 * Installs DSpace to `~/dspace/` (under the default 'vagrant' user account).
    * Makes DSpace available via Tomcat (e.g. http://localhost:8080/xmlui/)
-* Setup SSH Forwarding, so that you can use your local SSH key(s) on the VM (for development with GitHub)
-* Sync your local Git settings (name and email from local .gitconfig) to VM (for development with GitHub)
+* Sets up SSH Forwarding, so that you can use your local SSH key(s) on the VM (for development with GitHub)
+* Syncs your local Git settings (name and email from local .gitconfig) to VM (for development with GitHub)
 
 **If you want to help, please do.** We'd prefer solutions using [Puppet](https://puppetlabs.com/).
 
