@@ -50,11 +50,11 @@ Vagrant.configure("2") do |config|
     # BEGIN Vagrant-Cachier configuration ####################################
     # check for the presence of the Vagrant-Cachier plugin before attempting
     # these configurations
-    if defined? VagrantPlugins::vagrant-cachier
+    if Vagrant.has_plugin?('vagrant-cachier')
        # Use a vagrant-cachier cache if one is detected
        config.cache.auto_detect = true
 
-       # and lets specifically use the apt cache
+       # and lets specifically use the apt cache (note, this is a Debian-ism)
        config.cache.enable :apt
     end
     # END Vagrant-Cachie configuration #######################################
@@ -71,9 +71,9 @@ Vagrant.configure("2") do |config|
 
     # BEGIN Landrush configuration ###########################################
 
-    if defined? VagrantPlugins::Landrush
-       # enable landrush
-       config.landrush.enable
+
+    if Vagrant.has_plugin?('landrush')
+        config.landrush.enable
     end
 
     # END Landrush configuration ###########################################
