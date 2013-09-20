@@ -38,6 +38,13 @@ How it Works
 
 **If you want to help, please do.** We'd prefer solutions using [Puppet](https://puppetlabs.com/).
 
+Requirements
+------------
+
+* [Vagrant](http://vagrantup.com/) version 1.3.2 or higher
+* [VirtualBox](https://www.virtualbox.org/)
+* A GitHub account with an associated SSH key:  As vagrant-dspace was built initially as a developer tool, at this time one must have a GitHub account (and an associated SSH key) in order for 'vagrant-dspace' to be able to download DSpace source from GitHub. Please note, we are working on removing this requirement in the future.
+
 How To Use vagrant-dspace
 --------------------------
 
