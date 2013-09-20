@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# For any Puppet templates (.erb), ensure LF (Unix) line endings are
+# ALWAYS kept (even on Windows), as these templates represent Linux files.
+*.erb text eol=lf
