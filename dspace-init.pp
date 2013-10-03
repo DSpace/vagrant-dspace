@@ -90,22 +90,37 @@ include tomcat
 
 # Create a new Tomcat instance
 tomcat::instance { 'dspace':
-   owner => "vagrant",
-   appBase => "/home/vagrant/dspace/webapps", # Tell Tomcat to load webapps from this directory
-   ensure    => present,
-}
-
-->
-
-# Kickoff a DSpace installation for the 'vagrant' default user
-dspace::install { vagrant-dspace:
    owner   => "vagrant",
-   require => [Postgresql::Db['dspace'],Tomcat::Instance['dspace']]  # Require that PostgreSQL and Tomcat are setup
+   appBase => "/home/vagrant/dspace/webapps", # Tell Tomcat to load webapps from this directory
+   ensure  => present,
 }
 
 ->
 
-# set the runlevels of tomcat7-vagrant
+# Kickoff a DSpace installation for the 'vagrant' default user,
+# using the specified GitHub repository & branch.
+dspace::install { vagrant-dspace:
+   owner      => "vagrant",
+   version    => "4.0-SNAPSHOT",
+   git_repo   => "git@github.com:DSpace/DSpace.git",
+   git_branch => "master",
+   require    => [Postgresql::Db['dspace'],Tomcat::Instance['dspace']]  # Require that PostgreSQL and Tomcat are setup
+}
+
+-> 
+
+# For convenience in troubleshooting Tomcat, let's install Psi-probe
+exec {"Download and install the Psi-probe war":
+   command   => "wget http://psi-probe.googlecode.com/files/probe-2.3.3.zip && unzip probe-2.3.3.zip && rm probe-2.3.3.zip",
+   cwd       => "/home/vagrant/tomcat/webapps",
+   creates   => "/home/vagrant/tomcat/webapps/probe.war",
+   user      => "vagrant",
+   logoutput => true,
+}
+
+->
+
+# Set the runlevels of tomcat7-vagrant
 # AND start the tomcat7-vagrant service
 service {"tomcat7-vagrant":
    enable => "true",

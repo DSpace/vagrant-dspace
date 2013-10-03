@@ -8,22 +8,43 @@
 # Tested on:
 # - Ubuntu 12.04
 #
-# Sample Usage:
+# Parameters:
+# - $owner (REQUIRED)   => OS User who should own DSpace instance
+# - $version (REQUIRED) => Version of DSpace to install (e.g. "3.0", "3.1", "4.0", etc)
+# - $group              => Group who should own DSpace instance. Defaults to same as $owner
+# - $src_dir            => Location where DSpace source should be kept (defaults to the home directory of $owner at ~/dspace-src)
+# - $install_dir        => Location where DSpace instance should be installed (defaults to the home directory of $owner at ~/dspace)
+# - $service_owner      => Owner of the actual DSpace service (i.e. Tomcat service). Defaults to same as $owner
+# - $service_group      => Group of the actual DSpace service (i.e. Tomcat service). Defaults to same as $group
+# - $git_repo           => Git repository to pull DSpace source from. Defaults to DSpace/DSpace in GitHub
+# - $git_branch         => Git branch to build DSpace from. Defaults to "master".
+# - $mvn_params         => Any build params passed to Maven. Defaults to "-Denv=vagrant" which tells Maven to use the vagrant.properties file.
+# - $ant_installer_dir  => Full path of directory where the Ant installer is built to (via Maven).
+# - $admin_firstname    => First Name of the created default DSpace Administrator account.
+# - $admin_lastname     => Last Name of the created default DSpace Administrator account.
+# - $admin_email        => Email of the created default DSpace Administrator account.
+# - $admin_passwd       => Initial Password of the created default DSpace Administrator account.
+# - $admin_language     => Language of the created default DSpace Administrator account.
+# - $ensure => Whether to ensure DSpace instance is created ('present', default value) or deleted ('absent')
 #
+# Sample Usage:
 # dspace::install {
-#    owner => "vagrant"
+#    owner      => "vagrant",
+#    version    => "4.0-SNAPSHOT",
+#    git_branch => "master",
 # }
 #
 define dspace::install ($owner,
+                        $version,
                         $group             = $owner,
                         $src_dir           = "/home/${owner}/dspace-src", 
-                        $install_dir       = "/home/${owner}/dspace", 
-                        $tomcat_dir       = "/home/${owner}/tomcat", 
+                        $install_dir       = "/home/${owner}/dspace",
                         $service_owner     = "${owner}", 
                         $service_group     = "${owner}",
                         $git_repo          = "git@github.com:DSpace/DSpace.git",
                         $git_branch        = "master",
-                        $ant_installer_dir = "/home/${owner}/dspace-src/dspace/target/dspace-4.0-SNAPSHOT-build",
+                        $mvn_params        = "-Denv=vagrant",
+                        $ant_installer_dir = "/home/${owner}/dspace-src/dspace/target/dspace-${version}-build",
                         $admin_firstname   = "DSpaceDemo",
                         $admin_lastname    = "Admin",
                         $admin_email       = "dspacedemo+admin@gmail.com",
@@ -36,8 +57,8 @@ define dspace::install ($owner,
     # ensure that the install_dir exists, and has proper permissions
     file { "${install_dir}":
         ensure => "directory",
-        owner  => "${service_owner}",
-        group  => "${service_group}",
+        owner  => $service_owner,
+        group  => $service_group,
         mode   => 0700,
     }
 
@@ -46,8 +67,8 @@ define dspace::install ($owner,
     # Ensure a custom ~/.profile exists (with JAVA_HOME & MAVEN_HOME defined)
     file { "/home/${owner}/.profile" :
         ensure  => file,
-        owner   => vagrant,
-        group   => vagrant,
+        owner   => $owner,
+        group   => $group,
         content => template("dspace/profile.erb"),
     }
  
@@ -77,60 +98,45 @@ define dspace::install ($owner,
    # Create a 'vagrant.properties' file which will be used to build the DSpace installer
    # (INSTEAD OF the default 'build.properties' file that DSpace normally uses)
    file { "${src_dir}/vagrant.properties":
-     ensure => file,
-     owner => $owner,
-     group => $group,
-     mode => 0644,
-     backup => ".puppet-bak",  # If replaced, backup old settings to .puppet-bak
+     ensure  => file,
+     owner   => $owner,
+     group   => $group,
+     mode    => 0644,
+     backup  => ".puppet-bak",  # If replaced, backup old settings to .puppet-bak
      content => template("dspace/vagrant.properties.erb"),
    }
 
 ->
 
-   # Build DSpace installer (This actually just pulls down dependencies via Maven. Nothing is compiled.)
-   # (The '-Denv=vagrant' tells Maven to use the vagrant.properties file, which we created above)
+   # Build DSpace installer.
+   # (NOTE: by default, $mvn_params='-Denv=vagrant', which tells Maven to use the vagrant.properties file created above)
    exec { "Build DSpace installer in ${src_dir}":
-     command => "mvn -Denv=vagrant package ${mvn_params}",
-     cwd => "${src_dir}", # Run command from this directory
-     user => $owner,
-     creates => $ant_installer_dir, # Only run if Maven target directory doesn't already exist
-     timeout => 0, # Disable timeout. This build takes a while!
+     command   => "mvn package ${mvn_params}",
+     cwd       => "${src_dir}", # Run command from this directory
+     user      => $owner,
+     creates   => $ant_installer_dir, # Only run if Ant installer directory doesn't already exist
+     timeout   => 0, # Disable timeout. This build takes a while!
      logoutput => true,	# Send stdout to puppet log file (if any)
-     require => File["${src_dir}/vagrant.properties"], # Since this Maven command refers to the vagrant.properties file, we need to ensure that file is there before we run this step
    }
 
 ->
 
    # Install DSpace (via Ant)
    exec { "Install DSpace to ${install_dir}":
-     command => "ant fresh_install",
-     cwd => $ant_installer_dir,	# Run command from this directory
-     user => $owner,
-     creates => "${install_dir}/webapps/xmlui",	# Only run if XMLUI webapp doesn't yet exist (NOTE: we check for a webapp's existence since this is the *last step* of the install process)
+     command   => "ant fresh_install",
+     cwd       => $ant_installer_dir,	# Run command from this directory
+     user      => $owner,
+     creates   => "${install_dir}/webapps/xmlui",	# Only run if XMLUI webapp doesn't yet exist (NOTE: we check for a webapp's existence since this is the *last step* of the install process)
      logoutput => true,	# Send stdout to puppet log file (if any)
-     require => Exec["Build DSpace installer in ${src_dir}"]
    } 
 
 ->
 
    # create administrator
    exec { "Create DSpace Administrator":
-     command => "${install_dir}/bin/dspace create-administrator -e ${admin_email} -f ${admin_firstname} -l ${admin_lastname} -p ${admin_passwd} -c ${admin_language}",
-     cwd => $install_dir,
-     user => $owner,
-     logoutput => true,
-     require => Exec["Install DSpace to ${install_dir}"]
-   }
-
-->
-
-   # for convenience in troubleshooting Tomcat, let's install Psi-probe
-   exec {"download and install the Psi-probe war":
-     command => "wget http://psi-probe.googlecode.com/files/probe-2.3.3.zip && unzip probe-2.3.3.zip && rm probe-2.3.3.zip",
-     cwd => "${tomcat_dir}/webapps",
-     creates => "${tomcat_dir}/webapps/probe.war",
-     require => Exec["Install DSpace to ${install_dir}"],
-     user => $owner,
+     command   => "${install_dir}/bin/dspace create-administrator -e ${admin_email} -f ${admin_firstname} -l ${admin_lastname} -p ${admin_passwd} -c ${admin_language}",
+     cwd       => $install_dir,
+     user      => $owner,
      logoutput => true,
    }
 
