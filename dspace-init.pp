@@ -117,9 +117,9 @@ exec {"Download and install the Psi-probe war":
    user      => "vagrant",
    logoutput => true,
 }
-
+ 
 ->
-
+ 
 # Set the runlevels of tomcat7-vagrant
 # AND start the tomcat7-vagrant service
 service {"tomcat7-vagrant":
@@ -127,3 +127,12 @@ service {"tomcat7-vagrant":
    ensure => "running",
 }
 
+->
+
+# add a context fragment file for Psi-probe, and restart tomcat7-vagrant
+file { "/home/vagrant/tomcat/conf/Catalina/localhost/probe.xml" :
+   ensure  => file,
+   owner   => vagrant,
+   group   => vagrant,
+   content => template("dspace/probe.xml.erb"),
+}
