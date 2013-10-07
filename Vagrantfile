@@ -153,6 +153,7 @@ Vagrant.configure("2") do |config|
         puppet.manifest_file = "dspace-init.pp"
         puppet.module_path = "modules"
         puppet.options = "--verbose"
+        puppet.hiera_config_path = "hiera.yaml"
     end
 
     # Check if ~/.gitconfig exists locally

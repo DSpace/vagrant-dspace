@@ -41,16 +41,20 @@ define dspace::install ($owner,
                         $install_dir       = "/home/${owner}/dspace",
                         $service_owner     = "${owner}", 
                         $service_group     = "${owner}",
-                        $git_repo          = "git@github.com:DSpace/DSpace.git",
-                        $git_branch        = "master",
-                        $mvn_params        = "-Denv=vagrant",
-                        $ant_installer_dir = "/home/${owner}/dspace-src/dspace/target/dspace-${version}-build",
-                        $admin_firstname   = "DSpaceDemo",
-                        $admin_lastname    = "Admin",
-                        $admin_email       = "dspacedemo+admin@gmail.com",
-                        $admin_passwd      = "vagrant",
-                        $admin_language    = "en",
+
+# pull the following from Hiera
+
+                        $git_repo          = hiera('git_repo'),
+                        $git_branch        = hiera('git_branch'),
+                        $mvn_params        = hiera('mvn_params'),
+                        $ant_installer_dir = hiera('ant_installer_dir'),
+                        $admin_firstname   = hiera(admin_firstname),
+                        $admin_lastname    = hiera(admin_lastname),
+                        $admin_email       = hiera(admin_email),
+                        $admin_passwd      = hiera(admin_passwd),
+                        $admin_language    = hiera(admin_language),
                         $ensure            = present)
+
 {
 
 
