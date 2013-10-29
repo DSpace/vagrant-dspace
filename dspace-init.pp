@@ -59,6 +59,7 @@ class {'vim':
    set_as_default => true
 }
 
+# Install PostgreSQL package
 class { 'postgresql::globals':
   encoding => 'UTF8',  
 }
