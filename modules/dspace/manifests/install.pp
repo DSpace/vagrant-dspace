@@ -83,6 +83,7 @@ define dspace::install ($owner,
         command   => "git clone ${git_repo} ${src_dir}; chown -R ${owner}:${group} ${src_dir}",
         creates   => $src_dir,
         logoutput => true,
+        timeout => 0,
         require   => [Package["git"], Exec["Verify SSH connection to GitHub works?"]],
     }
 
