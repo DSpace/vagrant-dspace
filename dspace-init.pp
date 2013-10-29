@@ -59,29 +59,25 @@ class {'vim':
    set_as_default => true
 }
 
-# Install PostgreSQL package
-class { 'postgresql':
-  charset => 'UTF8',
+class { 'postgresql::globals':
+  encoding => 'UTF8',  
 }
 
 ->
 
 # Setup/Configure PostgreSQL server
 class { 'postgresql::server':
-  config_hash => {
-    'listen_addresses'           => '*',
-    'ip_mask_deny_postgres_user' => '0.0.0.0/32',
-    'ip_mask_allow_all_users'    => '0.0.0.0/0',
-    'manage_redhat_firewall'     => true,
-    'manage_pg_hba_conf'         => true,
-    'postgres_password'          => 'dspace',
-  },
+  ip_mask_deny_postgres_user => '0.0.0.0/32',
+  ip_mask_allow_all_users    => '0.0.0.0/0',
+  listen_addresses           => '*',
+  manage_firewall            => true,
+  postgres_password          => 'dspace',
 }
 
 ->
 
 # Create a 'dspace' database
-postgresql::db { 'dspace':
+postgresql::server::db { 'dspace':
   user     => 'dspace',
   password => 'dspace'
 }
@@ -104,7 +100,7 @@ dspace::install { vagrant-dspace:
    version    => "4.0-SNAPSHOT",
    git_repo   => "git@github.com:DSpace/DSpace.git",
    git_branch => "master",
-   require    => [Postgresql::Db['dspace'],Tomcat::Instance['dspace']]  # Require that PostgreSQL and Tomcat are setup
+   require    => [Postgresql::Server::Db['dspace'],Tomcat::Instance['dspace']]  # Require that PostgreSQL and Tomcat are setup
 }
 
 -> 
