@@ -1,0 +1,3 @@
+# ignore any .yaml files except common.yaml
+!common.yaml
+*.yaml
