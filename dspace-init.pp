@@ -60,18 +60,17 @@ class {'vim':
 }
 
 # Install PostgreSQL package
-class { 'postgresql::globals':
-  encoding => 'UTF8',  
-}
 
-->
+class { 'postgresql::globals':
+  encoding => 'UTF8',
+}->
 
 # Setup/Configure PostgreSQL server
 class { 'postgresql::server':
   ip_mask_deny_postgres_user => '0.0.0.0/32',
   ip_mask_allow_all_users    => '0.0.0.0/0',
   listen_addresses           => '*',
-  manage_firewall            => true,
+  manage_firewall            => false,
   postgres_password          => 'dspace',
 }
 
