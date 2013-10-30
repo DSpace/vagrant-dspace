@@ -96,11 +96,9 @@ tomcat::instance { 'dspace':
 # Kickoff a DSpace installation for the 'vagrant' default user,
 # using the specified GitHub repository & branch.
 dspace::install { vagrant-dspace:
-   owner      => "vagrant",
-   version    => "4.0-SNAPSHOT",
-   git_repo   => "git@github.com:DSpace/DSpace.git",
-   git_branch => "master",
-   require    => [Postgresql::Server::Db['dspace'],Tomcat::Instance['dspace']]  # Require that PostgreSQL and Tomcat are setup
+        owner             => "vagrant",
+        version           => "4.0-SNAPSHOT",
+       require    => [Postgresql::Server::Db['dspace'],Tomcat::Instance['dspace']]  # Require that PostgreSQL and Tomcat are setup
 }
 
 -> 
