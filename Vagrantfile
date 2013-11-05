@@ -167,6 +167,12 @@ Vagrant.configure("2") do |config|
         config.vm.provision :shell, :inline => "echo 'Saving local git email to VM...' && sudo -i -u vagrant git config --global user.email '#{git_email.chomp}'"
     end
 
+
+    if File.exists?("config/local-bootstrap.sh")
+        config.vm.provision :shell, :path => "config/local-bootstrap.sh"
+        config.vm.provision :shell, :inline => "echo 'running config/local_bootstrap.sh'"
+    end
+
     #############################################
     # Customized provider settings for VirtualBox
     # Many of these settings use VirtualBox's
