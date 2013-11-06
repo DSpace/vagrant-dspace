@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# local-bootstrap.sh.example is an example of a local bootstrap shell povisioner for Vagrant-DSpace. If you copy this file to local-bootstrap.sh, and modify it to match your needs, it will be run whenever you run vagrant-up.
+
+# local-bootstrap.sh is a hacky little solution to customizing your own DSpace clone from github. You can use it to do such things as set an upstream remote, configure fetching of pull requests from upstream, and much more
+
+# it is also a handy stop-gap measure for providing needed functionality for Vagrant DSpace (such as AIP auto-loading) without having to do a lot of puppet scripting. This works.
+
+
+# WORD of WARNING: don't forget this script will run as root, so be careful about files you create. Git config lines will need to be run as the vagrant user with sudo -i -u vagrant (example below).
+
+## START OFF BY CUSTOMIZING THE GIT CLONE ##
+cd /home/vagrant/dspace-src
+
+# set git to allways rebase when we pull (using sudo to run as the vagrant user, since this script runs as root)
+sudo -i -u vagrant git config --global --bool pull.rebase true
+
+# add an upstream remote
+git remote add upstream git@github.com:DSpace/DSpace.git
+
+# enable fetching of pull requests from upstream (this may or may not be common practice, but it's handy, why not try it out?)
+git config --add remote.upstream.fetch +refs/pull/*/head:refs/remotes/upstream/pr/*
+
+## now add content ##
+# not done yet, pitch in if you can, thanks!
