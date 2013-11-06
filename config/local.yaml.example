@@ -1,0 +1,25 @@
+---
+# local.yaml.example, if you'd like to override the settings in common.yaml, 
+# this is how you do it. Just rename this file to local.yaml and you're in 
+# business. 
+
+# The file local.yaml is in .gitignore, so you won't accidentally commit it.
+
+# First, you're probably going to want to work with your OWN fork of DSpace, 
+# not the official DSpace repository, so just change the git_repo to match your
+# fork. The example below won't work until you edit it.
+git_repo          : 'git@github.com:yourgithubusername/DSpace.git'
+git_branch        : 'master'
+mvn_params        : '-Denv=vagrant'
+
+# This is a hack, we'd like for there to be a better way to determine where the
+# ant installer ends up after running mvn package, but, for now, we're hard 
+# coding it. See DS-1760, and pitch in if you have a solution.
+ant_installer_dir : '/home/vagrant/dspace-src/dspace/target/dspace-4.0-rc2-SNAPSHOT-build'
+
+admin_firstname   : 'YourFirstName'
+admin_lastname    : 'YourLastName'
+admin_email       : 'youremail@your-institution.edu'
+admin_passwd      : 'changeme'
+admin_language    : 'en'
+
