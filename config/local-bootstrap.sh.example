@@ -7,13 +7,37 @@
 # it is also a handy stop-gap measure for providing needed functionality for Vagrant DSpace (such as AIP auto-loading) without having to do a lot of puppet scripting. This works.
 
 
-# WORD of WARNING: don't forget this script will run as root, so be careful about files you create. Git config lines will need to be run as the vagrant user with sudo -i -u vagrant (example below).
+# WORD of WARNING: don't forget this script will run as root, so be careful about files you create. Git config lines will need to be run either as the vagrant user.
+
+# You may have configured a different admin eperson in local.yaml, if so, you should use that admin user for the WHO variable below:
+WHO="dspacedemo+admin@gmail.com"
+CONTENT="/vagrant/content"
+HOME="/home/vagrant"
+DSPACE_HOME="$HOME/dspace"
+DSPACE="$DSPACE_HOME/dspace"
+DSPACE-SRC="$DSPACE_HOME-src"
 
 ## START OFF BY CUSTOMIZING THE GIT CLONE ##
-cd /home/vagrant/dspace-src
+cd $DSPACE-SRC
 
 # set git to allways rebase when we pull (using sudo to run as the vagrant user, since this script runs as root)
 sudo -i -u vagrant git config --global --bool pull.rebase true
+
+# set git to always use pretty colors
+sudo -i -u vagrant git config --global color.ui always
+
+# and don't even try to get smart about converting line endings, that just pisses me off
+sudo -i -u vagrant git config --global core.autocrlf input
+
+# and I don't need merge backups, really, I don't
+sudo -i -u vagrant git config --global --bool merge.keepbackups false
+
+# use the simple push, which means you have to be explicit about the branch you're pushing, which is a good thing, stop with all the smarts
+sudo -i -u vagrant git config --global push.default simple
+
+
+echo "and now setting up my preferences for my working copy... adding an upstream remote, PR refs..." 
+
 
 # add an upstream remote
 git remote add upstream git@github.com:DSpace/DSpace.git
@@ -22,4 +46,51 @@ git remote add upstream git@github.com:DSpace/DSpace.git
 git config --add remote.upstream.fetch +refs/pull/*/head:refs/remotes/upstream/pr/*
 
 ## now add content ##
-# not done yet, pitch in if you can, thanks!
+
+SITE=`echo $CONTENT/SITE@* | cut -f1 -d' '`
+if [ -n "$SITE" ]
+then
+   echo "Recursively installing content from AIPs at $CONTENT (starting with $SITE AIP)" 
+         
+          # let's get the handle from this site AIP
+	  SHFN="${SITE##*/}"
+	  SH=`echo $SHFN | cut -f2 -d'@'`
+	  SH=${SH/-/\/}
+          SH=`echo $SH | cut -f1 -d'.'`
+
+          # --------------------------------------
+          # Stop Tomcat
+          # --------------------------------------
+          service tomcat7-vagrant stop
+          
+          echo "" 
+
+   cd $HOME
+   sudo -i -u vagrant /home/vagrant/dspace/bin/dspace packager  -u -r -a -f -t AIP -e $WHO -i $SH -o skipIfParentMissing=true -o createMetadataFields=true $SITE
+	# ----------------------------------------------
+	# Re-index content
+	# ----------------------------------------------
+
+	echo "Reindexing all content in DSpace..."
+	$DSPACE index-init
+
+	echo ""
+
+	# --------------------------------------
+	# Start up Tomcat
+	# --------------------------------------
+        service tomcat7-vagrant start
+
+	echo ""
+
+	# --------------------------------------
+	# Step 8 : Update Discovery indexes
+	# --------------------------------------
+	echo "Rebuilding Discovery (Solr) Indexes..."
+	# Note: the '-f' option tells Discovery to force a reindex of everything and remove docs which no longer exist
+	$DSPACE update-discovery-index -f
+
+	echo ""
+	echo ""
+	echo "SUCCESS! batch load of AIP content is now complete!"
+fi
