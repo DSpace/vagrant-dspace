@@ -136,6 +136,29 @@ In the config folder, you will also find a file called local-bootstrap.sh.exampl
 
 local-bootstrap.sh is a "shell provisioner" for Vagrant, and our vagrantfile is [configured to run it](https://github.com/DSpace/vagrant-dspace/blob/master/Vagrantfile#L171) if it is present in the config folder. If you have a fork of Vagrant-DSpace for your own repository management, you may add another shell provisioner, to maintain your own workgroup's customs and configurations. You may find an example of this in the [Vagrant-MOspace](https://github.com/umlso/vagrant-mospace/blob/master/config/mospace-bootstrap.sh) repository.
 
+maven_settings.xml
+------------------
+
+If you've copied the example local-bootstrap.sh file, you may create a config/dotfiles folder, and place a file called maven_settings.xml in it, that file will be copied to /home/vagrant/.m2/settings.xml every time the local-bootstrap.sh provisioner is run. This will allow you to further customize your Maven builds. One handy (though somewhat dangerous) thing to add to your settings.xml file is the following profile:
+<code>
+                <profile>
+                        <id>sign</id>
+                        <activation>
+                                <activeByDefault>true</activeByDefault>
+                        </activation>
+                        <properties>
+                                <gpg.passphrase>add-your-passphrase-here-if-you-dare</gpg.passphrase>
+                        </properties>
+                </profile>
+</code>
+
+NOTE: any file in config/dotfiles is ignored by Git, so you won't accidentally commit it. But, still, putting your GPG passphrase in a plain text file might be viewed by some as foolish. If you elect to not add this profile, and you DO want to sign an artifact created by Maven using GPG, you'll need to enter your GPG passphrase quickly and consistently. Choose your poison.
+
+vim and .vimrc
+--------------
+
+Another optional config/dotfiles folder which is copied (if it exists) by the example local-bootstrap.sh shell provisioner is config/dotfiles/vimrc (/home/vagrant/.vimrc) and config/dotfiles/vim (/home/vagrant/.vim). Populating these will allow you to customize Vim to your heart's content. 
+
 What's Next?
 ------------
 
