@@ -61,7 +61,7 @@ Vagrant.configure("2") do |config|
 
     # The url from where the 'config.vm.box' box will be fetched if it
     # doesn't already exist on the user's system.
-    config.vm.box_url = "http://files.vagrantup.com/precise64.box"
+    config.vm.box_url = "http://github.com/DSpace/vagrantbox-ubuntu/releases/download/v1.0/precise64.box"
 
     # Hostname for virtual machine
     config.vm.hostname = "dspace.vagrant.dev"
@@ -87,6 +87,10 @@ Vagrant.configure("2") do |config|
     # If a port collision occurs (i.e. port 8080 on local machine is in use),
     # then tell Vagrant to use the next available port between 8081 and 8100
     config.vm.usable_port_range = 8081..8100
+
+    # name this machine
+    config.vm.define :dspace do |t|
+    end 
 
     # Turn on SSH forwarding (so that 'vagrant ssh' has access to your local SSH keys, and you can use your local SSH keys to access GitHub, etc.)
     config.ssh.forward_agent = true
@@ -131,6 +135,10 @@ Vagrant.configure("2") do |config|
         shell.inline = "touch $1 && chmod 0440 $1 && echo $2 > $1"
         shell.args = %q{/etc/sudoers.d/root_ssh_agent "Defaults    env_keep += \"SSH_AUTH_SOCK\""}
     end
+
+    # Shell script to set apt sources.list to something appropriate (close to
+    # you, and actually up, via apt-spy2
+    config.vm.provision :shell, :path => "apt-spy-2-bootstrap.sh"
 
     # Shell script to initialize latest Puppet on VM
     # Borrowed from https://github.com/hashicorp/puppet-bootstrap/
