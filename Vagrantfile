@@ -138,6 +138,7 @@ Vagrant.configure("2") do |config|
 
     # Shell script to set apt sources.list to something appropriate (close to
     # you, and actually up, via apt-spy2
+    config.vm.provision :shell, :inline => "echo '   > > > running apt-spy-2-bootstrap.sh, do not worry if it shows an error, it will be OK, there is a fallback.'"
     config.vm.provision :shell, :path => "apt-spy-2-bootstrap.sh"
 
     # Shell script to initialize latest Puppet on VM
@@ -150,6 +151,17 @@ Vagrant.configure("2") do |config|
     config.vm.provision :shell, :path => "librarian-puppet-bootstrap.sh"
 
     # Call our Puppet initialization script
+    config.vm.provision :shell, :inline => "echo '   > > > beginning puppet provisioning, this will appear to hang...'"
+    config.vm.provision :shell, :inline => "echo '   > > > PATIENCE! output is only shown after each step completes...'"
+
+    # display the local.yaml file, if it exists, to give us a chance to back out
+    # before waiting for this vagrant up to complete
+
+    if File.exists?("config/local.yaml")
+        config.vm.provision :shell, :inline => "echo '   > > > using the following local.yaml data, if this is not correct, control-c now...'"
+        config.vm.provision :shell, :inline => "echo '---BEGIN local.yaml ---' && cat /vagrant/config/local.yaml && echo '--- END local.yaml -----'"
+    end
+
     config.vm.provision :puppet do |puppet|
         # Set some custom "facts" for Puppet manifest(s)/modules to use.
         puppet.facter = {
@@ -177,8 +189,8 @@ Vagrant.configure("2") do |config|
 
 
     if File.exists?("config/local-bootstrap.sh")
+        config.vm.provision :shell, :inline => "echo '   > > > running config/local_bootstrap.sh'"
         config.vm.provision :shell, :path => "config/local-bootstrap.sh"
-        config.vm.provision :shell, :inline => "echo 'running config/local_bootstrap.sh'"
     end
 
     #############################################
