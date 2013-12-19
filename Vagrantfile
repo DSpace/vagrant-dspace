@@ -61,7 +61,7 @@ Vagrant.configure("2") do |config|
 
     # The url from where the 'config.vm.box' box will be fetched if it
     # doesn't already exist on the user's system.
-    config.vm.box_url = "http://github.com/DSpace/vagrantbox-ubuntu/releases/download/v1.0/precise64.box"
+    config.vm.box_url = "http://github.com/DSpace/vagrantbox-ubuntu/releases/download/v1.1/precise64.box"
 
     # Hostname for virtual machine
     config.vm.hostname = "dspace.vagrant.dev"
