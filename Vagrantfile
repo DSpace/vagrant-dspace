@@ -61,7 +61,7 @@ Vagrant.configure("2") do |config|
 
     # The url from where the 'config.vm.box' box will be fetched if it
     # doesn't already exist on the user's system.
-    config.vm.box_url = "http://files.vagrantup.com/precise64.box"
+    config.vm.box_url = "http://github.com/DSpace/vagrantbox-ubuntu/releases/download/v1.1/precise64.box"
 
     # Hostname for virtual machine
     config.vm.hostname = "dspace.vagrant.dev"
@@ -87,6 +87,10 @@ Vagrant.configure("2") do |config|
     # If a port collision occurs (i.e. port 8080 on local machine is in use),
     # then tell Vagrant to use the next available port between 8081 and 8100
     config.vm.usable_port_range = 8081..8100
+
+    # name this machine
+    config.vm.define :dspace do |t|
+    end 
 
     # Turn on SSH forwarding (so that 'vagrant ssh' has access to your local SSH keys, and you can use your local SSH keys to access GitHub, etc.)
     config.ssh.forward_agent = true
@@ -132,6 +136,11 @@ Vagrant.configure("2") do |config|
         shell.args = %q{/etc/sudoers.d/root_ssh_agent "Defaults    env_keep += \"SSH_AUTH_SOCK\""}
     end
 
+    # Shell script to set apt sources.list to something appropriate (close to
+    # you, and actually up, via apt-spy2
+    config.vm.provision :shell, :inline => "echo '   > > > running apt-spy-2-bootstrap.sh, do not worry if it shows an error, it will be OK, there is a fallback.'"
+    config.vm.provision :shell, :path => "apt-spy-2-bootstrap.sh"
+
     # Shell script to initialize latest Puppet on VM
     # Borrowed from https://github.com/hashicorp/puppet-bootstrap/
     config.vm.provision :shell, :path => "puppet-bootstrap-ubuntu.sh"
@@ -142,6 +151,17 @@ Vagrant.configure("2") do |config|
     config.vm.provision :shell, :path => "librarian-puppet-bootstrap.sh"
 
     # Call our Puppet initialization script
+    config.vm.provision :shell, :inline => "echo '   > > > beginning puppet provisioning, this will appear to hang...'"
+    config.vm.provision :shell, :inline => "echo '   > > > PATIENCE! output is only shown after each step completes...'"
+
+    # display the local.yaml file, if it exists, to give us a chance to back out
+    # before waiting for this vagrant up to complete
+
+    if File.exists?("config/local.yaml")
+        config.vm.provision :shell, :inline => "echo '   > > > using the following local.yaml data, if this is not correct, control-c now...'"
+        config.vm.provision :shell, :inline => "echo '---BEGIN local.yaml ---' && cat /vagrant/config/local.yaml && echo '--- END local.yaml -----'"
+    end
+
     config.vm.provision :puppet do |puppet|
         # Set some custom "facts" for Puppet manifest(s)/modules to use.
         puppet.facter = {
@@ -169,8 +189,8 @@ Vagrant.configure("2") do |config|
 
 
     if File.exists?("config/local-bootstrap.sh")
+        config.vm.provision :shell, :inline => "echo '   > > > running config/local_bootstrap.sh'"
         config.vm.provision :shell, :path => "config/local-bootstrap.sh"
-        config.vm.provision :shell, :inline => "echo 'running config/local_bootstrap.sh'"
     end
 
     #############################################

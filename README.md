@@ -111,6 +111,54 @@ The following Vagrant plugins are not required, but they do make using Vagrant a
 * Vagrant-Proxyconf: http://vagrantplugins.com/plugins/vagrant-proxyconf/
 * Vagrant-VBox-Snapshot: http://vagrantplugins.com/plugins/vagrant-vbox-snapshot/
 
+How to Tweak Things to your Liking?
+-----------------------------------
+
+local.yaml
+----------
+
+If you look at the config folder, there are a few files you'll be interested in. The first is common.yaml, it's a [Hiera](http://projects.puppetlabs.com/projects/hiera) configuration file. You may copy this file to one named local.yaml. Any changes to local.yaml will override the defaults set in the common.yaml file. The local.yaml file is ignored in .gitignore, so you won't accidentally commit it. Here are the options:
+
+* git_repo - it would be a good idea to point this to your own fork of DSpace
+* git_branch - if you're constantly working on another brach than master, you can change it here
+* mvn_params - add other maven prameters here (this is added to the Vagrant user's profile, so these options are always on whenever you run mvn as the Vagrant user
+* ant_installer_dir - until we figure out how to have the installer just run from whatever version of DSpace is in the target folder produced by Maven, we'll need to hard code the DSpace version so we can have Puppet look in the right place to run the Ant installer for DSpace
+* admin_firstname - you may want to change this to something more memorable than the demo DSpace user
+* admin_lastname - ditto
+* admin_email - likewise
+* admin_passwd - you probably have a preferred password
+* admin_language - and you my have a language preference, you can set it here
+
+local-bootstrap.sh
+------------------
+
+In the config folder, you will also find a file called local-bootstrap.sh.example. If you copy that file to local-bootstrap.sh and edit it to your liking (it is well-commented) you'll be able to customize your git clone folder to your liking (turning on the color.ui, always pull using rebase, set an upstream github repository, add the ability to fetch pull requests from upstream), as well as automatically batch-load content (an example using AIPs is included, but you're welcome to script whatever you need here... if you come up with something interesting, please consider sharing it with the community). 
+
+local-bootstrap.sh is a "shell provisioner" for Vagrant, and our vagrantfile is [configured to run it](https://github.com/DSpace/vagrant-dspace/blob/master/Vagrantfile#L171) if it is present in the config folder. If you have a fork of Vagrant-DSpace for your own repository management, you may add another shell provisioner, to maintain your own workgroup's customs and configurations. You may find an example of this in the [Vagrant-MOspace](https://github.com/umlso/vagrant-mospace/blob/master/config/mospace-bootstrap.sh) repository.
+
+maven_settings.xml
+------------------
+
+If you've copied the example local-bootstrap.sh file, you may create a config/dotfiles folder, and place a file called maven_settings.xml in it, that file will be copied to /home/vagrant/.m2/settings.xml every time the local-bootstrap.sh provisioner is run. This will allow you to further customize your Maven builds. One handy (though somewhat dangerous) thing to add to your settings.xml file is the following profile:
+<code>
+                <profile>
+                        <id>sign</id>
+                        <activation>
+                                <activeByDefault>true</activeByDefault>
+                        </activation>
+                        <properties>
+                                <gpg.passphrase>add-your-passphrase-here-if-you-dare</gpg.passphrase>
+                        </properties>
+                </profile>
+</code>
+
+NOTE: any file in config/dotfiles is ignored by Git, so you won't accidentally commit it. But, still, putting your GPG passphrase in a plain text file might be viewed by some as foolish. If you elect to not add this profile, and you DO want to sign an artifact created by Maven using GPG, you'll need to enter your GPG passphrase quickly and consistently. Choose your poison.
+
+vim and .vimrc
+--------------
+
+Another optional config/dotfiles folder which is copied (if it exists) by the example local-bootstrap.sh shell provisioner is config/dotfiles/vimrc (/home/vagrant/.vimrc) and config/dotfiles/vim (/home/vagrant/.vim). Populating these will allow you to customize Vim to your heart's content. 
+
 What's Next?
 ------------
 

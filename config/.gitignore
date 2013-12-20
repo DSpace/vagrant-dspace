@@ -2,3 +2,4 @@
 !common.yaml
 *.yaml
 local-bootstrap.sh
+dotfiles
