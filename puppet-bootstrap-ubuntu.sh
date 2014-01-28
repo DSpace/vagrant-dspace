@@ -62,11 +62,10 @@ fi
 # Install our custom librarian-puppet config file
 cp /vagrant/Puppetfile $PUPPET_DIR
 
-# Install 'librarian-puppet-maestrodev' (https://github.com/maestrodev/librarian-puppet), 
-# which is an improved version of 'librarian-puppet'
-if [ "$(gem search -i librarian-puppet-maestrodev)" = "false" ]; then
+# Install 'librarian-puppet' and all third-party modules configured in 'Puppetfile'
+if [ "$(gem search -i librarian-puppet)" = "false" ]; then
   echo "Installing librarian-puppet..."
-  gem install librarian-puppet-maestrodev --include-dependencies --no-rdoc --no-ri >/dev/null
+  gem install librarian-puppet >/dev/null
   echo "librarian-puppet installed!"
   echo "Installing third-party Puppet modules (via librarian-puppet)..."
   cd $PUPPET_DIR && librarian-puppet install --clean
