@@ -88,10 +88,6 @@ Vagrant.configure("2") do |config|
     # then tell Vagrant to use the next available port between 8081 and 8100
     config.vm.usable_port_range = 8081..8100
 
-    # name this machine
-    config.vm.define :dspace do |t|
-    end 
-
     # Turn on SSH forwarding (so that 'vagrant ssh' has access to your local SSH keys, and you can use your local SSH keys to access GitHub, etc.)
     config.ssh.forward_agent = true
 
@@ -136,19 +132,19 @@ Vagrant.configure("2") do |config|
         shell.args = %q{/etc/sudoers.d/root_ssh_agent "Defaults    env_keep += \"SSH_AUTH_SOCK\""}
     end
 
-    # Shell script to set apt sources.list to something appropriate (close to
-    # you, and actually up, via apt-spy2
+    # Check our system locale -- make sure it is set to UTF-8
+    config.vm.provision :shell, :inline => "locale | grep 'LANG=en_US.UTF-8' > /dev/null || sudo update-locale --reset LANG=en_US.UTF-8"
+
+    # Turn off annoying console bells/beeps in Ubuntu (only if not already turned off in /etc/inputrc)
+    config.vm.provision :shell, :inline => "grep '^set bell-style none' /etc/inputrc || echo 'set bell-style none' >> /etc/inputrc"
+
+    # Shell script to set apt sources.list to something appropriate (close to you, and actually up) via apt-spy2
     config.vm.provision :shell, :inline => "echo '   > > > running apt-spy-2-bootstrap.sh, do not worry if it shows an error, it will be OK, there is a fallback.'"
     config.vm.provision :shell, :path => "apt-spy-2-bootstrap.sh"
 
-    # Shell script to initialize latest Puppet on VM
-    # Borrowed from https://github.com/hashicorp/puppet-bootstrap/
+    # Shell script to initialize latest Puppet on VM & also install librarian-puppet (which manages our third party puppet modules)
+    # This has to be done before the puppet provisioning so that the modules are available when puppet tries to parse its manifests.
     config.vm.provision :shell, :path => "puppet-bootstrap-ubuntu.sh"
-
-    # This shell provisioner installs librarian-puppet and runs it to install
-    # puppet modules. This has to be done before the puppet provisioning so that
-    # the modules are available when puppet tries to parse its manifests.
-    config.vm.provision :shell, :path => "librarian-puppet-bootstrap.sh"
 
     # Call our Puppet initialization script
     config.vm.provision :shell, :inline => "echo '   > > > beginning puppet provisioning, this will appear to hang...'"
@@ -171,7 +167,6 @@ Vagrant.configure("2") do |config|
         }
         puppet.manifests_path = "."
         puppet.manifest_file = "dspace-init.pp"
-        puppet.module_path = "modules"
         puppet.options = "--verbose"
         puppet.hiera_config_path = "hiera.yaml"
     end

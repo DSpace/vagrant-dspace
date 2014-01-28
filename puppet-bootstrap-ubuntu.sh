@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 #
-# This bootstraps Puppet on Ubuntu 12.04 LTS.
-# Copied from: https://github.com/hashicorp/puppet-bootstrap/
+# This bootstraps Puppet & Librarian-Puppet on Ubuntu 12.04 LTS.
+# Based on the script at: https://github.com/hashicorp/puppet-bootstrap/
+# 
+# However, we've updated it to also install and configure librarian-puppet
+# https://github.com/rodjek/librarian-puppet  
+# We use librarian-puppet to auto-install 3rd party Puppet modules.
 #
 set -e
+
+# Puppet directory (this is where we want Puppet to be installed & all its main modules)
+PUPPET_DIR=/etc/puppet/
 
 # Load up the release information
 . /etc/lsb-release
@@ -19,7 +26,7 @@ if [ "$EUID" -ne "0" ]; then
 fi
 
 # Do the initial apt-get update
-echo "Initial apt-get update..."
+echo "Ensure apt-get update has been run..."
 apt-get update >/dev/null
 
 # Install wget if we have to (some older Ubuntu versions)
@@ -36,5 +43,34 @@ apt-get update >/dev/null
 # Install Puppet
 echo "Installing Puppet..."
 apt-get install -y puppet >/dev/null
-
 echo "Puppet installed!"
+
+# Install our custom Puppet config file
+cp /vagrant/puppet.conf $PUPPET_DIR
+
+### Start librarian-puppet installation & initialization
+
+# Install Git
+echo "Installing Git..."
+apt-get install -y git >/dev/null
+echo "Git installed!"
+
+# Ensure Puppet directory exists & the 'librarian-puppet' "Puppetfile" is copied there.
+if [ ! -d "$PUPPET_DIR" ]; then
+  mkdir -p $PUPPET_DIR
+fi
+# Install our custom librarian-puppet config file
+cp /vagrant/Puppetfile $PUPPET_DIR
+
+# Install 'librarian-puppet' and all third-party modules configured in 'Puppetfile'
+if [ "$(gem search -i librarian-puppet)" = "false" ]; then
+  echo "Installing librarian-puppet..."
+  gem install librarian-puppet >/dev/null
+  echo "librarian-puppet installed!"
+  echo "Installing third-party Puppet modules (via librarian-puppet)..."
+  cd $PUPPET_DIR && librarian-puppet install --clean
+else
+  echo "Updating third-party Puppet modules (via librarian-puppet)..."
+  cd $PUPPET_DIR && librarian-puppet update
+fi
+
