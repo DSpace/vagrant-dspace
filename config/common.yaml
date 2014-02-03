@@ -4,7 +4,7 @@ git_repo          : 'git@github.com:DSpace/DSpace.git'
 git_branch        : 'master'
 mvn_params        : '-Denv=vagrant'
 
-ant_installer_dir : '/home/vagrant/dspace-src/dspace/target/dspace-4.0-rc4-SNAPSHOT-build'
+ant_installer_dir : '/home/vagrant/dspace-src/dspace/target/dspace-5.0-SNAPSHOT-build'
 admin_firstname   : 'DSpaceDemo'
 admin_lastname    : 'Admin'
 admin_email       : 'dspacedemo+admin@gmail.com'
