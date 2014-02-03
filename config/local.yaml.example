@@ -15,7 +15,7 @@ mvn_params        : '-Denv=vagrant'
 # This is a hack, we'd like for there to be a better way to determine where the
 # ant installer ends up after running mvn package, but, for now, we're hard 
 # coding it. See DS-1760, and pitch in if you have a solution.
-ant_installer_dir : '/home/vagrant/dspace-src/dspace/target/dspace-4.0-rc2-SNAPSHOT-build'
+ant_installer_dir : '/home/vagrant/dspace-src/dspace/target/dspace-5.0-SNAPSHOT-build'
 
 admin_firstname   : 'YourFirstName'
 admin_lastname    : 'YourLastName'
