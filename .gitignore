@@ -1,2 +1,6 @@
 # Ignore Vagrant settings
 .vagrant/
+
+# Ignore anything in "content/" subfolder, except for "content/README"
+/content/
+!/content/README
