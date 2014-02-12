@@ -3,7 +3,7 @@
 
 # Install Puppet PostgreSQL module from PuppetForge
 forge "http://forge.puppetlabs.com"
-mod "puppetlabs/postgresql", "3.1.0"
+mod "puppetlabs/postgresql", "3.3.0"
 mod "saz/vim"
 
 # Install Tim's simple Tomcat module from GitHub
