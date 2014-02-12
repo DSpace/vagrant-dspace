@@ -4,7 +4,10 @@ git_repo          : 'git@github.com:DSpace/DSpace.git'
 git_branch        : 'master'
 mvn_params        : '-Denv=vagrant'
 
-ant_installer_dir : '/home/vagrant/dspace-src/dspace/target/dspace-5.0-SNAPSHOT-build'
+# NOTE: if you change 'git_branch' above, you MAY need to modify this 'ant_installer_dir'
+# setting. It must be set to the directory where the Ant-based installer ends up, after
+# 'mvn package' is run. For now, this is hardcoded (see DS-1760 ticket).
+ant_installer_dir : '/home/vagrant/dspace-src/dspace/target/dspace-installer'
 admin_firstname   : 'DSpaceDemo'
 admin_lastname    : 'Admin'
 admin_email       : 'dspacedemo+admin@gmail.com'
