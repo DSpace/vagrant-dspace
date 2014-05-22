@@ -16,6 +16,22 @@ but has now been more broadly accepted.
 
 _BIG WARNING: THIS IS STILL A WORK IN PROGRESS. YOUR MILEAGE MAY VARY. NEVER USE THIS IN PRODUCTION._
 
+
+Table of Contents
+-----------------
+
+1. [How it Works](#how-it-works)
+2. [Requirements - The prerequisites you need](#requirements)
+3. [Getting Started - How to install and run 'vagrant-dspace'](#getting-started)
+4. [What will you get? - What does the end result look like?](#what-will-you-get)
+5. [Usage Tips - How to perform common activities in this environment](#usage-tips)
+6. [How to Tweak Things to your Liking? - Tips on customizing the 'vagrant-dspace' install process](#how-to-tweak-things-to-your-liking)
+7. [Vagrant Plugin Recommendations - Other plugins you may wish to consider installing](#vagrant-plugin-recommendations)
+8. [What's Next?](#whats-next)
+9. [Tools We Use To Make This All Work](#tools-we-use-to-make-this-all-work)
+10. [Reporting Bugs / Requesting Enhancements](#reporting-bugs--requesting-enhancements)
+11. [License](#license)
+
 How it Works
 ------------
 
@@ -45,7 +61,7 @@ Requirements
 * [VirtualBox](https://www.virtualbox.org/)
 * A GitHub account with an associated SSH key:  As vagrant-dspace was built initially as a developer tool, at this time one must have a GitHub account (and an associated SSH key) in order for 'vagrant-dspace' to be able to download DSpace source from GitHub. Please note, we are working on removing this requirement in the future.
 
-How To Use vagrant-dspace
+Getting Started
 --------------------------
 
 1. Install [Vagrant](http://vagrantup.com) (Only tested with the [VirtualBox](https://www.virtualbox.org/) provider so far)
@@ -101,21 +117,29 @@ As you develop with 'vagrant-dspace', from time to time you may want to run a `v
 This cleans out any old experiments and starts fresh with a new base image. If you're just using vagrant-dspace for dspace development, this isn't advice for you. 
 But, if you're working on contributing back to vagrant-dspace, do try this from time to time, just to sanity-check your Vagrant and Puppet scripts.
 
-Additional Vagrant Plugin Recommendations
------------------------------------------
+Usage Tips
+------------
 
-The following Vagrant plugins are not required, but they do make using Vagrant and vagrant-dspace more enjoyable.
+Here's some common activities which you may wish to perform in `vagrant-dspace`:
 
-* Land Rush: https://github.com/phinze/landrush
-* Vagrant-Cachier: https://github.com/fgrehm/vagrant-cachier
-* Vagrant-Proxyconf: http://vagrantplugins.com/plugins/vagrant-proxyconf/
-* Vagrant-VBox-Snapshot: http://vagrantplugins.com/plugins/vagrant-vbox-snapshot/
+* **Restarting Tomcat**
+   * `sudo service tomcat7-vagrant restart` 
+* **Restarting PostgreSQL**
+   * `sudo service postgresql restart`
+* **Connecting to DSpace PostgreSQL database**
+   * `psql -h localhost -U dspace dspace`  (Password is "dspace")
+* **Rebuilding / Redeploying DSpace**
+   * `cd ~/dspace-src/`  (Move into source directory)
+   * `mvn clean package` (Rebuild/Recompile DSpace)
+   * `cd dspace/target/dspace-installer` (Move into the newly built installer directory)
+   * `ant update`   (Redeploy changes to ~/dspace/)
+   * `sudo service tomcat7-vagrant restart` (Reboot Tomcat)
+
 
 How to Tweak Things to your Liking?
 -----------------------------------
 
-local.yaml
-----------
+### local.yaml
 
 If you look at the config folder, there are a few files you'll be interested in. The first is common.yaml, it's a [Hiera](http://projects.puppetlabs.com/projects/hiera) configuration file. You may copy this file to one named local.yaml. Any changes to local.yaml will override the defaults set in the common.yaml file. The local.yaml file is ignored in .gitignore, so you won't accidentally commit it. Here are the options:
 
@@ -129,15 +153,13 @@ If you look at the config folder, there are a few files you'll be interested in.
 * admin_passwd - you probably have a preferred password
 * admin_language - and you my have a language preference, you can set it here
 
-local-bootstrap.sh
-------------------
+### local-bootstrap.sh
 
 In the config folder, you will also find a file called local-bootstrap.sh.example. If you copy that file to local-bootstrap.sh and edit it to your liking (it is well-commented) you'll be able to customize your git clone folder to your liking (turning on the color.ui, always pull using rebase, set an upstream github repository, add the ability to fetch pull requests from upstream), as well as automatically batch-load content (an example using AIPs is included, but you're welcome to script whatever you need here... if you come up with something interesting, please consider sharing it with the community). 
 
 local-bootstrap.sh is a "shell provisioner" for Vagrant, and our vagrantfile is [configured to run it](https://github.com/DSpace/vagrant-dspace/blob/master/Vagrantfile#L171) if it is present in the config folder. If you have a fork of Vagrant-DSpace for your own repository management, you may add another shell provisioner, to maintain your own workgroup's customs and configurations. You may find an example of this in the [Vagrant-MOspace](https://github.com/umlso/vagrant-mospace/blob/master/config/mospace-bootstrap.sh) repository.
 
-maven_settings.xml
-------------------
+### maven_settings.xml
 
 If you've copied the example local-bootstrap.sh file, you may create a config/dotfiles folder, and place a file called maven_settings.xml in it, that file will be copied to /home/vagrant/.m2/settings.xml every time the local-bootstrap.sh provisioner is run. This will allow you to further customize your Maven builds. One handy (though somewhat dangerous) thing to add to your settings.xml file is the following profile:
 <code>
@@ -154,10 +176,20 @@ If you've copied the example local-bootstrap.sh file, you may create a config/do
 
 NOTE: any file in config/dotfiles is ignored by Git, so you won't accidentally commit it. But, still, putting your GPG passphrase in a plain text file might be viewed by some as foolish. If you elect to not add this profile, and you DO want to sign an artifact created by Maven using GPG, you'll need to enter your GPG passphrase quickly and consistently. Choose your poison.
 
-vim and .vimrc
---------------
+### vim and .vimrc
 
 Another optional config/dotfiles folder which is copied (if it exists) by the example local-bootstrap.sh shell provisioner is config/dotfiles/vimrc (/home/vagrant/.vimrc) and config/dotfiles/vim (/home/vagrant/.vim). Populating these will allow you to customize Vim to your heart's content. 
+
+Vagrant Plugin Recommendations
+-------------------------------
+
+The following Vagrant plugins are not required, but they do make using Vagrant and vagrant-dspace more enjoyable.
+
+* Land Rush: https://github.com/phinze/landrush
+* Vagrant-Cachier: https://github.com/fgrehm/vagrant-cachier
+* Vagrant-Proxyconf: http://vagrantplugins.com/plugins/vagrant-proxyconf/
+* Vagrant-VBox-Snapshot: http://vagrantplugins.com/plugins/vagrant-vbox-snapshot/
+
 
 What's Next?
 ------------
