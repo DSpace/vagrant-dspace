@@ -37,7 +37,7 @@ class dspace ($java_version = "7")
 
     # Set Java defaults to point at OpenJDK
     # NOTE: $architecture is a "fact" automatically set by Puppet's 'facter'.
-    exec { "Update alternatives to OpenJDK Java ${version}":
+    exec { "Update alternatives to OpenJDK Java ${java_version}":
         command => "update-java-alternatives --set java-1.${java_version}.0-openjdk-${architecture}",
         unless  => "test \$(readlink /etc/alternatives/java) = '${install_dir}/${dir_name}/jre/bin/java'",
         path    => "/usr/bin:/usr/sbin:/bin",
