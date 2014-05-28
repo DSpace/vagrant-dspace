@@ -31,8 +31,8 @@ class dspace ($java_version = "7")
     }
 
     # Install the IcedTea plugin, as its absence seems to cause update-java-alternatives to fail
-    package { "icedtea-7-plugin":
-        name => "icedtea-7-plugin"
+    package { "icedtea-${java_version}-plugin":
+        name => "icedtea-${java_version}-plugin"
     }
 
     # Set Java defaults to point at OpenJDK
