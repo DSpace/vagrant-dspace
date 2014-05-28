@@ -200,6 +200,9 @@ Vagrant.configure("2") do |config|
         # Use VBoxManage to provide Virtual Machine with extra memory (default is only 300MB)
         vb.customize ["modifyvm", :id, "--memory", vb_memory]
 
+        # Use VBoxManage to have the Virtual Machine use the Host's DNS resolver
+        vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+
         # Use VBoxManage to ensure Virtual Machine only has access to 50% of host CPU
         #vb.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
 
