@@ -105,7 +105,7 @@ It is up to you to [continue the DSpace setup](https://wiki.duraspace.org/displa
 Your first step should  be to change the default password(s), and/or optionally create a new administrator:
 
     vagrant ssh
-    ~dspace/bin/dspace create-administrator
+    ~/dspace/bin/dspace create-administrator
 
 It is also worth noting that you may choose to tweak the default [`Vagrantfile`](https://github.com/tdonohue/vagrant-dspace/blob/master/Vagrantfile) to better match your own development environment. 
 There's even a few quick settings there to get you started.
