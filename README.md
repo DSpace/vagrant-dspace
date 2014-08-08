@@ -188,7 +188,7 @@ The following Vagrant plugins are not required, but they do make using Vagrant a
 * Land Rush: https://github.com/phinze/landrush
 * Vagrant-Cachier: https://github.com/fgrehm/vagrant-cachier
 * Vagrant-Proxyconf: http://vagrantplugins.com/plugins/vagrant-proxyconf/
-* Vagrant-VBox-Snapshot: http://vagrantplugins.com/plugins/vagrant-vbox-snapshot/
+* Vagrant-VBox-Snapshot: https://github.com/dergachev/vagrant-vbox-snapshot/
 
 
 What's Next?
