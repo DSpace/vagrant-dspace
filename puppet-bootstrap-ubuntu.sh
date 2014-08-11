@@ -65,7 +65,7 @@ cp /vagrant/Puppetfile $PUPPET_DIR
 # Install 'librarian-puppet' and all third-party modules configured in 'Puppetfile'
 if [ "$(gem search -i librarian-puppet)" = "false" ]; then
   echo "Installing librarian-puppet..."
-  gem install librarian-puppet >/dev/null
+  gem install librarian-puppet --version 1.0.3 >/dev/null
   echo "librarian-puppet installed!"
   echo "Installing third-party Puppet modules (via librarian-puppet)..."
   cd $PUPPET_DIR && librarian-puppet install --clean
