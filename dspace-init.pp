@@ -7,6 +7,9 @@
 # Tested on:
 # - Ubuntu 12.04
 
+# grab Maven version from hiera for later use
+$mvn_version = hiera('mvn_version')
+
 # Global default to requiring all packages be installed & apt-update to be run first
 Package {
   ensure => latest,                # requires latest version of each package to be installed
@@ -52,6 +55,12 @@ else { # Otherwise, pass the value of $::java_version to the 'dspace' module
        java_version => $::java_version,
     }
 }
+
+ # Install Maven
+class { "maven::maven":
+  version => $mvn_version, # version to install
+}
+
 
 # Install Vim for a more rewarding command-line-based editor experience
 class {'vim':
