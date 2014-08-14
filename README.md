@@ -146,6 +146,7 @@ If you look at the config folder, there are a few files you'll be interested in.
 * git_repo - it would be a good idea to point this to your own fork of DSpace
 * git_branch - if you're constantly working on another brach than master, you can change it here
 * mvn_params - add other maven prameters here (this is added to the Vagrant user's profile, so these options are always on whenever you run mvn as the Vagrant user
+* mvn_version - defaults to 3.0.5, but feel free to change it to whatever version you wish to test
 * ant_installer_dir - until we figure out how to have the installer just run from whatever version of DSpace is in the target folder produced by Maven, we'll need to hard code the DSpace version so we can have Puppet look in the right place to run the Ant installer for DSpace
 * admin_firstname - you may want to change this to something more memorable than the demo DSpace user
 * admin_lastname - ditto
