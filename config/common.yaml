@@ -2,6 +2,7 @@
 
 git_repo          : 'git@github.com:DSpace/DSpace.git'
 git_branch        : 'master'
+mvn_version       : '3.0.5'
 mvn_params        : '-Denv=vagrant'
 
 # NOTE: if you change 'git_branch' above, you MAY need to modify this 'ant_installer_dir'
