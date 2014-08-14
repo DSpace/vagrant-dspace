@@ -53,6 +53,12 @@ else { # Otherwise, pass the value of $::java_version to the 'dspace' module
     }
 }
 
+ # Install Maven
+class { "maven::maven":
+  version => "3.0.5", # version to install
+}
+
+
 # Install Vim for a more rewarding command-line-based editor experience
 class {'vim':
    ensure => present,
