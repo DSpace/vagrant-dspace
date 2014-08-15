@@ -19,6 +19,9 @@ DSPACESRC="$DSPACE_HOME-src"
 
 ## START OFF BY CUSTOMIZING THE GIT CLONE ##
 cd $DSPACESRC
+# add the fingerprint for github
+echo "Adding the fingerprint for github.com, so we don't get nagged later..."
+sudo -i -u vagrant ssh -T -oStrictHostKeyChecking=no git@github.com
 
 # set git to allways rebase when we pull (using sudo to run as the vagrant user, since this script runs as root)
 sudo -i -u vagrant git config --global --bool pull.rebase true
@@ -35,10 +38,16 @@ sudo -i -u vagrant git config --global --bool merge.keepbackups false
 echo "and now setting up my preferences for my working copy... adding an upstream remote, PR refs..." 
 
 # add an upstream remote
-git remote add upstream git@github.com:DSpace/DSpace.git
+sudo -s -u vagrant sh -c "cd $DSPACESRC && git remote add upstream git@github.com:DSpace/DSpace.git"
 
 # enable fetching of pull requests from upstream (this may or may not be common practice, but it's handy, why not try it out?)
-git config --add remote.upstream.fetch +refs/pull/*/head:refs/remotes/upstream/pr/*
+sudo -s -u vagrant sh -c "cd $DSPACESRC && git config --add remote.upstream.fetch +refs/pull/*/head:refs/remotes/upstream/pr/*"
+# now fetch everything so we're ready to go offline
+echo "getting ready for offline coding..."
+sudo -s -u vagrant sh -c "cd $DSPACESRC && git fetch --all"
+
+# run mvn install so our maven cache in ~/.m2/repository is current
+sudo -s -u vagrant sh -c "cd $DSPACESRC && mvn install"
 
 # Git-smart is super helpful, especially for git newbies, and is worth installing just for smart-log
 echo "installing git-smart"
