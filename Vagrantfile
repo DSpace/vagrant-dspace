@@ -50,13 +50,17 @@ Vagrant.configure("2") do |config|
     # BEGIN Vagrant-Cachier configuration ####################################
     # check for the presence of the Vagrant-Cachier plugin before attempting
     # these configurations
-    if Vagrant.has_plugin?('vagrant-cachier')
        # Use a vagrant-cachier cache if one is detected
        config.cache.auto_detect = true
 
        # and lets specifically use the apt cache (note, this is a Debian-ism)
        config.cache.enable :apt
-    end
+
+       # use the generic cache bucket for Maven
+       config.cache.enable :generic, {
+             "maven" => { cache_dir: "/home/vagrant/.m2/repository" },
+       }
+
     # END Vagrant-Cachie configuration #######################################
 
     # The url from where the 'config.vm.box' box will be fetched if it
