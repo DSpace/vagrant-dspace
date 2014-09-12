@@ -53,6 +53,10 @@ Vagrant.configure("2") do |config|
        # Use a vagrant-cachier cache if one is detected
        config.cache.auto_detect = true
 
+       # set vagrant-cachier scope to :box, so other projects that share the
+       # dspace-precise64 box will be able to used the same cached files
+       config.cache.scope = :box
+
        # and lets specifically use the apt cache (note, this is a Debian-ism)
        config.cache.enable :apt
 
@@ -61,11 +65,14 @@ Vagrant.configure("2") do |config|
              "maven" => { cache_dir: "/home/vagrant/.m2/repository" },
        }
 
-    # END Vagrant-Cachie configuration #######################################
+    # END Vagrant-Cachier configuration #######################################
 
     # The url from where the 'config.vm.box' box will be fetched if it
     # doesn't already exist on the user's system.
     config.vm.box_url = "http://github.com/DSpace/vagrantbox-ubuntu/releases/download/v1.1/precise64.box"
+
+    # define this box so Vagrant doesn't call it "default"
+    config.vm.define "vds"
 
     # Hostname for virtual machine
     config.vm.hostname = "dspace.vagrant.dev"
