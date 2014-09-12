@@ -164,15 +164,15 @@ local-bootstrap.sh is a "shell provisioner" for Vagrant, and our vagrantfile is 
 
 If you've copied the example local-bootstrap.sh file, you may create a config/dotfiles folder, and place a file called maven_settings.xml in it, that file will be copied to /home/vagrant/.m2/settings.xml every time the local-bootstrap.sh provisioner is run. This will allow you to further customize your Maven builds. One handy (though somewhat dangerous) thing to add to your settings.xml file is the following profile:
 ```
-                <profile>
-                        <id>sign</id>
-                        <activation>
-                                <activeByDefault>true</activeByDefault>
-                        </activation>
-                        <properties>
-                                <gpg.passphrase>add-your-passphrase-here-if-you-dare</gpg.passphrase>
-                        </properties>
-                </profile>
+    <profile>
+            <id>sign</id>
+            <activation>
+                    <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                    <gpg.passphrase>add-your-passphrase-here-if-you-dare</gpg.passphrase>
+            </properties>
+    </profile>
 ```
 
 NOTE: any file in config/dotfiles is ignored by Git, so you won't accidentally commit it. But, still, putting your GPG passphrase in a plain text file might be viewed by some as foolish. If you elect to not add this profile, and you DO want to sign an artifact created by Maven using GPG, you'll need to enter your GPG passphrase quickly and consistently. Choose your poison.
