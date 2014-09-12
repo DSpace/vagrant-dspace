@@ -186,11 +186,23 @@ Vagrant Plugin Recommendations
 
 The following Vagrant plugins are not required, but they do make using Vagrant and vagrant-dspace more enjoyable.
 
-* Land Rush: https://github.com/phinze/landrush
+* Land Rush: https://github.com/phinze/landrush (no more recent than version 0.12.0) *
 * Vagrant-Cachier: https://github.com/fgrehm/vagrant-cachier
 * Vagrant-Proxyconf: https://github.com/tmatilai/vagrant-proxyconf/
 * Vagrant-VBox-Snapshot: https://github.com/dergachev/vagrant-vbox-snapshot/
 
+NOTE: * if you do install the Land Rush plugin, we recommend you only install version 0.12.0 at this time, newer versions report errors in communicating with our base machine image. You may do this by typing:
+<code>
+    vagrant plugin install landrush --plugin-version 0.12.0
+</code>
+
+If you already have a newer version of the landrush plugin installed, you may revert to an earlier version by typing the following commands:
+
+<code>
+    vagrant plugin uninstall landrush
+    vagrant plugin install landrush --plugin-version 0.12.0
+</code>
+ 
 
 What's Next?
 ------------
