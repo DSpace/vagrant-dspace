@@ -163,17 +163,17 @@ local-bootstrap.sh is a "shell provisioner" for Vagrant, and our vagrantfile is 
 ### maven_settings.xml
 
 If you've copied the example local-bootstrap.sh file, you may create a config/dotfiles folder, and place a file called maven_settings.xml in it, that file will be copied to /home/vagrant/.m2/settings.xml every time the local-bootstrap.sh provisioner is run. This will allow you to further customize your Maven builds. One handy (though somewhat dangerous) thing to add to your settings.xml file is the following profile:
-<code>
-                <profile>
-                        <id>sign</id>
-                        <activation>
-                                <activeByDefault>true</activeByDefault>
-                        </activation>
-                        <properties>
-                                <gpg.passphrase>add-your-passphrase-here-if-you-dare</gpg.passphrase>
-                        </properties>
-                </profile>
-</code>
+```
+    <profile>
+            <id>sign</id>
+            <activation>
+                    <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                    <gpg.passphrase>add-your-passphrase-here-if-you-dare</gpg.passphrase>
+            </properties>
+    </profile>
+```
 
 NOTE: any file in config/dotfiles is ignored by Git, so you won't accidentally commit it. But, still, putting your GPG passphrase in a plain text file might be viewed by some as foolish. If you elect to not add this profile, and you DO want to sign an artifact created by Maven using GPG, you'll need to enter your GPG passphrase quickly and consistently. Choose your poison.
 
@@ -186,11 +186,23 @@ Vagrant Plugin Recommendations
 
 The following Vagrant plugins are not required, but they do make using Vagrant and vagrant-dspace more enjoyable.
 
-* Land Rush: https://github.com/phinze/landrush
+* Land Rush: https://github.com/phinze/landrush (no more recent than version 0.12.0) *
 * Vagrant-Cachier: https://github.com/fgrehm/vagrant-cachier
 * Vagrant-Proxyconf: https://github.com/tmatilai/vagrant-proxyconf/
 * Vagrant-VBox-Snapshot: https://github.com/dergachev/vagrant-vbox-snapshot/
 
+NOTE: * if you do install the Land Rush plugin, we recommend you only install version 0.12.0 at this time, newer versions report errors in communicating with our base machine image. You may do this by typing:
+```
+    vagrant plugin install landrush --plugin-version 0.12.0
+```
+
+If you already have a newer version of the landrush plugin installed, you may revert to an earlier version by typing the following commands:
+
+```
+    vagrant plugin uninstall landrush
+    vagrant plugin install landrush --plugin-version 0.12.0
+```
+ 
 
 What's Next?
 ------------
