@@ -45,7 +45,7 @@ Vagrant.configure("2") do |config|
     # please see the online documentation at vagrantup.com.
 
     # Every Vagrant virtual environment requires a box to build off of.
-    config.vm.box = "dspace-precise64"
+    config.vm.box = "dspace-trusty64"
 
     # BEGIN Vagrant-Cachier configuration ####################################
     # check for the presence of the Vagrant-Cachier plugin before attempting
@@ -54,7 +54,7 @@ Vagrant.configure("2") do |config|
        config.cache.auto_detect = true
 
        # set vagrant-cachier scope to :box, so other projects that share the
-       # dspace-precise64 box will be able to used the same cached files
+       # dspace-trusty64 box will be able to used the same cached files
        config.cache.scope = :box
 
        # and lets specifically use the apt cache (note, this is a Debian-ism)
@@ -69,7 +69,7 @@ Vagrant.configure("2") do |config|
 
     # The url from where the 'config.vm.box' box will be fetched if it
     # doesn't already exist on the user's system.
-    config.vm.box_url = "http://github.com/DSpace/vagrantbox-ubuntu/releases/download/v1.1/precise64.box"
+    config.vm.box_url = "http://github.com/DSpace/vagrantbox-ubuntu/releases/download/v1.0/trusty64.box"
 
     # define this box so Vagrant doesn't call it "default"
     config.vm.define "vds"
