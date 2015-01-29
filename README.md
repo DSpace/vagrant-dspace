@@ -37,7 +37,7 @@ How it Works
 
 'vagrant-dspace' does all of the following for you:
 
-* Spins up an Ubuntu 12.04 VM using Vagrant
+* Spins up an Ubuntu 14.04.1 LTS VM using Vagrant
 * Installs some of the basic prerequisites for DSpace Development (namely: Git, Java, Maven)
 * Clones DSpace source from GitHub to `~/dspace-src/` (under the default 'vagrant' user account)
 * Installs/Configures PostgreSQL
