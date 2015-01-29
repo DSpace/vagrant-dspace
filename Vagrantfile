@@ -50,6 +50,7 @@ Vagrant.configure("2") do |config|
     # BEGIN Vagrant-Cachier configuration ####################################
     # check for the presence of the Vagrant-Cachier plugin before attempting
     # these configurations
+    if Vagrant.has_plugin?('vagrant-cachier')
        # Use a vagrant-cachier cache if one is detected
        config.cache.auto_detect = true
 
@@ -65,11 +66,15 @@ Vagrant.configure("2") do |config|
              "maven" => { cache_dir: "/home/vagrant/.m2/repository" },
        }
 
+       # set the permissions for .m2 so we can use Maven properly
+       config.vm.provision :shell, :inline => "chown vagrant:vagrant /home/vagrant/.m2"
+
+    end
     # END Vagrant-Cachier configuration #######################################
 
     # The url from where the 'config.vm.box' box will be fetched if it
     # doesn't already exist on the user's system.
-    config.vm.box_url = "http://github.com/DSpace/vagrantbox-ubuntu/releases/download/v1.0/trusty64.box"
+    config.vm.box_url = "http://github.com/DSpace/vagrantbox-ubuntu/releases/download/v2.0/dspace-trusty64.box"
 
     # define this box so Vagrant doesn't call it "default"
     config.vm.define "vds"
@@ -85,6 +90,9 @@ Vagrant.configure("2") do |config|
 
     if Vagrant.has_plugin?('landrush')
         config.landrush.enable
+        # let's use the Google free DNS
+        config.landrush.upstream '8.8.8.8'
+        config.landrush.guest_redirect_dns = false
     end
 
     # END Landrush configuration ###########################################
