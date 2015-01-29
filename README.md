@@ -153,7 +153,7 @@ If you look at the config folder, there are a few files you'll be interested in.
 * admin_lastname - ditto
 * admin_email - likewise
 * admin_passwd - you probably have a preferred password
-* admin_language - and you my have a language preference, you can set it here
+* admin_language - and you may have a language preference, you can set it here
 
 ### local-bootstrap.sh
 
