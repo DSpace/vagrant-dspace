@@ -98,7 +98,7 @@ define dspace::install ($owner,
 
     # cp tmp_src_dir/* to src_dir/
     exec { "copy ${tmp_src_dir}/* to ${src_dir}/":
-        command   => "cp -r ${tmp_src_dir}/* ${src_dir}/",
+        command   => "cp -r ${tmp_src_dir}/. ${src_dir}/; chown -R ${owner}:${group} ${src_dir}",
         logoutput => true,
 }
 
