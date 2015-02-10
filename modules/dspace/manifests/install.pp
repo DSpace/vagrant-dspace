@@ -38,6 +38,7 @@ define dspace::install ($owner,
                         $version,
                         $group             = $owner,
                         $src_dir           = "/home/${owner}/dspace-src", 
+                        $tmp_src_dir       = "/home/${owner}/dspace-tmp-src", 
                         $install_dir       = "/home/${owner}/dspace",
                         $service_owner     = "${owner}", 
                         $service_group     = "${owner}",
@@ -78,15 +79,29 @@ define dspace::install ($owner,
  
 ->
    
-    # Clone DSpace GitHub to ~/dspace-src
-    exec { "git clone ${git_repo} ${src_dir}":
-        command   => "git clone ${git_repo} ${src_dir}; chown -R ${owner}:${group} ${src_dir}",
-        creates   => $src_dir,
+   # support for synced folders requires that we clone to a temp location and then move the new  
+   # .git folder to the src_dir (but we should skip this whole process if there is already a .git
+   # folder in dspace-src
+
+
+    # Clone DSpace GitHub to ~/dspace-tmp-src
+    exec { "git clone ${git_repo} ${tmp_src_dir}":
+        command   => "git clone ${git_repo} ${tmp_src_dir}; chown -R ${owner}:${group} ${tmp_src_dir}",
+        creates   => "${tmp_src_dir}/.git",
         logoutput => true,
         tries     => 2, # try 2 times, with a ten minute timeout, GitHub is sometimes slow, if it's too slow, might as well get everything else done
         timeout   => 600,
         require   => [Package["git"], Exec["Verify SSH connection to GitHub works?"]],
-    }
+}
+
+->
+
+    # cp tmp_src_dir/* to src_dir/
+    exec { "copy ${tmp_src_dir}/* to ${src_dir}/":
+        command   => "cp -r ${tmp_src_dir}/* ${src_dir}/",
+        logoutput => true,
+}
+
 
 ->
 

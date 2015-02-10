@@ -2,5 +2,12 @@
 .vagrant/
 
 # Ignore anything in "content/" subfolder, except for "content/README"
-/content/
 !/content/README
+/content/
+
+# Ignore "dspace/" and "dspace-src/" subfolders, except for the READMEs
+!/dspace/README
+/dspace/
+
+!/dspace-src/README
+/dspace-src/
