@@ -38,7 +38,6 @@ define dspace::install ($owner,
                         $version,
                         $group             = $owner,
                         $src_dir           = "/home/${owner}/dspace-src", 
-                        $tmp_src_dir       = "/home/${owner}/dspace-tmp-src", 
                         $install_dir       = "/home/${owner}/dspace",
                         $service_owner     = "${owner}", 
                         $service_group     = "${owner}",
@@ -78,30 +77,42 @@ define dspace::install ($owner,
     }
  
 ->
-   
-   # support for synced folders requires that we clone to a temp location and then move the new  
-   # .git folder to the src_dir (but we should skip this whole process if there is already a .git
-   # folder in dspace-src
 
+    ### BEGIN clone of DSpace from GitHub to ~/dspace-src (this is a bit of a strange way to ckeck out, we do it this
+    ### way to support cases where src_dir already exists)
 
-    # Clone DSpace GitHub to ~/dspace-tmp-src
-    exec { "git clone ${git_repo} ${tmp_src_dir}":
-        command   => "git clone ${git_repo} ${tmp_src_dir}; chown -R ${owner}:${group} ${tmp_src_dir}",
-        creates   => "${tmp_src_dir}/.git",
-        logoutput => true,
-        tries     => 2, # try 2 times, with a ten minute timeout, GitHub is sometimes slow, if it's too slow, might as well get everything else done
-        timeout   => 600,
-        require   => [Package["git"], Exec["Verify SSH connection to GitHub works?"]],
-}
+    # if the src_dir folder does not yet exist, create it
+    file { "${src_dir}":
+        ensure => "directory",
+        owner  => "${owner}",
+        group  => "${group}",
+        mode   => 770,
+    }
 
 ->
 
-    # cp tmp_src_dir/* to src_dir/
-    exec { "copy ${tmp_src_dir}/* to ${src_dir}/":
-        command   => "cp -r ${tmp_src_dir}/. ${src_dir}/; chown -R ${owner}:${group} ${src_dir}",
+    exec { "initializing ${src_dir} as a Git repository, setting origin, and fetching all":
+        command   => "git init; git remote add origin ${git_repo}]; git fetch --all",
+        creates   => "${src_dir}/.git",
+        cwd     => $src_dir, # run command from this directory
+        user    => $owner,
         logoutput => true,
-}
+        require   => [Package["git"]],
+     }
 
+->
+
+    # If there is no pom.xml, we should checkout the master branch (similar to a standard clone process)
+    exec { "first running git checkout master to populate ${src_dir}":
+        command  => "git checkout master",
+        cwd      => $src_dir, # run command from this directory
+        creates  => "${src_dir}/pom.xml",
+        user    => $owner,
+        logoutput => true,
+        require   => [Package["git"]],
+    }
+
+    ### END clone of DSpace
 
 ->
 
@@ -113,6 +124,8 @@ define dspace::install ($owner,
        # Only perform this checkout if the branch EXISTS and it is NOT currently checked out (if checked out it will have '*' next to it in the branch listing)
        onlyif  => "git branch -a | grep -w '${git_branch}' && git branch | grep '^\\*' | grep -v '^\\* ${git_branch}\$'",
     }
+
+
 
 ->
 

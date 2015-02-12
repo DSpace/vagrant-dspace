@@ -6,8 +6,11 @@
 /content/
 
 # Ignore "dspace/" and "dspace-src/" subfolders, except for the READMEs
-!/dspace/README
+!/dspace/.gitkeep
 /dspace/
 
-!/dspace-src/README
+!/dspace-src/.gitkeep
 /dspace-src/
+
+# ignore IDE folders
+.idea
