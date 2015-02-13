@@ -63,10 +63,4 @@ class dspace ($java_version = "7")
     # Install Git
     package { "git":
     }
-
-    # Check if our SSH connection to GitHub works. This verifies that SSH forwarding is working right.
-    #exec { "Verify SSH connection to GitHub works?" :
-    #    command => "ssh -T -oStrictHostKeyChecking=no git@github.com",
-    #    returns => 1,   # If this succeeds, it actually returns '1'. If it fails, it returns '255'
-    #}
 }
