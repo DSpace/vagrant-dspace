@@ -2,5 +2,15 @@
 .vagrant/
 
 # Ignore anything in "content/" subfolder, except for "content/README"
-/content/
 !/content/README
+/content/
+
+# Ignore "dspace/" and "dspace-src/" subfolders, except for the READMEs
+!/dspace/.gitkeep
+/dspace/
+
+!/dspace-src/.gitkeep
+/dspace-src/
+
+# ignore IDE folders
+.idea

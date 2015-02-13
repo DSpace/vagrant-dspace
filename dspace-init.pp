@@ -6,6 +6,7 @@
 #
 # Tested on:
 # - Ubuntu 12.04
+# - Ubuntu 14.04.1
 
 # grab Maven version from hiera for later use
 $mvn_version = hiera('mvn_version')

@@ -77,16 +77,41 @@ define dspace::install ($owner,
     }
  
 ->
-   
-    # Clone DSpace GitHub to ~/dspace-src
-    exec { "git clone ${git_repo} ${src_dir}":
-        command   => "git clone ${git_repo} ${src_dir}; chown -R ${owner}:${group} ${src_dir}",
-        creates   => $src_dir,
-        logoutput => true,
-        tries     => 2, # try 2 times, with a ten minute timeout, GitHub is sometimes slow, if it's too slow, might as well get everything else done
-        timeout   => 600,
-        require   => [Package["git"], Exec["Verify SSH connection to GitHub works?"]],
+
+    ### BEGIN clone of DSpace from GitHub to ~/dspace-src (this is a bit of a strange way to ckeck out, we do it this
+    ### way to support cases where src_dir already exists)
+
+    # if the src_dir folder does not yet exist, create it
+    file { "${src_dir}":
+        ensure => "directory",
+        owner  => "${owner}",
+        group  => "${group}",
+        mode   => 770,
     }
+
+->
+
+    exec { "initializing ${src_dir} as a Git repository, setting origin, fetching all, checking out master and setting file ownership":
+        command   => "git init && git remote add origin ${git_repo} && git fetch --all && git checkout master && chown -R ${owner}:${group} ${src_dir}",
+        creates   => "${src_dir}/.git",
+        cwd     => $src_dir, # run command from this directory
+        logoutput => true,
+        tries => 2, # try 2 times, with a ten minute timeout, GitHub is sometimes slow, if it's too slow, might as well get everything else done
+        timeout => 600,
+        require => [Package["git"], Exec["Verify SSH connection to GitHub works?"]],
+     }
+
+    # This should not be necassary, however, if there is no pom.xml, we should checkout the master branch (similar to a standard clone process)
+    exec { "first running git checkout master to populate ${src_dir}":
+        command  => "git checkout master",
+        cwd      => $src_dir, # run command from this directory
+        creates  => "${src_dir}/pom.xml",
+        user    => $owner,
+        logoutput => true,
+        require   => [Package["git"]],
+    }
+
+    ### END clone of DSpace
 
 ->
 
@@ -96,8 +121,10 @@ define dspace::install ($owner,
        cwd     => $src_dir, # run command from this directory
        user    => $owner,
        # Only perform this checkout if the branch EXISTS and it is NOT currently checked out (if checked out it will have '*' next to it in the branch listing)
-       onlyif  => "git branch -a | grep -w '${git_branch}' && git branch | grep '^\\*' | grep -v '^\\* ${git_branch}\$'",
+       onlyif  => "git branch -a | grep -w '${git_branch}'; git branch | grep '^\\*' | grep -v '^\\* ${git_branch}\$'",
     }
+
+
 
 ->
 

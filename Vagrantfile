@@ -226,9 +226,19 @@ Vagrant.configure("2") do |config|
         #vb.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
 
         # This allows symlinks to be created within the /vagrant root directory,
-        # which is something librarian-puppet needs to be able to do. This might
+        # which is something librarian-puppet needs to be able to do. This mighti
         # be enabled by default depending on what version of VirtualBox is used.
         # Borrowed from https://github.com/purple52/librarian-puppet-vagrant/
         vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
     end
+
+    # set up dspace-src and dspace as synced folders to support the use of an IDE on the host machine
+    config.vm.synced_folder "dspace-src", "/home/vagrant/dspace-src"
+    config.vm.synced_folder "dspace", "/home/vagrant/dspace"
+
+    # if we're running with vagrant-notify, send a notification that we're done, in case we've wandered off
+    if Vagrant.has_plugin?('vagrant-notify')
+        config.vm.provision :shell, :inline => "notify-send --urgency=critical 'Vagrant-DSpace is up! Get back to work! :-)'", run: "always"
+    end
+
 end
