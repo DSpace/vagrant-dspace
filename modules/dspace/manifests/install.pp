@@ -91,18 +91,17 @@ define dspace::install ($owner,
 
 ->
 
-    exec { "initializing ${src_dir} as a Git repository, setting origin, and fetching all":
-        command   => "git init; git remote add origin ${git_repo}]; git fetch --all",
+    exec { "initializing ${src_dir} as a Git repository, setting origin, fetching all, checking out master and setting file ownership":
+        command   => "git init && git remote add origin ${git_repo} && git fetch --all && git checkout master && chown -R ${owner}:${group} ${src_dir}",
         creates   => "${src_dir}/.git",
         cwd     => $src_dir, # run command from this directory
-        user    => $owner,
         logoutput => true,
-        require   => [Package["git"]],
+        tries => 2, # try 2 times, with a ten minute timeout, GitHub is sometimes slow, if it's too slow, might as well get everything else done
+        timeout => 600,
+        require => [Package["git"], Exec["Verify SSH connection to GitHub works?"]],
      }
 
-->
-
-    # If there is no pom.xml, we should checkout the master branch (similar to a standard clone process)
+    # This should not be necassary, however, if there is no pom.xml, we should checkout the master branch (similar to a standard clone process)
     exec { "first running git checkout master to populate ${src_dir}":
         command  => "git checkout master",
         cwd      => $src_dir, # run command from this directory
@@ -122,7 +121,7 @@ define dspace::install ($owner,
        cwd     => $src_dir, # run command from this directory
        user    => $owner,
        # Only perform this checkout if the branch EXISTS and it is NOT currently checked out (if checked out it will have '*' next to it in the branch listing)
-       onlyif  => "git branch -a | grep -w '${git_branch}' && git branch | grep '^\\*' | grep -v '^\\* ${git_branch}\$'",
+       onlyif  => "git branch -a | grep -w '${git_branch}'; git branch | grep '^\\*' | grep -v '^\\* ${git_branch}\$'",
     }
 
 
