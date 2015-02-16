@@ -6,6 +6,7 @@
 #
 # Tested on:
 # - Ubuntu 12.04
+# - Ubuntu 14.04
 
 # grab Maven version from hiera for later use
 $mvn_version = hiera('mvn_version')
@@ -52,40 +53,30 @@ if $::java_version == undef {
 }
 else { # Otherwise, pass the value of $::java_version to the 'dspace' module
     class { 'dspace':
-       java_version => $::java_version,
+      java_version => $::java_version,
     }
 }
 
- # Install Maven
-class { "maven::maven":
-  version => $mvn_version, # version to install
-}
-
-
-# Install Vim for a more rewarding command-line-based editor experience
-class {'vim':
-   ensure => present,
-   set_as_default => true
-}
-
-# Install PostgreSQL package
-
+# Init PostgreSQL module
+# (We use https://github.com/puppetlabs/puppetlabs-postgresql/)
+# DSpace requires UTF-8 encoding in PostgreSQL
 class { 'postgresql::globals':
-  encoding => 'UTF8',
-}->
-
-# Setup/Configure PostgreSQL server
-class { 'postgresql::server':
-  ip_mask_deny_postgres_user => '0.0.0.0/32',
-  ip_mask_allow_all_users    => '0.0.0.0/0',
-  listen_addresses           => '*',
-  manage_firewall            => false,
-  postgres_password          => 'dspace',
+  encoding => 'UTF-8',
 }
 
 ->
 
-# Create a 'dspace' database
+# Setup/Configure PostgreSQL server
+class { 'postgresql::server':
+  ip_mask_deny_postgres_user => '0.0.0.0/32',  # allows postgres use to connect from any IP
+  ip_mask_allow_all_users    => '0.0.0.0/0',   # allow other users to connect from any IP
+  listen_addresses           => '*',           # accept connections from any IP/machine
+  postgres_password          => 'dspace',      # set password for "postgres"
+}
+
+->
+
+# Create a 'dspace' database & 'dspace' user account (which owns the database)
 postgresql::server::db { 'dspace':
   user     => 'dspace',
   password => 'dspace'
@@ -95,9 +86,9 @@ include tomcat
 
 # Create a new Tomcat instance
 tomcat::instance { 'dspace':
-   owner   => "vagrant",
-   appBase => "/home/vagrant/dspace/webapps", # Tell Tomcat to load webapps from this directory
-   ensure  => present,
+  owner   => "vagrant",
+  appBase => "/home/vagrant/dspace/webapps", # Tell Tomcat to load webapps from this directory
+  ensure  => present,
 }
 
 ->
@@ -105,20 +96,20 @@ tomcat::instance { 'dspace':
 # Kickoff a DSpace installation for the 'vagrant' default user,
 # using the specified GitHub repository & branch.
 dspace::install { vagrant-dspace:
-        owner             => "vagrant",
-        version           => "4.0-SNAPSHOT",
-       require    => [Postgresql::Server::Db['dspace'],Tomcat::Instance['dspace']]  # Require that PostgreSQL and Tomcat are setup
+  owner   => "vagrant",
+  version => "6.0-SNAPSHOT",
+  require => [Postgresql::Server::Db['dspace'],Tomcat::Instance['dspace']]  # Require that PostgreSQL and Tomcat are setup
 }
 
 -> 
 
 # For convenience in troubleshooting Tomcat, let's install Psi-probe
 exec {"Download and install the Psi-probe war":
-   command   => "wget http://psi-probe.googlecode.com/files/probe-2.3.3.zip && unzip probe-2.3.3.zip && rm probe-2.3.3.zip",
-   cwd       => "/home/vagrant/tomcat/webapps",
-   creates   => "/home/vagrant/tomcat/webapps/probe.war",
-   user      => "vagrant",
-   logoutput => true,
+  command   => "wget http://psi-probe.googlecode.com/files/probe-2.3.3.zip && unzip probe-2.3.3.zip && rm probe-2.3.3.zip",
+  cwd       => "/home/vagrant/tomcat/webapps",
+  creates   => "/home/vagrant/tomcat/webapps/probe.war",
+  user      => "vagrant",
+  logoutput => true,
 }
  
 ->
@@ -126,16 +117,16 @@ exec {"Download and install the Psi-probe war":
 # Set the runlevels of tomcat7-vagrant
 # AND start the tomcat7-vagrant service
 service {"tomcat7-vagrant":
-   enable => "true",
-   ensure => "running",
+  enable => "true",
+  ensure => "running",
 }
 
 ->
 
 # add a context fragment file for Psi-probe, and restart tomcat7-vagrant
 file { "/home/vagrant/tomcat/conf/Catalina/localhost/probe.xml" :
-   ensure  => file,
-   owner   => vagrant,
-   group   => vagrant,
-   content => template("dspace/probe.xml.erb"),
+  ensure  => file,
+  owner   => vagrant,
+  group   => vagrant,
+  content => template("dspace/probe.xml.erb"),
 }
