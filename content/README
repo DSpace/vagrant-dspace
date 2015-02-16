@@ -1,1 +1,0 @@
-/content folder is for holding content for import into Vagrant-DSpace. The entire contents of this folder (with the exception of this README file) are ignored, so you won't accidentally commit content to this project.
