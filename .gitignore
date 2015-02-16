@@ -5,8 +5,6 @@
 /content/*
 !/content/README.md
 
-*.properties
-
 # Ignore "dspace/" subfolder, except for the README
 /dspace/*
 !/dspace/readme.md
