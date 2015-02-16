@@ -7,6 +7,7 @@
 #
 # Tested on:
 # - Ubuntu 12.04
+# - Ubuntu 14.04
 #
 # Parameters:
 # - $owner (REQUIRED)   => OS User who should own DSpace instance
@@ -14,8 +15,6 @@
 # - $group              => Group who should own DSpace instance. Defaults to same as $owner
 # - $src_dir            => Location where DSpace source should be kept (defaults to the home directory of $owner at ~/dspace-src)
 # - $install_dir        => Location where DSpace instance should be installed (defaults to the home directory of $owner at ~/dspace)
-# - $service_owner      => Owner of the actual DSpace service (i.e. Tomcat service). Defaults to same as $owner
-# - $service_group      => Group of the actual DSpace service (i.e. Tomcat service). Defaults to same as $group
 # - $git_repo           => Git repository to pull DSpace source from. Defaults to DSpace/DSpace in GitHub
 # - $git_branch         => Git branch to build DSpace from. Defaults to "master".
 # - $mvn_params         => Any build params passed to Maven. Defaults to "-Denv=vagrant" which tells Maven to use the vagrant.properties file.
@@ -39,8 +38,6 @@ define dspace::install ($owner,
                         $group             = $owner,
                         $src_dir           = "/home/${owner}/dspace-src", 
                         $install_dir       = "/home/${owner}/dspace",
-                        $service_owner     = "${owner}", 
-                        $service_group     = "${owner}",
 
 # pull the following from Hiera
 
@@ -54,15 +51,13 @@ define dspace::install ($owner,
                         $admin_passwd      = hiera(admin_passwd),
                         $admin_language    = hiera(admin_language),
                         $ensure            = present)
-
 {
-
 
     # ensure that the install_dir exists, and has proper permissions
     file { "${install_dir}":
         ensure => "directory",
-        owner  => $service_owner,
-        group  => $service_group,
+        owner  => $owner,
+        group  => $group,
         mode   => 0700,
     }
 
@@ -78,15 +73,31 @@ define dspace::install ($owner,
  
 ->
    
-    # Clone DSpace GitHub to ~/dspace-src
-    exec { "git clone ${git_repo} ${src_dir}":
-        command   => "git clone ${git_repo} ${src_dir}; chown -R ${owner}:${group} ${src_dir}",
-        creates   => $src_dir,
-        logoutput => true,
-        tries     => 2, # try 2 times, with a ten minute timeout, GitHub is sometimes slow, if it's too slow, might as well get everything else done
-        timeout   => 600,
-        require   => [Package["git"], Exec["Verify SSH connection to GitHub works?"]],
+    ### BEGIN clone of DSpace from GitHub to ~/dspace-src (this is a bit of a strange way to ckeck out, we do it this
+    ### way to support cases where src_dir already exists)
+
+    # if the src_dir folder does not yet exist, create it
+    file { "${src_dir}":
+        ensure => directory,
+        owner  => $owner,
+        group  => $group,
+        mode   => 0700,
     }
+
+->
+
+    exec { "Cloning DSpace source code into ${src_dir}":
+        command   => "git init && git remote add origin ${git_repo} && git fetch --all && git checkout master && chown -R ${owner}:${group} ${src_dir}",
+        creates   => "${src_dir}/.git",
+        cwd       => $src_dir, # run command from this directory
+        logoutput => true,
+        tries     => 2,    # try 2 times
+        timeout   => 600,  # set a 10 min timeout. GitHub is sometimes slow. If it's too slow, might as well get everything else done
+        require   => [Package["git"], Exec["Verify SSH connection to GitHub works?"]],
+     }
+
+
+    ### END clone of DSpace
 
 ->
 
