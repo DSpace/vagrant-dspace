@@ -38,18 +38,15 @@ define dspace::install ($owner,
                         $group             = $owner,
                         $src_dir           = "/home/${owner}/dspace-src", 
                         $install_dir       = "/home/${owner}/dspace",
-
-# pull the following from Hiera
-
-                        $git_repo          = hiera('git_repo'),
-                        $git_branch        = hiera('git_branch'),
-                        $mvn_params        = hiera('mvn_params'),
-                        $ant_installer_dir = hiera('ant_installer_dir'),
-                        $admin_firstname   = hiera(admin_firstname),
-                        $admin_lastname    = hiera(admin_lastname),
-                        $admin_email       = hiera(admin_email),
-                        $admin_passwd      = hiera(admin_passwd),
-                        $admin_language    = hiera(admin_language),
+                        $git_repo          = "https://github.com/DSpace/DSpace.git",
+                        $git_branch        = "master",
+                        $mvn_params        = "",
+                        $ant_installer_dir = "/home/${owner}/dspace-src/dspace/target/dspace-installer",
+                        $admin_firstname   = undef,
+                        $admin_lastname    = undef,
+                        $admin_email       = undef,
+                        $admin_passwd      = undef,
+                        $admin_language    = undef,
                         $ensure            = present)
 {
 
@@ -93,7 +90,6 @@ define dspace::install ($owner,
         logoutput => true,
         tries     => 2,    # try 2 times
         timeout   => 600,  # set a 10 min timeout. GitHub is sometimes slow. If it's too slow, might as well get everything else done
-        require   => [Package["git"], Exec["Verify SSH connection to GitHub works?"]],
      }
 
 
@@ -147,14 +143,16 @@ define dspace::install ($owner,
      logoutput => true,	# Send stdout to puppet log file (if any)
    } 
 
-->
-
-   # create administrator
-   exec { "Create DSpace Administrator":
-     command   => "${install_dir}/bin/dspace create-administrator -e ${admin_email} -f ${admin_firstname} -l ${admin_lastname} -p ${admin_passwd} -c ${admin_language}",
-     cwd       => $install_dir,
-     user      => $owner,
-     logoutput => true,
+   # Create initial administrator (if specified)
+   if $admin_email and $admin_passwd and $admin_firstname and $admin_lastname and $admin_language 
+   {
+     exec { "Create DSpace Administrator":
+       command   => "${install_dir}/bin/dspace create-administrator -e ${admin_email} -f ${admin_firstname} -l ${admin_lastname} -p ${admin_passwd} -c ${admin_language}",
+       cwd       => $install_dir,
+       user      => $owner,
+       logoutput => true,
+       require   => Exec["Install DSpace to ${install_dir}"],
+     }
    }
 
 }
