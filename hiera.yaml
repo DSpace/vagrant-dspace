@@ -1,7 +1,7 @@
 ---
 :hierarchy:
     - local
-    - common
+    - default
 :backends:
     - yaml
 :yaml:

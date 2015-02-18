@@ -1,20 +1,10 @@
 ###
-# local.yaml data file
-#
-# This file allows you to override ANY of the default settings in 'default.yaml'.
-# Simply copy this file into a "local.yaml" file in the same directory and get started!
-# The file local.yaml is in .gitignore, so you won't accidentally commit it.
-#
-# Only the most commonly tweaked settings exist in this file. Though you can copy
-# ANY of the settings from 'default.yaml' into this file and change them.
-###
-
-###
-# default.yaml data file
+# default.yaml - Default settings for vagrant-dspace
 #
 # This is the default settings for 'vagrant-dspace'. If you wish to override or change
-# these settings, you should copy this file into a "local.yaml" and modify whatever settings
-# you see fit.
+# these settings, you can copy this file into a "local.yaml" and modify whatever settings
+# you see fit. Any settings which are not in your "local.yaml" or are commented out will
+# default to whatever is in "default.yaml"
 #
 # By default, anytime Puppet is run, the /etc/puppet/hiera.yaml config file will load
 # the settings in BOTH the "default.yaml" and "local.yaml". The settings in "local.yaml"
@@ -24,24 +14,24 @@
 #-----------------------------
 # Vagrant Settings
 #-----------------------------
-# Name of the VM to create in VirtualBox 
+# Name of the VM to create in VirtualBox
 #(Also the name of the subfolder in ~/VirtualBox VMs/ where this VM is normally kept)
 vm_name    : 'dspace-dev'
 
-# How much memory to provide to VirtualBox (in MB)
+# How much memory to provide to VirtualBox VM (in MB)
 # Provide 2GB of memory by default
 vm_memory  : 2048
 
-# Maximum amount of host CPU which VirtualBox can use (in %)
-# The example below would only let VirtualBox use up to 50% of host CPU
+# Maximum amount of host CPU which VirtualBox VM can use (in %)
+# The example below would only let VM use up to 50% of host CPU
 #vm_max_cpu : 50
 
 # Local IP address which will refer to this VM
-ip_address: 192.168.50.2
+ip_address : 192.168.50.2
 
 # Local port which will access DSpace/Tomcat on this VM
 # NOTE: if this port is already in use, Vagrant will use the next available port between 8081 and 8100
-port: 8080
+port       : 8080
 
 # Whether to sync the ~/dspace-src/ (DSpace Source) to the host machine
 # (under [vagrant-dspace]/dspace-src/).
@@ -66,10 +56,9 @@ vm_gui_mode     : false
 #-----------------------------
 # DSpace Source Code settings
 #-----------------------------
-# You're probably going to want to work with your OWN fork of DSpace, 
-# not the official DSpace repository, so just change the git_repo to match your
-# fork. The example below won't work until you edit it.
-git_repo          : 'git@github.com:yourgithubusername/DSpace.git'
+# By default, we are always grabbing the DSpace Source code from GitHub
+# We use the "master" branch by default.
+git_repo          : 'git@github.com:DSpace/DSpace.git'
 git_branch        : 'master'
 
 #-------------------------------
@@ -77,19 +66,45 @@ git_branch        : 'master'
 #-------------------------------
 # Initial Admin account to auto-create for DSpace
 # After DSpace starts, you will be able to immediately login using the specified "admin_email" and "admin_passwd"
-admin_firstname   : 'YourFirstName'
-admin_lastname    : 'YourLastName'
-admin_email       : 'youremail@your-institution.edu'
-admin_passwd      : 'changeme'
+admin_firstname   : 'DSpaceDemo'
+admin_lastname    : 'Admin'
+admin_email       : 'dspacedemo+admin@gmail.com'
+admin_passwd      : 'vagrant'
 admin_language    : 'en'
 
 #------------------------------
 # DSpace Build/Install settings
 #------------------------------
+# Java version to install/use (valid values = 6 or 7)
+# NOTE: OpenJDK is always installed for vagrant-dspace
+dspace::java_version : 7
+
 # Maven Defaults
 #
 # Always build/compile DSpace using "vagrant.properties"
 # instead of the normal "build.properties" file
 # IF you want to exclude particular webapps from building & installing, you can do so like:
 # mvn_params: '-Denv=vagrant -P!dspace-lni,!dspace-rdf'
-mvn_params        : '-Denv=vagrant -P!dspace-lni,!dspace-rdf'
+mvn_params        : '-Denv=vagrant'
+
+# Ant Defaults
+# NOTE: if you change 'git_branch' above, you MAY need to modify this 'ant_installer_dir'
+# setting. It must be set to the directory where the Ant-based installer ends up, after
+# 'mvn package' is run.
+# By default this is commented out, as it is always the same location for DSpace 5 or above.
+#ant_installer_dir : '/home/vagrant/dspace-src/dspace/target/dspace-installer'
+
+# Tomcat Defaults
+#
+# We use Ubuntu, so these are all Ubuntu defaults. Don't change them.
+# Tomcat Package to install
+tomcat_package    : 'tomcat7'
+# Name of default Tomcat service
+tomcat_service    : 'tomcat7'
+# Location of default Catalina Home/Base
+catalina_home     : '/usr/share/tomcat7'
+catalina_base     : '/var/lib/tomcat7'
+# Options to pass to Tomcat
+# This IS customizable. Feel free to tweak memory settings, etc.
+catalina_opts     : '-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx1024m -Xms1024m -XX:MaxPermSize=128m -XX:+UseConcMarkSweepGC'
+
