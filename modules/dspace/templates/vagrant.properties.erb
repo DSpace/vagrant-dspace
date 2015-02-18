@@ -1,7 +1,18 @@
 # DSpace build.properties
 # This file should be customised to suit your build environment.
-# Note that not all configuration is handled here, only the most common properties that tend to differ between build environments. 
+# Note that not all configuration is handled here, only the most common
+# properties that tend to differ between build environments. 
 # For adjusting global settings or more complex settings, edit the relevant config file.
+#
+# IMPORTANT: Do not remove or comment out settings in build.properties
+# When you edit the "build.properties" file (or a custom *.properties file),
+# take care not to remove or comment out any settings. Doing so, may cause
+# your final "dspace.cfg" file to be misconfigured with regards to that
+# particular setting.  Instead, if you wish to remove/disable a particular
+# setting, just clear out its value.  For example, if you don't want to be
+# notified of new user registrations, ensure the "mail.registration.notify"
+# setting has no value, e.g. "mail.registration.notify="
+#
 
 ##########################
 # SERVER CONFIGURATION #
@@ -30,7 +41,7 @@ dspace.ui = xmlui
 dspace.url = ${dspace.baseUrl}/${dspace.ui}
 
 # Name of the site
-dspace.name = DSpace Master on Vagrant
+dspace.name = DSpace on Vagrant
 
 # Solr server
 solr.server=http://localhost:8080/solr
@@ -83,7 +94,6 @@ db.poolname = dspacepool
 # EMAIL CONFIGURATION #
 #######################
 
-#TODO
 # SMTP mail server
 mail.server = 
 
@@ -99,11 +109,9 @@ mail.server.port = 25
 # From address for mail
 mail.from.address = dspace-noreply@myu.edu
 
-#TODO
 # Currently limited to one recipient!
 mail.feedback.recipient = dspace@myu.edu
 
-#TODO
 # General site administration (Webmaster) e-mail
 mail.admin = dspace@myu.edu
 
@@ -151,3 +159,13 @@ http.proxy.host =
 
 # port number of proxy server
 http.proxy.port =
+
+#####################
+# LOGLEVEL SETTINGS #
+#####################
+loglevel.other = INFO
+# loglevel.other: Log level for other third-party tools/APIs used by DSpace
+# Possible values (from most to least info): DEBUG, INFO, WARN, ERROR, FATAL
+loglevel.dspace = INFO
+# loglevel.dspace: Log level for all DSpace-specific code (org.dspace.*)
+# Possible values (from most to least info): DEBUG, INFO, WARN, ERROR, FATAL
