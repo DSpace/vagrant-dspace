@@ -43,10 +43,9 @@ How it Works
 * Installs/Configures PostgreSQL
    * We install [puppetlabs/postgresql](http://forge.puppetlabs.com/puppetlabs/postgresql) (via [librarian-puppet](http://librarian-puppet.com/)),
      and then use that Puppet module to setup PostgreSQL
-* Installs Tomcat to `~/tomcat/` (under the default 'vagrant' user account)
-   * We install [tdonohue/puppet-tomcat](https://github.com/tdonohue/puppet-tomcat/) (via [librarian-puppet](http://librarian-puppet.com/)),
+* Installs Tomcat (running as the 'vagrant' user acct)
+   * We install [puppetlabs/tomcat](https://forge.puppetlabs.com/puppetlabs/tomcat) (via [librarian-puppet](http://librarian-puppet.com/)),
      and then use that Puppet module to setup Tomcat
-   * WARNING: We are just pulling down the latest "master" code from tdonohue/puppet-tomcat at this time.
 * Installs DSpace to `~/dspace/` (under the default 'vagrant' user account).
    * Makes DSpace available via Tomcat (e.g. http://localhost:8080/xmlui/)
 * Sets up SSH Forwarding, so that you can use your local SSH key(s) on the VM (for development with GitHub)
@@ -89,27 +88,17 @@ What will you get?
 
 * A running instance of [DSpace 'master'](https://github.com/DSpace/DSpace), on top of latest PostgreSQL and Tomcat 7 (and using Java OpenJDK 7 by default)
    * You can visit this instance at `http://localhost:8080/xmlui/` or `http://localhost:8080/jspui/` from your local web browser 
-   * If you install and configure the [Landrush plugin](https://github.com/phinze/landrush) for Vagrant, you can instead visit http://dspace.vagrant.dev:8080/xmlui/ or http://dspace.vagrant.dev:8080/jspui/
-   * An initial Administrator account is also auto-created:
-       * Login: `dspacedemo+admin@gmail.com` , Pwd: 'vagrant'
+       * If you install and configure the [Landrush plugin](https://github.com/phinze/landrush) for Vagrant, you can instead visit http://dspace.vagrant.dev:8080/xmlui/ or http://dspace.vagrant.dev:8080/jspui/
+   * An initial Administrator account is also auto-created (this account can be tweaked in a `local.yaml` file, see below)
+       * Default Login: `dspacedemo+admin@gmail.com` , Default Pwd: 'vagrant'
 * A fresh Ubuntu virtual server with DSpace GitHub cloned (at `~/dspace-src/`) and Java/Maven/Ant/Git installed.
 * All "out of the box" DSpace webapps running out of `~/dspace/webapps/`. The full DSpace installation is at `~/dspace/`.
-* Tomcat 7 instance installed at `~/tomcat/`
+* Tomcat 7 instance installed
    * Includes [PSI Probe](http://code.google.com/p/psi-probe/) running at `http://localhost:8080/probe/`
        * PSI Probe Login: 'dspace', Pwd: 'vagrant'
 * Enough to get you started with developing/building/using DSpace (or debug issues with the DSpace build process, if any pop up)
    * Though you may wish to install your IDE of choice.
 * A very handy playground for testing multiple-machine configurations of DSpace, and software that might utilize DSpace as a service
-
-It is up to you to [continue the DSpace setup](https://wiki.duraspace.org/display/DSDOC3x/Installation#Installation-InstallationInstructions), as needed. 
- 
-Your first step should  be to change the default password(s), and/or optionally create a new administrator:
-
-    vagrant ssh
-    ~/dspace/bin/dspace create-administrator
-
-It is also worth noting that you may choose to tweak the default [`Vagrantfile`](https://github.com/tdonohue/vagrant-dspace/blob/master/Vagrantfile) to better match your own development environment. 
-There's even a few quick settings there to get you started.
 
 If you want to destroy the VM at anytime (and start fresh again), just run `vagrant destroy`. 
 No worries, you can always recreate a new VM from scratch with another `vagrant up`.
@@ -124,7 +113,7 @@ Usage Tips
 Here's some common activities which you may wish to perform in `vagrant-dspace`:
 
 * **Restarting Tomcat**
-   * `sudo service tomcat7-vagrant restart` 
+   * `sudo service tomcat7 restart` 
 * **Restarting PostgreSQL**
    * `sudo service postgresql restart`
 * **Connecting to DSpace PostgreSQL database**
@@ -134,36 +123,35 @@ Here's some common activities which you may wish to perform in `vagrant-dspace`:
    * `mvn clean package` (Rebuild/Recompile DSpace)
    * `cd dspace/target/dspace-installer` (Move into the newly built installer directory)
    * `ant update`   (Redeploy changes to ~/dspace/)
-   * `sudo service tomcat7-vagrant restart` (Reboot Tomcat)
+   * `sudo service tomcat7 restart` (Reboot Tomcat)
 
 
 How to Tweak Things to your Liking?
 -----------------------------------
 
-### local.yaml
+### local.yaml - Your local settings go here!
 
-If you look at the config folder, there are a few files you'll be interested in. The first is common.yaml, it's a [Hiera](http://projects.puppetlabs.com/projects/hiera) configuration file. You may copy this file to one named local.yaml. Any changes to local.yaml will override the defaults set in the common.yaml file. The local.yaml file is ignored in .gitignore, so you won't accidentally commit it. Here are the options:
+If you look at the config folder, there are a few files you'll be interested in. The first is `default.yaml`, it's a [Hiera](http://projects.puppetlabs.com/projects/hiera) configuration file. You may copy this file to one named `local.yaml`. Any changes to `local.yaml` will override the defaults set in the `default.yaml` file. The `local.yaml` file is ignored in `.gitignore`, so you won't accidentally commit it. Here are the options:
 
-* git_repo - it would be a good idea to point this to your own fork of DSpace
-* git_branch - if you're constantly working on another brach than master, you can change it here
-* mvn_params - add other maven prameters here (this is added to the Vagrant user's profile, so these options are always on whenever you run mvn as the Vagrant user
-* mvn_version - defaults to 3.0.5, but feel free to change it to whatever version you wish to test
-* ant_installer_dir - until we figure out how to have the installer just run from whatever version of DSpace is in the target folder produced by Maven, we'll need to hard code the DSpace version so we can have Puppet look in the right place to run the Ant installer for DSpace
-* admin_firstname - you may want to change this to something more memorable than the demo DSpace user
-* admin_lastname - ditto
-* admin_email - likewise
-* admin_passwd - you probably have a preferred password
-* admin_language - and you may have a language preference, you can set it here
+* `git_repo` - it would be a good idea to point this to your own fork of DSpace
+* `git_branch` - if you're constantly working on another brach than master, you can change it here
+* `mvn_params` - add other maven prameters here (this is added to the Vagrant user's profile, so these options are always on whenever you run mvn as the Vagrant user
+* `ant_installer_dir` - until we figure out how to have the installer just run from whatever version of DSpace is in the target folder produced by Maven, we'll need to hard code the DSpace version so we can have Puppet look in the right place to run the Ant installer for DSpace
+* `admin_firstname` - you may want to change this to something more memorable than the demo DSpace user
+* `admin_lastname` - ditto
+* `admin_email` - likewise
+* `admin_passwd` - you probably have a preferred password
+* `admin_language` - and you may have a language preference, you can set it here
 
-### local-bootstrap.sh
+### local-bootstrap.sh - You can script your own tweaks/customizations!
 
-In the config folder, you will also find a file called local-bootstrap.sh.example. If you copy that file to local-bootstrap.sh and edit it to your liking (it is well-commented) you'll be able to customize your git clone folder to your liking (turning on the color.ui, always pull using rebase, set an upstream github repository, add the ability to fetch pull requests from upstream), as well as automatically batch-load content (an example using AIPs is included, but you're welcome to script whatever you need here... if you come up with something interesting, please consider sharing it with the community). 
+In the `config` folder, you will also find a file called `local-bootstrap.sh.example`. If you copy that file to `local-bootstrap.sh` and edit it to your liking (it is well-commented) you'll be able to customize your git clone folder to your liking (turning on the color.ui, always pull using rebase, set an upstream github repository, add the ability to fetch pull requests from upstream), as well as automatically batch-load content (an example using AIPs is included, but you're welcome to script whatever you need here... if you come up with something interesting, please consider sharing it with the community). 
 
 local-bootstrap.sh is a "shell provisioner" for Vagrant, and our vagrantfile is [configured to run it](https://github.com/DSpace/vagrant-dspace/blob/master/Vagrantfile#L171) if it is present in the config folder. If you have a fork of Vagrant-DSpace for your own repository management, you may add another shell provisioner, to maintain your own workgroup's customs and configurations. You may find an example of this in the [Vagrant-MOspace](https://github.com/umlso/vagrant-mospace/blob/master/config/mospace-bootstrap.sh) repository.
 
-### maven_settings.xml
+### maven_settings.xml - Tips on tweaking Maven
 
-If you've copied the example local-bootstrap.sh file, you may create a config/dotfiles folder, and place a file called maven_settings.xml in it, that file will be copied to /home/vagrant/.m2/settings.xml every time the local-bootstrap.sh provisioner is run. This will allow you to further customize your Maven builds. One handy (though somewhat dangerous) thing to add to your settings.xml file is the following profile:
+If you've copied the example `local-bootstrap.sh` file, you may create a `config/dotfiles` folder, and place a file called `maven_settings.xml` in it, that file will be copied to `/home/vagrant/.m2/settings.xml` every time the `local-bootstrap.sh` provisioner is run. This will allow you to further customize your Maven builds. One handy (though somewhat dangerous) thing to add to your `settings.xml` file is the following profile:
 ```
     <profile>
             <id>sign</id>
@@ -176,11 +164,11 @@ If you've copied the example local-bootstrap.sh file, you may create a config/do
     </profile>
 ```
 
-NOTE: any file in config/dotfiles is ignored by Git, so you won't accidentally commit it. But, still, putting your GPG passphrase in a plain text file might be viewed by some as foolish. If you elect to not add this profile, and you DO want to sign an artifact created by Maven using GPG, you'll need to enter your GPG passphrase quickly and consistently. Choose your poison.
+NOTE: any file in `config/dotfiles` is ignored by Git, so you won't accidentally commit it. But, still, putting your GPG passphrase in a plain text file might be viewed by some as foolish. If you elect to not add this profile, and you DO want to sign an artifact created by Maven using GPG, you'll need to enter your GPG passphrase quickly and consistently. Choose your poison.
 
-### vim and .vimrc
+### vim and .vimrc - Tips on using/tweaking VIM
 
-Another optional config/dotfiles folder which is copied (if it exists) by the example local-bootstrap.sh shell provisioner is config/dotfiles/vimrc (/home/vagrant/.vimrc) and config/dotfiles/vim (/home/vagrant/.vim). Populating these will allow you to customize Vim to your heart's content. 
+Another optional `config/dotfiles` folder which is copied (if it exists) by the example `local-bootstrap.sh` shell provisioner is `config/dotfiles/vimrc` (/home/vagrant/.vimrc) and `config/dotfiles/vim` (/home/vagrant/.vim). Populating these will allow you to customize (Vim)[http://www.vim.org/] to your heart's content. 
 
 Vagrant Plugin Recommendations
 -------------------------------
