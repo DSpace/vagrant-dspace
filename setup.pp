@@ -227,7 +227,7 @@ dspace::install { 'vagrant-dspace':
 # For convenience in troubleshooting Tomcat, let's install Psi-probe
 # http://psi-probe.googlecode.com/
 $probe_version = "2.3.3"
-exec {"Download and install the Psi-probe v${probe_version} war":
+exec {"Download and install the PSI Probe v${probe_version} war":
   command   => "wget http://psi-probe.googlecode.com/files/probe-${probe_version}.zip && unzip probe-${probe_version}.zip && rm probe-${probe_version}.zip",
   cwd       => "${catalina_base}/webapps",
   creates   => "${catalina_base}/webapps/probe.war",
@@ -244,4 +244,15 @@ file { "${catalina_base}/conf/Catalina/localhost/probe.xml" :
   group   => vagrant,
   content => template("dspace/probe.xml.erb"),
   notify  => Service['tomcat'],
+}
+
+->
+
+# Add a "dspace" Tomcat User (password="vagrant") who can login to PSI Probe
+file_line { 'Add \'dspace\' Tomcat user for PSI Probe':
+  path   => "${catalina_base}/conf/tomcat-users.xml", # File to modify
+  after  => '<tomcat-users>',                         # Add content immediately after this line
+  line   => '<role rolename="manager"/><user username="dspace" password="vagrant" roles="manager"/>', # Lines to add to file
+  match  => "^.*username=\"dspace\".*$",              # Regex for line to replace (if found)
+  notify => Service['tomcat'],                        # If changes are made, notify Tomcat to restart
 }
