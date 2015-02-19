@@ -234,15 +234,6 @@ dspace::install { 'vagrant-dspace':
 #  user      => "vagrant",
 #  logoutput => true,
 #}
- 
-#->
- 
-# Set the runlevels of tomcat7-vagrant
-# AND start the tomcat7-vagrant service
-#service {"tomcat7-vagrant":
-#  enable => "true",
-#  ensure => "running",
-#}
 
 #->
 

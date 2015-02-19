@@ -13,7 +13,7 @@
 # Sample Usage:
 # include dspace
 #
-class dspace ($java_version = "7")
+class dspace($java_version = "7")
 {
     # Default to requiring all packages be installed
     Package {
@@ -21,10 +21,10 @@ class dspace ($java_version = "7")
     }
 
     # Java installation directory
-    $install_dir = "/usr/lib/jvm"
+    $java_install_dir = "/usr/lib/jvm"
 
-    # OpenJDK directory name (NOTE: $architecture is a "fact")
-    $dir_name = "java-${java_version}-openjdk-${architecture}"
+    # OpenJDK version/directory name (NOTE: $architecture is a "fact")
+    $java_name = "java-${java_version}-openjdk-${architecture}"
 
     # Install Java, based on set $java_version (passed to Puppet in VagrantFile)
     package { "java":
@@ -36,18 +36,18 @@ class dspace ($java_version = "7")
     # Set Java defaults to point at OpenJDK
     # NOTE: $architecture is a "fact" automatically set by Puppet's 'facter'.
     exec { "Update alternatives to OpenJDK Java ${java_version}":
-      command => "update-java-alternatives --set java-1.${java_version}.0-openjdk-${architecture}",
-      unless  => "test \$(readlink /etc/alternatives/java) = '${install_dir}/${dir_name}/jre/bin/java'",
+      command => "update-java-alternatives --set ${java_name}",
+      unless  => "test \$(readlink /etc/alternatives/java) = '${java_install_dir}/${java_name}/jre/bin/java'",
       path    => "/usr/bin:/usr/sbin:/bin",
     }
  
  ->
 
     # Create a "default-java" symlink (for easier JAVA_HOME setting). Overwrite if existing.
-    exec { "Symlink OpenJDK to '${install_dir}/default-java'":
+    exec { "Symlink OpenJDK to '${java_install_dir}/default-java'":
       cwd     => $install_dir,
-      command => "ln -sfn ${dir_name} default-java",
-      unless  => "test \$(readlink ${install_dir}/default-java) = '${dir_name}'",
+      command => "ln -sfn ${java_name} default-java",
+      unless  => "test \$(readlink ${java_install_dir}/default-java) = '${java_name}'",
       path    => "/usr/bin:/usr/sbin:/bin",
     }
 
