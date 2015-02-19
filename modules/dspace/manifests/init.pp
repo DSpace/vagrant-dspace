@@ -20,6 +20,21 @@ class dspace($java_version = "7")
       ensure => installed,
     }
 
+    # Install Maven & Ant which are required to build & deploy, respectively
+    # For Maven, do NOT install "recommended" apt-get packages, as this will
+    # install OpenJDK 6 and always set it as the default Java alternative
+    package { 'maven':
+      install_options => ['--no-install-recommends'],
+      before          => Package['java'],
+    }
+    package { "ant":
+      before => Package['java'],
+    }
+
+    # Install Git, needed for any DSpace development
+    package { "git":
+    }
+
     # Java installation directory
     $java_install_dir = "/usr/lib/jvm"
 
@@ -49,25 +64,5 @@ class dspace($java_version = "7")
       command => "ln -sfn ${java_name} default-java",
       unless  => "test \$(readlink ${java_install_dir}/default-java) = '${java_name}'",
       path    => "/usr/bin:/usr/sbin:/bin",
-    }
-
- ->
-
-    # Install Maven & Ant which are required to build & deploy, respectively
-    # For Maven, do NOT install "recommended" apt-get packages, as this will
-    # install OpenJDK 6 and always set it as the default Java alternative
-    package { 'maven':
-      install_options => ['--no-install-recommends'],
-    }
-
- ->
-
-    package { "ant":
-    }
-    
- ->
-
-    # Install Git, needed for any DSpace development
-    package { "git":
     }
 }
