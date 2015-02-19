@@ -224,23 +224,24 @@ dspace::install { 'vagrant-dspace':
   notify            => Service['tomcat'],
 }
 
-#-> 
-
 # For convenience in troubleshooting Tomcat, let's install Psi-probe
-#exec {"Download and install the Psi-probe war":
-#  command   => "wget http://psi-probe.googlecode.com/files/probe-2.3.3.zip && unzip probe-2.3.3.zip && rm probe-2.3.3.zip",
-#  cwd       => "/home/vagrant/tomcat/webapps",
-#  creates   => "/home/vagrant/tomcat/webapps/probe.war",
-#  user      => "vagrant",
-#  logoutput => true,
-#}
+# http://psi-probe.googlecode.com/
+$probe_version = "2.3.3"
+exec {"Download and install the Psi-probe v${probe_version} war":
+  command   => "wget http://psi-probe.googlecode.com/files/probe-${probe_version}.zip && unzip probe-${probe_version}.zip && rm probe-${probe_version}.zip",
+  cwd       => "${catalina_base}/webapps",
+  creates   => "${catalina_base}/webapps/probe.war",
+  user      => "vagrant",
+  logoutput => true,
+}
 
-#->
+->
 
-# add a context fragment file for Psi-probe, and restart tomcat7-vagrant
-#file { "/home/vagrant/tomcat/conf/Catalina/localhost/probe.xml" :
-# ensure  => file,
-#  owner   => vagrant,
-#  group   => vagrant,
-#  content => template("dspace/probe.xml.erb"),
-#}
+# add a context fragment file for Psi-probe, and restart tomcat
+file { "${catalina_base}/conf/Catalina/localhost/probe.xml" :
+  ensure  => file,
+  owner   => vagrant,
+  group   => vagrant,
+  content => template("dspace/probe.xml.erb"),
+  notify  => Service['tomcat'],
+}
