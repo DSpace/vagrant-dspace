@@ -116,7 +116,9 @@ Vagrant.configure("2") do |config|
     # Basic System Customizations
     #-----------------------------
     # Check our system locale -- make sure it is set to UTF-8
-    config.vm.provision :shell, :inline => "echo 'Setting locale to en_US.UTF-8...' && locale | grep 'LANG=en_US.UTF-8' > /dev/null || sudo update-locale --reset LANG=en_US.UTF-8"
+    # This also means we need to run 'dpkg-reconfigure' to avoid "unable to re-open stdin" errors (see http://serverfault.com/a/500778)
+    $locale = "en_US.UTF-8"
+    config.vm.provision :shell, :inline => "echo 'Setting locale to UTF-8 (${locale})...' && locale | grep 'LANG=${locale}' > /dev/null || update-locale --reset LANG=${locale} && dpkg-reconfigure locales"
 
     # Turn off annoying console bells/beeps in Ubuntu (only if not already turned off in /etc/inputrc)
     config.vm.provision :shell, :inline => "echo 'Turning off console beeps...' && grep '^set bell-style none' /etc/inputrc || echo 'set bell-style none' >> /etc/inputrc"
