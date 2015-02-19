@@ -11,9 +11,10 @@ echo "  This may take a while..."
 
 # Ensure dependencies are installed (These are needed to dynamically determine your country code).
 # * ruby >= 1.9.2 is needed for apt-spy2
+# * zlib1g-dev (zlib) is needed to build apt-spy2 from "native extensions" (needed to install "nokogiri" prerequisite)
 # * dnsutils ensures 'dig' is installed (to get IP address)
-# * geoip-bin lets us look up country code via IP
-apt-get install -y ruby1.9.3 dnsutils geoip-bin >/dev/null
+# * geoip-bin ensures 'geoiplookup' is installed (lets us look up country code via IP)
+apt-get install -y ruby1.9.3 zlib1g-dev dnsutils geoip-bin >/dev/null
 
 # Figure out the two-letter country code for the current locale, based on IP address
 # First, let's get our public IP address via OpenDNS (e.g. http://unix.stackexchange.com/a/81699)
