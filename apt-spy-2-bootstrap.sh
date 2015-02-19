@@ -2,6 +2,9 @@
 # apt-spy-2-bootstrap.sh
 # Uses the Ruby gem apt-spy2 to ensure the apt sources.list file is configured appropriately for this location, and that it selects mirrors that are currently functional
 
+# Load up the release information
+. /etc/lsb-release
+
 # Do the initial apt-get update
 echo "Initial apt-get update..."
 apt-get update >/dev/null
