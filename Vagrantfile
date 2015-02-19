@@ -116,10 +116,10 @@ Vagrant.configure("2") do |config|
     # Basic System Customizations
     #-----------------------------
     # Check our system locale -- make sure it is set to UTF-8
-    config.vm.provision :shell, :inline => "locale | grep 'LANG=en_US.UTF-8' > /dev/null || sudo update-locale --reset LANG=en_US.UTF-8"
+    config.vm.provision :shell, :inline => "echo 'Setting locale to en_US.UTF-8...' && locale | grep 'LANG=en_US.UTF-8' > /dev/null || sudo update-locale --reset LANG=en_US.UTF-8"
 
     # Turn off annoying console bells/beeps in Ubuntu (only if not already turned off in /etc/inputrc)
-    config.vm.provision :shell, :inline => "grep '^set bell-style none' /etc/inputrc || echo 'set bell-style none' >> /etc/inputrc"
+    config.vm.provision :shell, :inline => "echo 'Turning off console beeps...' && grep '^set bell-style none' /etc/inputrc || echo 'set bell-style none' >> /etc/inputrc"
 
     #------------------------
     # Enable SSH Forwarding
@@ -179,7 +179,7 @@ Vagrant.configure("2") do |config|
 
     # Shell script to set apt sources.list to something appropriate (close to you, and actually up)
     # via apt-spy2 (https://github.com/lagged/apt-spy2)
-    config.vm.provision :shell, :inline => "echo '   > > > running apt-spy-2-bootstrap.sh, do not worry if it shows an error, it will be OK, there is a fallback.'"
+    config.vm.provision :shell, :inline => "echo '   > > > running apt-spy2 to locate a nearby mirror (for quicker installs). Do not worry if it shows an error, it will be OK, there is a fallback.'"
     config.vm.provision :shell, :path => "apt-spy-2-bootstrap.sh"
 
     # Shell script to initialize latest Puppet on VM & also install librarian-puppet (which manages our third party puppet modules)
@@ -198,8 +198,8 @@ Vagrant.configure("2") do |config|
     end
 
     # Call our Puppet initialization script
-    config.vm.provision :shell, :inline => "echo '   > > > beginning puppet provisioning, this will appear to hang...'"
-    config.vm.provision :shell, :inline => "echo '   > > > PATIENCE! output is only shown after each step completes...'"
+    config.vm.provision :shell, :inline => "echo '   > > > Beginning Puppet provisioning, this may take a while (and will appear to hang during DSpace Install step)...'"
+    config.vm.provision :shell, :inline => "echo '   > > > PATIENCE! Console output is only shown after each step completes...'"
 
     # Actually run Puppet to setup the server, install all prerequisites and install DSpace
     config.vm.provision :puppet do |puppet|
