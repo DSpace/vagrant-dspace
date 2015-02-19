@@ -54,13 +54,14 @@ echo "Installing Puppet..."
 DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install puppet >/dev/null
 echo "Puppet installed!"
 
+# COMMENTED OUT, as this is handled by our custom "apt-spy2-bootstrap.sh" script
 # Install RubyGems for the provider
-echo "Installing RubyGems..."
-if [ $DISTRIB_CODENAME != "trusty" ]; then
-  apt-get install -y rubygems >/dev/null
-fi
-gem install --no-ri --no-rdoc rubygems-update
-update_rubygems >/dev/null
+#echo "Installing RubyGems..."
+#if [ $DISTRIB_CODENAME != "trusty" ]; then
+#  apt-get install -y rubygems >/dev/null
+#fi
+#gem install --no-ri --no-rdoc rubygems-update
+#update_rubygems >/dev/null
 
 # ----------------------------------------------
 # Custom for 'vagrant-dspace' & librarian-puppet

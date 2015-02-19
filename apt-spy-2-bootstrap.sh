@@ -16,6 +16,14 @@ echo "  This may take a while..."
 # * geoip-bin ensures 'geoiplookup' is installed (lets us look up country code via IP)
 apt-get install -y ruby1.9.3 zlib1g-dev dnsutils geoip-bin >/dev/null
 
+# Install/Update RubyGems for the provider
+echo "Installing RubyGems..."
+if [ $DISTRIB_CODENAME != "trusty" ]; then
+  apt-get install -y rubygems >/dev/null
+fi
+gem install --no-ri --no-rdoc rubygems-update
+update_rubygems >/dev/null
+
 # Figure out the two-letter country code for the current locale, based on IP address
 # First, let's get our public IP address via OpenDNS (e.g. http://unix.stackexchange.com/a/81699)
 export CURRENTIP=`dig +short myip.opendns.com @resolver1.opendns.com`
@@ -32,10 +40,10 @@ if [ "$(gem search -i apt-spy2)" = "false" ]; then
   gem install apt-spy2
   echo "... apt-spy2 installed!"
   echo "... Setting 'apt' sources.list for closest mirror to country=$COUNTRY"
-  apt-spy2 fix --launchpad --commit --country=$COUNTRY ; true
+  apt-spy2 fix --launchpad --commit --country=$COUNTRY
 else
   echo "... Setting 'apt' sources.list for closest mirror to country=$COUNTRY"
-  apt-spy2 fix --launchpad --commit --country=$COUNTRY ; true
+  apt-spy2 fix --launchpad --commit --country=$COUNTRY
 fi
 
 # apt-spy2 requires running an 'apt-get update' after doing a 'fix'
