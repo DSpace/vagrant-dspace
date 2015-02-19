@@ -228,11 +228,12 @@ dspace::install { 'vagrant-dspace':
 # http://psi-probe.googlecode.com/
 $probe_version = "2.3.3"
 exec {"Download and install the PSI Probe v${probe_version} war":
-  command   => "wget http://psi-probe.googlecode.com/files/probe-${probe_version}.zip && unzip probe-${probe_version}.zip && rm probe-${probe_version}.zip",
+  command   => "wget http://psi-probe.googlecode.com/files/probe-${probe_version}.zip && unzip -u probe-${probe_version}.zip && rm probe-${probe_version}.zip",
   cwd       => "${catalina_base}/webapps",
   creates   => "${catalina_base}/webapps/probe.war",
   user      => "vagrant",
   logoutput => true,
+  tries     => 3,          # In case of a network hiccup, try this download 3 times
 }
 
 ->
