@@ -60,9 +60,9 @@ class dspace($java_version = "7")
 
     # Create a "default-java" symlink (for easier JAVA_HOME setting). Overwrite if existing.
     exec { "Symlink OpenJDK to '${java_install_dir}/default-java'":
-      cwd     => $install_dir,
+      cwd     => $java_install_dir,
       command => "ln -sfn ${java_name} default-java",
-      unless  => "test \$(readlink ${java_install_dir}/default-java) = '${java_name}'",
+      unless  => "test \$(readlink default-java) = '${java_name}'",
       path    => "/usr/bin:/usr/sbin:/bin",
     }
 }
