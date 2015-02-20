@@ -1,20 +1,10 @@
 ###
-# local.yaml data file
-#
-# This file allows you to override ANY of the default settings in 'default.yaml'.
-# Simply copy this file into a "local.yaml" file in the same directory and get started!
-# The file local.yaml is in .gitignore, so you won't accidentally commit it.
-#
-# Only the most commonly tweaked settings exist in this file. Though you can copy
-# ANY of the settings from 'default.yaml' into this file and change them.
-###
-
-###
-# default.yaml data file
+# default.yaml - Default settings for vagrant-dspace
 #
 # This is the default settings for 'vagrant-dspace'. If you wish to override or change
-# these settings, you should copy this file into a "local.yaml" and modify whatever settings
-# you see fit.
+# these settings, you can copy this file into a "local.yaml" and modify whatever settings
+# you see fit. Any settings which are not in your "local.yaml" or are commented out will
+# default to whatever is in "default.yaml"
 #
 # By default, anytime Puppet is run, the /etc/puppet/hiera.yaml config file will load
 # the settings in BOTH the "default.yaml" and "local.yaml". The settings in "local.yaml"
@@ -24,29 +14,29 @@
 #-----------------------------
 # Vagrant Settings
 #-----------------------------
-# Name of the VM to create in VirtualBox 
+# Name of the VM to create in VirtualBox
 #(Also the name of the subfolder in ~/VirtualBox VMs/ where this VM is normally kept)
 # (Changes to this setting require a 'vagrant destroy && vagrant up' to take effect)
 vm_name    : 'dspace-dev'
 
-# How much memory to provide to VirtualBox (in MB)
+# How much memory to provide to VirtualBox VM (in MB)
 # Provide 2GB of memory by default
 # (Changes to this setting require a 'vagrant reload' to take effect)
 vm_memory  : 2048
 
-# Maximum amount of host CPU which VirtualBox can use (in %)
-# The example below would only let VirtualBox use up to 50% of host CPU
+# Maximum amount of host CPU which VirtualBox VM can use (in %)
+# The example below would only let VM use up to 50% of host CPU
 # (Changes to this setting require a 'vagrant reload' to take effect)
 #vm_max_cpu : 50
 
 # Local IP address which will refer to this VM
 # (Changes to this setting require a 'vagrant reload' to take effect)
-ip_address: 192.168.50.2
+ip_address : 192.168.50.2
 
 # Local port which will access DSpace/Tomcat on this VM
 # NOTE: if this port is already in use, Vagrant will use the next available port between 8081 and 8100
 # (Changes to this setting require a 'vagrant reload' to take effect)
-port: 8080
+port       : 8080
 
 # Whether to sync the ~/dspace-src/ (DSpace Source) to the host machine
 # (under [vagrant-dspace]/dspace-src/).
@@ -59,6 +49,12 @@ port: 8080
 # By default this is "false" to keep things speedy.
 # (Changes to this setting require a 'vagrant destroy && vagrant up' to take effect)
 sync_src_to_host : false
+
+# Default Vagrant "box" to use. This should be an Ubuntu box (12.04 or 14.04 recommended)
+# as 'vagrant-dspace' has not been tested on other OSes.
+# (Changes to these settings require a 'vagrant destroy && vagrant up' to take effect)
+vagrant_box     : 'dspace-trusty64'
+vagrant_box_url : 'http://github.com/DSpace/vagrantbox-ubuntu/releases/download/v2.0/dspace-trusty64.box'
 
 # Boot VM into GUI mode (login: vagrant, pwd: vagrant). Useful for debugging VM boot issues, etc.
 # By default this is disabled as it can be memory hungry, and SSH is usually all you need.
@@ -74,7 +70,7 @@ vm_gui_mode     : false
 # it will be dynamically changed into the HTTPS GitHub URL (https://github.com/[user]/[proj])
 # You may also change "git_repo" to an HTTPS URL in order to force HTTPS at all times.
 # (Changes to these settings require a 'vagrant destroy && vagrant up' to take effect)
-git_repo          : 'git@github.com:yourgithubusername/DSpace.git'
+git_repo          : 'git@github.com:DSpace/DSpace.git'
 git_branch        : 'master'
 
 #-------------------------------
@@ -83,15 +79,20 @@ git_branch        : 'master'
 # Initial Admin account to auto-create for DSpace
 # After DSpace starts, you will be able to immediately login using the specified "admin_email" and "admin_passwd"
 # (Changes to these settings require a 'vagrant provision' to take effect)
-admin_firstname   : 'YourFirstName'
-admin_lastname    : 'YourLastName'
-admin_email       : 'youremail@your-institution.edu'
-admin_passwd      : 'changeme'
+admin_firstname   : 'DSpaceDemo'
+admin_lastname    : 'Admin'
+admin_email       : 'dspacedemo+admin@gmail.com'
+admin_passwd      : 'vagrant'
 admin_language    : 'en'
 
 #------------------------------
 # DSpace Build/Install settings
 #------------------------------
+# Java version to install/use (valid values = 6 or 7)
+# NOTE: OpenJDK is always installed for vagrant-dspace
+# (This setting is only used during a "vagrant up")
+dspace::java_version : '7'
+
 # Maven Defaults
 #
 # Always build/compile DSpace using "vagrant.properties"
@@ -99,11 +100,29 @@ admin_language    : 'en'
 # IF you want to exclude particular webapps from building & installing, you can do so like:
 # mvn_params: '-Denv=vagrant -P!dspace-lni,!dspace-rdf'
 # (This setting is only used during a 'vagrant up')
-mvn_params        : '-Denv=vagrant -P!dspace-lni,!dspace-rdf'
+mvn_params        : '-Denv=vagrant'
+
+# Ant Defaults
+# NOTE: if you change 'git_branch' above, you MAY need to modify this 'ant_installer_dir'
+# setting. It must be set to the directory where the Ant-based installer ends up, after
+# 'mvn package' is run.
+# By default this is commented out, as it is always the same location for DSpace 5 or above.
+# (This setting is only used during a 'vagrant up')
+#ant_installer_dir : '/home/vagrant/dspace-src/dspace/target/dspace-installer'
 
 # Tomcat Defaults
 #
+# We use Ubuntu, so these are all Ubuntu defaults. Don't change them.
+# (Except where specified, these settings are only used during a 'vagrant up')
+# Tomcat Package to install
+tomcat_package    : 'tomcat7'
+# Name of default Tomcat service
+tomcat_service    : 'tomcat7'
+# Location of default Catalina Home/Base
+catalina_home     : '/usr/share/tomcat7'
+catalina_base     : '/var/lib/tomcat7'
 # Options to pass to Tomcat
 # This IS customizable. Feel free to tweak memory settings, etc.
 # (Changes to this setting require a 'vagrant provision' to take effect)
 catalina_opts     : '-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx1024m -Xms1024m -XX:MaxPermSize=128m -XX:+UseConcMarkSweepGC'
+

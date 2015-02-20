@@ -1,6 +1,25 @@
 # Ignore Vagrant settings
 .vagrant/
 
-# Ignore anything in "content/" subfolder, except for "content/README"
-/content/
-!/content/README
+# Ignore anything in "content/" subfolder, except for README
+/content/*
+!/content/README.md
+
+# Ignore "dspace/" subfolder, except for the README
+/dspace/*
+!/dspace/readme.md
+
+# Ignore the "dspace-src/" subfolder entirely. 
+# NOTE: this cannot be set to "/dspace-src/*" as then the .gitignore file
+# installed into this subdirectory will accidentally be loaded by Git,
+# which could result in DSpace source code being committed to 'vagrant-dspace'
+# NOTE #2: This README is lowercased (readme.md) so it doesn't "collide" 
+# with the default DSpace README file during checkout
+/dspace-src/
+!/dspace-src/readme.md
+
+# Ignore IDE folders / files
+# IntelliJ IDEA
+.idea
+# NetBeans
+nbactions.xml

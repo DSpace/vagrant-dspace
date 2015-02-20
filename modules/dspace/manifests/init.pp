@@ -5,6 +5,7 @@
 #
 # Tested on:
 # - Ubuntu 12.04
+# - Ubuntu 14.04
 #
 # Parameters:
 # - $java => version of Java (6 or 7)
@@ -12,61 +13,56 @@
 # Sample Usage:
 # include dspace
 #
-class dspace ($java_version = "7")
+class dspace($java_version = "7")
 {
     # Default to requiring all packages be installed
     Package {
-        ensure => installed,
+      ensure => installed,
+    }
+
+    # Install Maven & Ant which are required to build & deploy, respectively
+    # For Maven, do NOT install "recommended" apt-get packages, as this will
+    # install OpenJDK 6 and always set it as the default Java alternative
+    package { 'maven':
+      install_options => ['--no-install-recommends'],
+      before          => Package['java'],
+    }
+    package { "ant":
+      before => Package['java'],
+    }
+
+    # Install Git, needed for any DSpace development
+    package { "git":
     }
 
     # Java installation directory
-    $install_dir = "/usr/lib/jvm"
+    $java_install_dir = "/usr/lib/jvm"
 
-    # OpenJDK directory name (NOTE: $architecture is a "fact")
-    $dir_name = "java-1.${java_version}.0-openjdk-${architecture}"
+    # OpenJDK version/directory name (NOTE: $architecture is a "fact")
+    $java_name = "java-${java_version}-openjdk-${architecture}"
 
     # Install Java, based on set $java_version (passed to Puppet in VagrantFile)
     package { "java":
-        name => "openjdk-${java_version}-jdk",  # Install OpenJDK package (as Oracle JDK tends to require a more complex manual download & unzip)
+      name => "openjdk-${java_version}-jdk",  # Install OpenJDK package (as Oracle JDK tends to require a more complex manual download & unzip)
     }
 
-    # Install the IcedTea plugin, as its absence seems to cause update-java-alternatives to fail
-    package { "icedtea-${java_version}-plugin":
-        name => "icedtea-${java_version}-plugin"
-    }
+ ->
 
     # Set Java defaults to point at OpenJDK
     # NOTE: $architecture is a "fact" automatically set by Puppet's 'facter'.
     exec { "Update alternatives to OpenJDK Java ${java_version}":
-        command => "update-java-alternatives --set java-1.${java_version}.0-openjdk-${architecture}",
-        unless  => "test \$(readlink /etc/alternatives/java) = '${install_dir}/${dir_name}/jre/bin/java'",
-        path    => "/usr/bin:/usr/sbin:/bin",
+      command => "update-java-alternatives --set ${java_name}",
+      unless  => "test \$(readlink /etc/alternatives/java) = '${java_install_dir}/${java_name}/jre/bin/java'",
+      path    => "/usr/bin:/usr/sbin:/bin",
     }
  
-   -> 
+ ->
+
     # Create a "default-java" symlink (for easier JAVA_HOME setting). Overwrite if existing.
-    exec { "Symlink OpenJDK to '${install_dir}/default-java'":
-        cwd     => $install_dir,
-        command => "ln -sfn ${dir_name} default-java",
-        unless  => "test \$(readlink ${install_dir}/default-java) = '${dir_name}'",
-        path    => "/usr/bin:/usr/sbin:/bin",
-    }
-
-    # Install Maven & Ant
-    package { "maven": 
-        require => Package["java"],
-    }
-    package { "ant":
-        require => Package["java"],
-    }
-    
-    # Install Git
-    package { "git":
-    }
-
-    # Check if our SSH connection to GitHub works. This verifies that SSH forwarding is working right.
-    exec { "Verify SSH connection to GitHub works?" :
-        command => "ssh -T -oStrictHostKeyChecking=no git@github.com",
-        returns => 1,   # If this succeeds, it actually returns '1'. If it fails, it returns '255'
+    exec { "Symlink OpenJDK to '${java_install_dir}/default-java'":
+      cwd     => $java_install_dir,
+      command => "ln -sfn ${java_name} default-java",
+      unless  => "test \$(readlink default-java) = '${java_name}'",
+      path    => "/usr/bin:/usr/sbin:/bin",
     }
 }

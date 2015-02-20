@@ -1,5 +1,11 @@
-# ignore any .yaml files except common.yaml
-!common.yaml
+# Ignore any .yaml files except default.yaml
 *.yaml
+!default.yaml
+
+# Ignore any customized local-bootstrap.sh file
+# which is run during 'vagrant up'
 local-bootstrap.sh
+
+# Ignore special 'dotfiles' folder, used to copy 
+# any local dotfiles to VM
 dotfiles

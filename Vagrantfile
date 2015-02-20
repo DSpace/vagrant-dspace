@@ -4,37 +4,33 @@
 ####################################
 # Vagrantfile for DSpace Development
 # 
-# WARNING: THIS IS A WORK IN PROGRESS. IT DOES NOT YET FULLY INSTALL DSPACE VIA VAGRANT!
+# WARNING: THIS IS A WORK IN PROGRESS.
 #  
 # DO NOT USE IN PRODUCTION. THIS IS FOR DEVELOPMENT/TESTING PURPOSES ONLY.
-#
-# Currently, this config only sets up the following via Vagrant
-#   * Setup SSH Key Forwarding (from local machine to Vagrant VM)
-#   * Setup basic Git settings (email & username) on VM
-#   * Install Java, Maven, Ant on VM
-#   * Checkout DSpace source code from GitHub to VM
 #
 # ONLY TESTED with VirtualBox provider. Your mileage may vary with other providers
 ####################################
 
-#======================================================
-# QUICK SETTINGS
-# Feel free to tweak for your development environment.
-#======================================================
-# General Settings
-#------------------
-# Version of Java to install on VM (valid values: 7 or 6)
-java = "7"
+#=====================================================================
+# Load settings from our YAML configs (/config/*.yaml)
+# 
+# This bit of "magic" is possible cause a Vagrantfile is just Ruby! :)
+# It reads some basic configs from our 'default.yaml' and 'local.yaml'
+# in order to decide how to start up the Vagrant VM.
+#=====================================================================
+require "yaml"
 
-# Virtual Box Quick Settings
-# (Additional options are in the :virtualbox provider settings below.)
-#--------------------------
-# Name of the VM created in VirtualBox (Also the name of the subfolder in ~/VirtualBox VMs/ where this VM is normally kept)
-vb_name = "dspace-dev"
+# Load up our config files
+# First, load 'config/default.yaml'
+CONF = YAML.load(File.open("config/default.yaml", File::RDONLY).read)
 
-# How much memory to provide to VirtualBox (in MB)
-# Provide 2GB of memory by default
-vb_memory = 2048  
+# Next, load local overrides from 'config/local.yaml'
+# If it doesn't exist, no worries. We'll just use the defaults
+if File.exists?("config/local.yaml")
+  CONF.merge!(YAML.load(File.open("config/local.yaml", File::RDONLY).read))
+end
+
+# At this point, all our configs can be referenced as CONF['key'], e.g. CONF['vb_name']
 
 ####################################  
 
@@ -44,18 +40,63 @@ Vagrant.configure("2") do |config|
     # options are documented and commented below. For a complete reference,
     # please see the online documentation at vagrantup.com.
 
+    #-----------------------------
+    # Basic Box Settings
+    #-----------------------------
     # Every Vagrant virtual environment requires a box to build off of.
-    config.vm.box = "dspace-trusty64"
+    config.vm.box = CONF['vagrant_box']
 
-    # BEGIN Vagrant-Cachier configuration ####################################
-    # check for the presence of the Vagrant-Cachier plugin before attempting
-    # these configurations
+    # The url from where the 'config.vm.box' box will be fetched if it
+    # doesn't already exist on the user's system.
+    if CONF['vagrant_box_url']
+        config.vm.box_url = CONF['vagrant_box_url']
+    end
+
+    # define this box so Vagrant doesn't call it "default"
+    config.vm.define "vagrant-dspace"
+
+    # Hostname for virtual machine
+    config.vm.hostname = "dspace.vagrant.dev"
+
+    #-----------------------------
+    # Network Settings
+    #-----------------------------
+    # configure a private network and set this guest's IP to 192.168.50.2
+    config.vm.network "private_network", ip: CONF['ip_address']
+
+    # Create a forwarded port mapping which allows access to a specific port
+    # within the machine from a port on the host machine. In the example below,
+    # accessing "localhost:8080" will access port 8080 on the VM.
+    config.vm.network :forwarded_port, guest: 8080, host: CONF['port'],
+      auto_correct: true
+
+    # If a port collision occurs (i.e. port 8080 on local machine is in use),
+    # then tell Vagrant to use the next available port between 8081 and 8100
+    config.vm.usable_port_range = 8081..8100
+
+    # BEGIN Landrush (https://github.com/phinze/landrush) configuration
+    # This section will only be triggered if you have installed "landrush"
+    #     vagrant plugin install landrush
+    if Vagrant.has_plugin?('landrush')
+        config.landrush.enable
+        # let's use the Google free DNS
+        config.landrush.upstream '8.8.8.8'
+        config.landrush.guest_redirect_dns = false
+    end
+    # END Landrush configuration
+
+    #------------------------------
+    # Caching Settings (if enabled)
+    #------------------------------
+    # BEGIN Vagrant-Cachier (https://github.com/fgrehm/vagrant-cachier) configuration
+    # This section will only be triggered if you have installed "vagrant-cachier"
+    #     vagrant plugin install vagrant-cachier
     if Vagrant.has_plugin?('vagrant-cachier')
        # Use a vagrant-cachier cache if one is detected
        config.cache.auto_detect = true
 
        # set vagrant-cachier scope to :box, so other projects that share the
-       # dspace-trusty64 box will be able to used the same cached files
+       # vagrant box will be able to used the same cached files
        config.cache.scope = :box
 
        # and lets specifically use the apt cache (note, this is a Debian-ism)
@@ -68,47 +109,30 @@ Vagrant.configure("2") do |config|
 
        # set the permissions for .m2 so we can use Maven properly
        config.vm.provision :shell, :inline => "chown vagrant:vagrant /home/vagrant/.m2"
-
     end
-    # END Vagrant-Cachier configuration #######################################
+    # END Vagrant-Cachier configuration
 
-    # The url from where the 'config.vm.box' box will be fetched if it
-    # doesn't already exist on the user's system.
-    config.vm.box_url = "http://github.com/DSpace/vagrantbox-ubuntu/releases/download/v2.0/dspace-trusty64.box"
+    #-----------------------------
+    # Basic System Customizations
+    #-----------------------------
+    # Check our system locale -- make sure it is set to UTF-8
+    # This also means we need to run 'dpkg-reconfigure' to avoid "unable to re-open stdin" errors (see http://serverfault.com/a/500778)
+    # For now, we have a hardcoded locale of "en_US.UTF-8"
+    locale = "en_US.UTF-8"
+    config.vm.provision :shell, :inline => "echo 'Setting locale to UTF-8 (#{locale})...' && locale | grep 'LANG=#{locale}' > /dev/null || update-locale --reset LANG=#{locale} && dpkg-reconfigure locales"
 
-    # define this box so Vagrant doesn't call it "default"
-    config.vm.define "vds"
+    # Turn off annoying console bells/beeps in Ubuntu (only if not already turned off in /etc/inputrc)
+    config.vm.provision :shell, :inline => "echo 'Turning off console beeps...' && grep '^set bell-style none' /etc/inputrc || echo 'set bell-style none' >> /etc/inputrc"
 
-    # Hostname for virtual machine
-    config.vm.hostname = "dspace.vagrant.dev"
-
-    # configure a private network and set this guest's IP to 192.168.50.2
-    config.vm.network "private_network", ip: "192.168.50.2"
-
-    # BEGIN Landrush configuration ###########################################
-
-
-    if Vagrant.has_plugin?('landrush')
-        config.landrush.enable
-        # let's use the Google free DNS
-        config.landrush.upstream '8.8.8.8'
-        config.landrush.guest_redirect_dns = false
-    end
-
-    # END Landrush configuration ###########################################
-
-    # Create a forwarded port mapping which allows access to a specific port
-    # within the machine from a port on the host machine. In the example below,
-    # accessing "localhost:8080" will access port 8080 on the VM.
-    config.vm.network :forwarded_port, guest: 8080, host: 8080,
-      auto_correct: true
-
-    # If a port collision occurs (i.e. port 8080 on local machine is in use),
-    # then tell Vagrant to use the next available port between 8081 and 8100
-    config.vm.usable_port_range = 8081..8100
-
+    #------------------------
+    # Enable SSH Forwarding
+    #------------------------
     # Turn on SSH forwarding (so that 'vagrant ssh' has access to your local SSH keys, and you can use your local SSH keys to access GitHub, etc.)
     config.ssh.forward_agent = true
+
+    # Prevent annoying "stdin: is not a tty" errors from displaying during 'vagrant up'
+    # See also https://github.com/mitchellh/vagrant/issues/1673#issuecomment-28288042
+    config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
 
     # THIS NEXT PART IS TOTAL HACK (only necessary for running Vagrant on Windows)
     # Windows currently doesn't support SSH Forwarding when running Vagrant's "Provisioning scripts" 
@@ -131,17 +155,12 @@ Vagrant.configure("2") do |config|
             # Read local machine's GitHub SSH Key (~/.ssh/github_rsa)
             github_ssh_key = File.read(File.join(Dir.home, ".ssh", "github_rsa"))
             # Copy it to VM as the /root/.ssh/id_rsa key
-            config.vm.provision :shell, :inline => "echo 'Windows-specific: Copying local GitHub SSH Key to VM for provisioning...' && mkdir -p /root/.ssh && echo '#{github_ssh_key}' > /root/.ssh/id_rsa && chmod 600 /root/.ssh/id_rsa"
+            config.vm.provision :shell, :inline => "echo 'Windows-specific: Copying local GitHub SSH Key to VM for provisioning...' && mkdir -p /root/.ssh && echo '#{github_ssh_key}' > /root/.ssh/id_rsa && chmod 600 /root/.ssh/id_rsa", run: "always"
         else
             # Else, throw a Vagrant Error. Cannot successfully startup on Windows without a GitHub SSH Key!
             raise Vagrant::Errors::VagrantError, "\n\nERROR: GitHub SSH Key not found at ~/.ssh/github_rsa (required for 'vagrant-dspace' on Windows).\nYou can generate this key manually OR by installing GitHub for Windows (http://windows.github.com/)\n\n"
         end   
     end
-
-    ####
-    # Provisioning Scripts
-    #    These scripts run in the order in which they appear, and setup the virtual machine (VM) for us.
-    ####
 
     # Create a '/etc/sudoers.d/root_ssh_agent' file which ensures sudo keeps any SSH_AUTH_SOCK settings
     # This allows sudo commands (like "sudo ssh git@github.com") to have access to local SSH keys (via SSH Forwarding)
@@ -151,47 +170,53 @@ Vagrant.configure("2") do |config|
         shell.args = %q{/etc/sudoers.d/root_ssh_agent "Defaults    env_keep += \"SSH_AUTH_SOCK\""}
     end
 
-    # Check our system locale -- make sure it is set to UTF-8
-    config.vm.provision :shell, :inline => "locale | grep 'LANG=en_US.UTF-8' > /dev/null || sudo update-locale --reset LANG=en_US.UTF-8"
+    # Check if a test SSH connection to GitHub succeeds or fails (on every vagrant up)
+    # This sets a Puppet Fact named "github_ssh_status" on the VM. 
+    # That fact is then used by 'setup.pp' to determine whether to connect to a Git Repo via SSH or HTTPS (see setup.pp)
+    config.vm.provision :shell, :inline => "echo 'Testing SSH connection to GitHub on VM...' && mkdir -p /etc/facter/facts.d/ && ssh -T -q -oStrictHostKeyChecking=no git@github.com; echo github_ssh_status=$? > /etc/facter/facts.d/github_ssh.txt", run: "always"
 
-    # Turn off annoying console bells/beeps in Ubuntu (only if not already turned off in /etc/inputrc)
-    config.vm.provision :shell, :inline => "grep '^set bell-style none' /etc/inputrc || echo 'set bell-style none' >> /etc/inputrc"
+    #------------------------
+    # Provisioning Scripts
+    #    These scripts run in the order in which they appear, and setup the virtual machine (VM) for us.
+    #------------------------
 
-    # Shell script to set apt sources.list to something appropriate (close to you, and actually up) via apt-spy2
-    config.vm.provision :shell, :inline => "echo '   > > > running apt-spy-2-bootstrap.sh, do not worry if it shows an error, it will be OK, there is a fallback.'"
+    # Shell script to set apt sources.list to something appropriate (close to you, and actually up)
+    # via apt-spy2 (https://github.com/lagged/apt-spy2)
+    config.vm.provision :shell, :inline => "echo '   > > > running apt-spy2 to locate a nearby mirror (for quicker installs). Do not worry if it shows an error, it will be OK, there is a fallback.'"
     config.vm.provision :shell, :path => "apt-spy-2-bootstrap.sh"
 
     # Shell script to initialize latest Puppet on VM & also install librarian-puppet (which manages our third party puppet modules)
     # This has to be done before the puppet provisioning so that the modules are available when puppet tries to parse its manifests.
     config.vm.provision :shell, :path => "puppet-bootstrap-ubuntu.sh"
 
-    # Call our Puppet initialization script
-    config.vm.provision :shell, :inline => "echo '   > > > beginning puppet provisioning, this will appear to hang...'"
-    config.vm.provision :shell, :inline => "echo '   > > > PATIENCE! output is only shown after each step completes...'"
-
+    # Copy our 'hiera.yaml' file over to the global Puppet directory (/etc/puppet) on VM
+    # This lets us run 'puppet apply' manually on the VM for any minor updates or tests
+    config.vm.provision :shell, :inline => "cp /vagrant/hiera.yaml /etc/puppet"
+   
     # display the local.yaml file, if it exists, to give us a chance to back out
     # before waiting for this vagrant up to complete
-
     if File.exists?("config/local.yaml")
         config.vm.provision :shell, :inline => "echo '   > > > using the following local.yaml data, if this is not correct, control-c now...'"
         config.vm.provision :shell, :inline => "echo '---BEGIN local.yaml ---' && cat /vagrant/config/local.yaml && echo '--- END local.yaml -----'"
     end
 
+    # Call our Puppet initialization script
+    config.vm.provision :shell, :inline => "echo '   > > > Beginning Puppet provisioning, this may take a while (and will appear to hang during DSpace Install step)...'"
+    config.vm.provision :shell, :inline => "echo '   > > > PATIENCE! Console output is only shown after each step completes...'"
+
+    # Actually run Puppet to setup the server, install all prerequisites and install DSpace
     config.vm.provision :puppet do |puppet|
-        # Set some custom "facts" for Puppet manifest(s)/modules to use.
-        puppet.facter = {
-            "vagrant"       => "1",
-            "fqdn"          => "vagrant-dspace",
-            "java_version"  => "#{java}",        # version of Java (used by 'dspace-init.pp')
-        }
         puppet.manifests_path = "."
-        puppet.manifest_file = "dspace-init.pp"
+        puppet.manifest_file = "setup.pp"
         puppet.options = "--verbose"
-        puppet.hiera_config_path = "hiera.yaml"
     end
 
+    #-------------------------------------
+    # Local customizations to VM
+    #-------------------------------------
     # Check if ~/.gitconfig exists locally
     # If so, copy basic Git Config settings to Vagrant VM
+    # This lets developers easily commit code to GitHub as themselves
     if File.exists?(File.join(Dir.home, ".gitconfig"))
         git_name = `git config user.name`   # find locally set git name
         git_email = `git config user.email` # find locally set git email
@@ -201,10 +226,17 @@ Vagrant.configure("2") do |config|
         config.vm.provision :shell, :inline => "echo 'Saving local git email to VM...' && sudo -i -u vagrant git config --global user.email '#{git_email.chomp}'"
     end
 
-
+    # Load any local customizations from the "local-bootstrap.sh" script (if it exists)
+    # Check out the "config/local-bootstrap.sh.example" for examples
     if File.exists?("config/local-bootstrap.sh")
         config.vm.provision :shell, :inline => "echo '   > > > running config/local_bootstrap.sh'"
         config.vm.provision :shell, :path => "config/local-bootstrap.sh"
+    end
+
+    # For IDE support + vagrant-dspace
+    # Set up dspace-src subdirectory as a synced folder to support the use of an IDE on the host machine
+    if CONF['sync_src_to_host'] == true
+        config.vm.synced_folder "dspace-src", "/home/vagrant/dspace-src"
     end
 
     #############################################
@@ -213,17 +245,25 @@ Vagrant.configure("2") do |config|
     # 'VBoxManage' tool: http://www.virtualbox.org/manual/ch08.html
     #############################################
     config.vm.provider :virtualbox do |vb|
+        # Boot into GUI mode (login: vagrant, pwd: vagrant). Useful for debugging boot issues, etc.
+        vb.gui = CONF['vm_gui_mode']
+
         # Name of the VM created in VirtualBox (Also the name of the subfolder in ~/VirtualBox VMs/ where this VM is kept)
-        vb.name = vb_name
+        vb.name = CONF['vm_name']
+
+        # Let VirtualBox know this is Ubuntu
+        vb.customize ["modifyvm", :id, "--ostype", 'Ubuntu']
 
         # Use VBoxManage to provide Virtual Machine with extra memory (default is only 300MB)
-        vb.customize ["modifyvm", :id, "--memory", vb_memory]
+        vb.customize ["modifyvm", :id, "--memory", CONF['vm_memory']]
+
+        if CONF['vb_max_cpu']
+          # Use VBoxManage to ensure Virtual Machine only has access to a percentage of host CPU
+          vb.customize ["modifyvm", :id, "--cpuexecutioncap", CONF['vm_max_cpu']]
+        end
 
         # Use VBoxManage to have the Virtual Machine use the Host's DNS resolver
         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-
-        # Use VBoxManage to ensure Virtual Machine only has access to 50% of host CPU
-        #vb.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
 
         # This allows symlinks to be created within the /vagrant root directory,
         # which is something librarian-puppet needs to be able to do. This might
@@ -231,4 +271,14 @@ Vagrant.configure("2") do |config|
         # Borrowed from https://github.com/purple52/librarian-puppet-vagrant/
         vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
     end
+
+    # if we're running with vagrant-notify, send a notification that we're done, in case we've wandered off
+    # https://github.com/fgrehm/vagrant-notify
+    # NOTE: Currently this plugin only works on Linux or OSX hosts
+    if Vagrant.has_plugin?('vagrant-notify')
+        config.vm.provision :shell, :inline => "notify-send --urgency=critical 'Vagrant-DSpace is up! Get back to work! :-)'", run: "always"
+    end
+
+    # Message to display to user after 'vagrant up' completes
+    config.vm.post_up_message = "Setup of 'vagrant-dspace' is now COMPLETE! DSpace should now be available at:\n\nhttp://localhost:#{CONF['port']}/xmlui/\n\nYou can login using '#{CONF['admin_email']}' with password '#{CONF['admin_passwd']}'.\nYou can also SSH into the new VM via 'vagrant ssh'"
 end
