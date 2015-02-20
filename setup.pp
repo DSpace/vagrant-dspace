@@ -231,18 +231,18 @@ dspace::install { 'vagrant-dspace':
 # http://psi-probe.googlecode.com/
 $probe_version = "2.3.3"
 exec {"Download and install the PSI Probe v${probe_version} war":
-  command   => "wget --quiet --timeout=600 --continue https://psi-probe.googlecode.com/files/probe-${probe_version}.zip && unzip -u probe-${probe_version}.zip && rm probe-${probe_version}.zip",
+  command   => "wget --quiet --continue https://psi-probe.googlecode.com/files/probe-${probe_version}.zip && unzip -u probe-${probe_version}.zip && rm probe-${probe_version}.zip",
   cwd       => "${catalina_base}/webapps",
   creates   => "${catalina_base}/webapps/probe.war",
   user      => "vagrant",
   logoutput => true,
-  tries     => 3,          # In case of a network hiccup, try this download 3 times
-  require   => Service['tomcat'],
+  tries     => 3,                     # In case of a network hiccup, try this download 3 times
+  require   => File[$catalina_base],  # CATALINA_BASE must exist before downloading
 }
 
 ->
 
-# add a context fragment file for Psi-probe, and restart tomcat
+# Add a context fragment file for Psi-probe, and restart tomcat
 file { "${catalina_base}/conf/Catalina/localhost/probe.xml" :
   ensure  => file,
   owner   => vagrant,
@@ -254,10 +254,10 @@ file { "${catalina_base}/conf/Catalina/localhost/probe.xml" :
 ->
 
 # Add a "dspace" Tomcat User (password="vagrant") who can login to PSI Probe
+# (NOTE: This line will only be added after <tomcat-users> if it doesn't already exist there)
 file_line { 'Add \'dspace\' Tomcat user for PSI Probe':
-  path   => "${catalina_base}/conf/tomcat-users.xml", # File to modify
-  after  => '<tomcat-users>',                         # Add content immediately after this line
-  line   => '<role rolename="manager"/><user username="dspace" password="vagrant" roles="manager"/>', # Lines to add to file
-  match  => "^.*username=\"dspace\".*$",              # Regex for line to replace (if found)
-  notify => Service['tomcat'],                        # If changes are made, notify Tomcat to restart
+  path    => "${catalina_base}/conf/tomcat-users.xml", # File to modify
+  after   => '<tomcat-users>',                         # Add content immediately after this line
+  line    => '<role rolename="manager"/><user username="dspace" password="vagrant" roles="manager"/>', # Lines to add to file
+  notify  => Service['tomcat'],                        # If changes are made, notify Tomcat to restart
 }

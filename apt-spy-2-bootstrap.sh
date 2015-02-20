@@ -40,6 +40,7 @@ if [ -z "$COUNTRY" ] || [ "${#COUNTRY}" -ne "2" ]; then
 fi
 
 if [ "$(gem search -i apt-spy2)" = "false" ]; then
+  echo "Installing apt-spy2 (and prerequisites)..."
   gem install --no-ri --no-rdoc apt-spy2
   echo "... apt-spy2 installed!"
   echo "... Setting 'apt' sources.list for closest mirror to country=$COUNTRY"
