@@ -27,7 +27,7 @@ Table of Contents
 5. [Usage Tips - How to perform common activities in this environment](#usage-tips)
 6. [How to Tweak Things to your Liking? - Tips on customizing the 'vagrant-dspace' install process](#how-to-tweak-things-to-your-liking)
 7. [Vagrant Plugin Recommendations - Other plugins you may wish to consider installing](#vagrant-plugin-recommendations)
-8. [Don't Miss These Really Cool Things You Can Do with Vagrant](#don't-miss-these-really-cool-things-you-can-do-with-vagrant) 
+8. [Don't Miss These Really Cool Things You Can Do with Vagrant](#dont-miss-these-really-cool-things-you-can-do-with-vagrant) 
 9. [What's Next?](#whats-next)
 10. [Tools We Use To Make This All Work](#tools-we-use-to-make-this-all-work)
 11. [Reporting Bugs / Requesting Enhancements](#reporting-bugs--requesting-enhancements)
