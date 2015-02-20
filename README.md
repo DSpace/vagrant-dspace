@@ -195,7 +195,7 @@ If you already have a newer version of the landrush plugin installed, you may re
 ```
 Don't miss these really cool things you can do with Vagrant
 -----------------------------------------------------------
-* [Vagrant Share](http://docs.vagrantup.com/v2/share/) requires a free login on [HashiCorp's Atlas](https://atlas.hashicorp.com/), allows you to share your Vagrant environment with anyone in the world, enabling collaboration directly in your Vagrant environment in almost any network environment. It can be used to demo functionality (or bugs) with other developers, and can even enable a sort of pair programming. OK, maybe not really, but you can at least callaborate more than before.
+* [Vagrant Share](http://docs.vagrantup.com/v2/share/) requires a free login on [HashiCorp's Atlas](https://atlas.hashicorp.com/), allows you to share your Vagrant environment with anyone in the world, enabling collaboration directly in your Vagrant environment in almost any network environment. It can be used to demo functionality (or bugs) with other developers, and can even enable a sort of pair programming. OK, maybe not really, but you can at least collaborate more than before.
 
 What's Next?
 ------------
