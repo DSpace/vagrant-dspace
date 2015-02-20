@@ -179,6 +179,7 @@ The following Vagrant plugins are not required, but they do make using Vagrant a
 * Vagrant-Cachier: https://github.com/fgrehm/vagrant-cachier
 * Vagrant-Proxyconf: https://github.com/tmatilai/vagrant-proxyconf/
 * Vagrant-VBox-Snapshot: https://github.com/dergachev/vagrant-vbox-snapshot/
+* Vagrant-Notify: https://github.com/fgrehm/vagrant-notify
 
 NOTE: * if you do install the Land Rush plugin, we recommend you only install version 0.12.0 at this time, newer versions report errors in communicating with our base machine image. You may do this by typing:
 ```
@@ -191,7 +192,9 @@ If you already have a newer version of the landrush plugin installed, you may re
     vagrant plugin uninstall landrush
     vagrant plugin install landrush --plugin-version 0.12.0
 ```
- 
+Don't miss these really cool things you can do with Vagrant
+-----------------------------------------------------------
+* [Vagrant Share](http://docs.vagrantup.com/v2/share/) requires a free login on [HashiCorp's Atlas](https://atlas.hashicorp.com/), allows you to share your Vagrant environment with anyone in the world, enabling collaboration directly in your Vagrant environment in almost any network environment. It can be used to demo functionality (or bugs) with other developers, and can even enable a sort of pair programming. OK, maybe not really, but you can at least callaborate more than before.
 
 What's Next?
 ------------
