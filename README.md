@@ -51,33 +51,34 @@ How it Works
    * Makes DSpace available via Tomcat (e.g. http://localhost:8080/xmlui/)
 * Sets up SSH Forwarding, so that you can use your local SSH key(s) on the VM (for development with GitHub)
 * Syncs your local Git settings (name and email from local .gitconfig) to VM (for development with GitHub)
+* Optionally sets up "sync folder", so that `~/dspace-src` on the VM is synced to `[vagrant-dspace]/dspace-src` on your host machine. This allows for IDE-based development. But, it's disabled by default.
 
 **If you want to help, please do.** We'd prefer solutions using [Puppet](https://puppetlabs.com/).
 
 Requirements
 ------------
 
-* [Vagrant](http://vagrantup.com/) version 1.3.2 or higher
+* [Vagrant](http://vagrantup.com/) version 1.6.0 or above.
 * [VirtualBox](https://www.virtualbox.org/)
-* [Git](http://git-scm.com/)
-* A GitHub account with an associated SSH key:  As vagrant-dspace was built initially as a developer tool, at this time one must have a GitHub account (and an associated SSH key) in order for 'vagrant-dspace' to be able to download DSpace source from GitHub. Please note, we are working on removing this requirement in the future.
+* (Optional) A GitHub account with an associated SSH key. This is NOT required, but if you plan to do development on 'vagrant-dspace' and/or create Pull Requests, it is recommended. If you have a local SSH agent running, Vagrant will attempt to automatically forward your local SSH key(s) to the VM, so that you will be able to immediately interact with GitHub via SSH on the VM.
+   * WARNING: If you are on Windows, Vagrant SSH forwarding does not currently work properly. Instead we recommend creating a GitHub-specific SSH Key (at `~/.ssh/github_rsa`) which you also connect to your GitHub Account. There are a few easy ways to create this key:
+      *  Install [GitHub for Windows](http://windows.github.com/) - this will automatically generate a new `~/.ssh/github_rsa` key.
+      * OR, manually generate a new `~/.ssh/github_rsa` key and associate it with your GitHub Account. [GitHub has detailed instructions on how to do this.](https://help.github.com/articles/generating-ssh-keys)
+   * SIDENOTE: Mac OSX / Linux users do NOT need this, as Vagrant's SSH Key Forwarding works properly from Mac OSX & Linux. There's just a bug in using Vagrant + Windows.
 
 Getting Started
 --------------------------
 
 1. Install all required software (see above). Linux users take note: the versions of Vagrant and Virtualbox in your distribution's package manager are probably not current enough. Download and manually install the most recent version from [Vagrant](http://vagrantup.com) and [VirtualBox](https://www.virtualbox.org/). It will be OK. Both of these projects move quickly, and the distro managers have a hard time keeping up.
-2. Clone a copy of 'vagrant-dspace' to your local computer
+2. Clone a copy of 'vagrant-dspace' to your local computer (via Git)
    * `git clone git@github.com:DSpace/vagrant-dspace.git`
-3. _WINDOWS ONLY_ : Any users of Vagrant from Windows MUST create a GitHub-specific SSH Key (at `~/.ssh/github_rsa`) which is then connected to your GitHub Account. There are two easy ways to do this:
-   * Install [GitHub for Windows](http://windows.github.com/) - this will automatically generate a new `~/.ssh/github_rsa` key.
-   * OR, manually generate a new `~/.ssh/github_rsa` key and associate it with your GitHub Account. [GitHub has detailed instructions on how to do this.](https://help.github.com/articles/generating-ssh-keys)
-   * SIDENOTE: Mac OSX / Linux users do NOT need this, as Vagrant's SSH Key Forwarding works properly from Mac OSX & Linux. There's just a bug in using Vagrant + Windows.
+   * If you don't have Git installed locally, you should be able to simply download the [latest 'vagrant-dspace' from GitHub (as a ZIP)](https://github.com/DSpace/vagrant-dspace/archive/master.zip)
 4. `cd [vagrant-dspace]/`
 5. `vagrant up`
    * Wait for ~15 minutes while Vagrant & Puppet do all the heavy lifting of cloning GitHub & building & installing DSpace.
    * There may be times that vagrant will appear to "stall" for several minutes (especially during the Maven build of DSpace). But, don't worry.
 6. Once complete, visit `http://localhost:8080/xmlui/` or `http://localhost:8080/jspui/` in your local web browser to see if it worked! _More info below on what to expect._
-   * If you already have something running locally on port 8080, vagrant-dspace will attempt to use the next available port between 8081 and 8100.
+   * If you already have something running locally on port 8080, vagrant-dspace will attempt to use the next available port between 8081 and 8100. The default port is also configurable by creating a `config/local.yaml` (see below for more details)
    
 The `vagrant up` command will initialize a new VM based on the settings in the `Vagrantfile` in that directory.  
 
@@ -90,9 +91,10 @@ What will you get?
 * A running instance of [DSpace 'master'](https://github.com/DSpace/DSpace), on top of latest PostgreSQL and Tomcat 7 (and using Java OpenJDK 7 by default)
    * You can visit this instance at `http://localhost:8080/xmlui/` or `http://localhost:8080/jspui/` from your local web browser 
        * If you install and configure the [Landrush plugin](https://github.com/phinze/landrush) for Vagrant, you can instead visit http://dspace.vagrant.dev:8080/xmlui/ or http://dspace.vagrant.dev:8080/jspui/
-   * An initial Administrator account is also auto-created (this account can be tweaked in a `local.yaml` file, see below)
+   * An initial Administrator account is also auto-created (this account can be tweaked in a `config/local.yaml` file, see below)
        * Default Login: `dspacedemo+admin@gmail.com` , Default Pwd: 'vagrant'
-* A fresh Ubuntu virtual server with DSpace GitHub cloned (at `~/dspace-src/`) and Java/Maven/Ant/Git installed.
+* DSpace GitHub cloned (at `~/dspace-src/`) and Java/Maven/Ant/Git installed.
+   * If `sync_src_to_host=true` in your `config/local.yaml`, then this VM directory will also be synce to `[vagrant-dspace]/dspace-src` on your host machine.  
 * All "out of the box" DSpace webapps running out of `~/dspace/webapps/`. The full DSpace installation is at `~/dspace/`.
 * Tomcat 7 instance installed
    * Includes [PSI Probe](http://code.google.com/p/psi-probe/) running at `http://localhost:8080/probe/`
@@ -132,17 +134,23 @@ How to Tweak Things to your Liking?
 
 ### local.yaml - Your local settings go here!
 
-If you look at the config folder, there are a few files you'll be interested in. The first is `default.yaml`, it's a [Hiera](http://projects.puppetlabs.com/projects/hiera) configuration file. You may copy this file to one named `local.yaml`. Any changes to `local.yaml` will override the defaults set in the `default.yaml` file. The `local.yaml` file is ignored in `.gitignore`, so you won't accidentally commit it. Here are the options:
+If you look at the `config` folder, there are a few files you'll be interested in. The first is `default.yaml`, it's a YAML configuration file (which is loaded by Vagrantfile to configure Vagrant, as well as loaded by Hiera to configure Puppet). You may copy this file to one named `local.yaml`. Any changes to `local.yaml` will override the defaults set in the `default.yaml` file. The `local.yaml` file is ignored in `.gitignore`, so you won't accidentally commit it. Here are the basic options (see the `default.yaml` for more):
 
-* `git_repo` - it would be a good idea to point this to your own fork of DSpace
+* `vm_name` - Name of the Virtual Machine to create (default is usually fine)
+* `vm_memory` - Specify the amount of memory to give this VM (2GB by default)
+* `vm_cpu_max` - Limit the amount of local CPU this VM can access (off by default)
+* `ip_address` - Local IP address to assign to the VM
+* `port` - Port this VM should use for Tomcat (port 8080 by default)
+* `sync_src_to_host` - Whether or not to auto-sync the `~/dspace-src/` folder on the VM to the `[vagrant-dspace]/dspace-src/` folder on your host machine. By default this is false as the sync folder currently is often slow. But, if you want to work in a local IDE, you probably will want this to be set to "true".
+* `git_repo` - it would be a good idea to point this to your own fork of DSpace. By default this is a GitHub SSH URL. But, if vagrant-dspace is unable to connect to GitHub via SSH, this will be dynamically changed to a GitHub HTTPS URL.
 * `git_branch` - if you're constantly working on another brach than master, you can change it here
-* `mvn_params` - add other maven prameters here (this is added to the Vagrant user's profile, so these options are always on whenever you run mvn as the Vagrant user
-* `ant_installer_dir` - until we figure out how to have the installer just run from whatever version of DSpace is in the target folder produced by Maven, we'll need to hard code the DSpace version so we can have Puppet look in the right place to run the Ant installer for DSpace
 * `admin_firstname` - you may want to change this to something more memorable than the demo DSpace user
 * `admin_lastname` - ditto
 * `admin_email` - likewise
 * `admin_passwd` - you probably have a preferred password
 * `admin_language` - and you may have a language preference, you can set it here
+* `mvn_params` - add other maven prameters here (this is added to the Vagrant user's profile, so these options are always on whenever you run mvn as the Vagrant user)
+* `catalina_opt` - the default CATALINA_OPTS setting for Tomcat. This allows you to tweak the amount of memory available to Tomcat (1GB by default)
 
 ### local-bootstrap.sh - You can script your own tweaks/customizations!
 
