@@ -32,7 +32,9 @@ end
 
 # At this point, all our configs can be referenced as CONF['key'], e.g. CONF['vb_name']
 
-####################################  
+####################################
+# Currently, we require Vagrant 1.6.0 or above.
+Vagrant.require_version ">= 1.6.0"
 
 # Actual Vagrant configs
 Vagrant.configure("2") do |config|
