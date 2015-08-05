@@ -41,12 +41,19 @@ vm_memory  : 2048
 
 # Local IP address which will refer to this VM
 # (Changes to this setting require a 'vagrant reload' to take effect)
-ip_address: 192.168.50.2
+ip_address : 192.168.50.2
 
 # Local port which will access DSpace/Tomcat on this VM
 # NOTE: if this port is already in use, Vagrant will use the next available port between 8081 and 8100
 # (Changes to this setting require a 'vagrant reload' to take effect)
-port: 8080
+port       : 8080
+
+# Local port which will access PostgreSQL on this VM
+# This allows you to access the VM's DSpace database via pgAdminIII, or even debug code
+# (via a locally installed IDE) while using this database.
+# NOTE: if this port is already in use, Vagrant will use the next available port between 8081 and 8100
+# (Changes to this setting require a 'vagrant reload' to take effect)
+db_port    : 5432
 
 # Whether to sync the ~/dspace-src/ (DSpace Source) to the host machine
 # (under [vagrant-dspace]/dspace-src/).
