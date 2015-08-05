@@ -140,7 +140,8 @@ If you look at the `config` folder, there are a few files you'll be interested i
 * `vm_memory` - Specify the amount of memory to give this VM (2GB by default)
 * `vm_cpu_max` - Limit the amount of local CPU this VM can access (off by default)
 * `ip_address` - Local IP address to assign to the VM
-* `port` - Port this VM should use for Tomcat (port 8080 by default)
+* `port` - Local port this VM should use for Tomcat (port 8080 by default)
+* `db_port` - Local port where VM's PostgreSQL database will be accessible (port 5432 by default). This lets you manage the VM database locally via tools like pgAdminIII, and debug code in your local IDE while using the VM database for "test" data.
 * `sync_src_to_host` - Whether or not to auto-sync the `~/dspace-src/` folder on the VM to the `[vagrant-dspace]/dspace-src/` folder on your host machine. By default this is false as the sync folder currently is often slow. But, if you want to work in a local IDE, you probably will want this to be set to "true".
 * `git_repo` - it would be a good idea to point this to your own fork of DSpace. By default this is a GitHub SSH URL. But, if vagrant-dspace is unable to connect to GitHub via SSH, this will be dynamically changed to a GitHub HTTPS URL.
 * `git_branch` - if you're constantly working on another brach than master, you can change it here

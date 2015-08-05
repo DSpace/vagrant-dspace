@@ -68,11 +68,15 @@ Vagrant.configure("2") do |config|
 
     # Create a forwarded port mapping which allows access to a specific port
     # within the machine from a port on the host machine. In the example below,
-    # accessing "localhost:8080" will access port 8080 on the VM.
+    # accessing "localhost:[port]" will access port 8080 on the VM.
     config.vm.network :forwarded_port, guest: 8080, host: CONF['port'],
       auto_correct: true
 
-    # If a port collision occurs (i.e. port 8080 on local machine is in use),
+    # Forward PostgreSQL database port (5432) to local machine port (for DB & pgAdmin3 access)
+    config.vm.network :forwarded_port, guest: 5432, host: CONF['db_port'],
+      auto_correct: true
+
+    # If a port collision occurs (e.g. port 8080 on local machine is in use),
     # then tell Vagrant to use the next available port between 8081 and 8100
     config.vm.usable_port_range = 8081..8100
 
@@ -282,5 +286,5 @@ Vagrant.configure("2") do |config|
     end
 
     # Message to display to user after 'vagrant up' completes
-    config.vm.post_up_message = "Setup of 'vagrant-dspace' is now COMPLETE! DSpace should now be available at:\n\nhttp://localhost:#{CONF['port']}/xmlui/\n\nYou can login using '#{CONF['admin_email']}' with password '#{CONF['admin_passwd']}'.\nYou can also SSH into the new VM via 'vagrant ssh'"
+    config.vm.post_up_message = "Setup of 'vagrant-dspace' is now COMPLETE! DSpace should now be available at:\n\nhttp://localhost:#{CONF['port']}/xmlui/\nLOGIN: '#{CONF['admin_email']}', PASSWORD: '#{CONF['admin_passwd']}'\n\nThe DSpace database is accessible via local port #{CONF['db_port']}.\nYou can SSH into the new VM via 'vagrant ssh'"
 end

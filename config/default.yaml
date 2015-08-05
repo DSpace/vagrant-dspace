@@ -38,6 +38,13 @@ ip_address : 192.168.50.2
 # (Changes to this setting require a 'vagrant reload' to take effect)
 port       : 8080
 
+# Local port which will access PostgreSQL on this VM
+# This allows you to access the VM's DSpace database via pgAdminIII, or even debug code
+# (via a locally installed IDE) while using this database.
+# NOTE: if this port is already in use, Vagrant will use the next available port between 8081 and 8100
+# (Changes to this setting require a 'vagrant reload' to take effect)
+db_port    : 5432
+
 # Whether to sync the ~/dspace-src/ (DSpace Source) to the host machine
 # (under [vagrant-dspace]/dspace-src/).
 #   * Setting to "true" means the local copy & VM copy are always in sync, and
@@ -45,7 +52,7 @@ port       : 8080
 #     WILL take significantly longer (e.g. ~45mins instead of 10-15mins). 
 #     Subsequent 'vagrant up' calls will use existing local source (until deleted).
 #   * Setting to "false" is much more speedy, but you then can ONLY edit code
-#     directly on the VM (i.e. no IDE integration)
+#     directly on the VM (i.e. no direct IDE integration)
 # By default this is "false" to keep things speedy.
 # (Changes to this setting require a 'vagrant destroy && vagrant up' to take effect)
 sync_src_to_host : false
