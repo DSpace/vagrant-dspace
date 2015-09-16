@@ -8,7 +8,6 @@
 # 5. Installs DSpace via our custom "dspace" Puppet Module
 #
 # Tested on:
-# - Ubuntu 12.04
 # - Ubuntu 14.04
 
 # Global default to requiring all packages be installed & apt-update to be run first
@@ -63,26 +62,39 @@ include dspace
 # Init PostgreSQL module
 # (We use https://github.com/puppetlabs/puppetlabs-postgresql/)
 # DSpace requires UTF-8 encoding in PostgreSQL
+# DSpace also requires version 9.4 or above. We'll use 9.4
 class { 'postgresql::globals':
   encoding => 'UTF-8',
+  # Setup the official Postgresql apt repos (in sources).
+  # Necessary to install a newer version of Postgres than what is in apt by default
+  manage_package_repo => true,
+  version  => '9.4',
 }
 
 ->
 
 # Setup/Configure PostgreSQL server
 class { 'postgresql::server':
-  ip_mask_deny_postgres_user => '0.0.0.0/32',  # allows postgres use to connect from any IP
+  ip_mask_deny_postgres_user => '0.0.0.0/32',  # allows 'postgres' user to connect from any IP
   ip_mask_allow_all_users    => '0.0.0.0/0',   # allow other users to connect from any IP
   listen_addresses           => '*',           # accept connections from any IP/machine
   postgres_password          => 'dspace',      # set password for "postgres"
 }
 
-->
+# Ensure the PostgreSQL contrib package is installed
+# (includes various extensions, like pgcrypto which is required by DSpace)
+class { 'postgresql::server::contrib': }
 
 # Create a 'dspace' database & 'dspace' user account (which owns the database)
 postgresql::server::db { 'dspace':
   user     => 'dspace',
   password => 'dspace'
+}
+
+# Activate the 'pgcrypto' extension on our 'dspace' database
+# This is REQUIRED by DSpace 6 and above
+postgresql::server::extension { 'pgcrypto':
+  database => 'dspace',
 }
 
 #-----------------------
