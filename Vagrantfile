@@ -235,8 +235,7 @@ Vagrant.configure("2") do |config|
     # Load any local customizations from the "local-bootstrap.sh" script (if it exists)
     # Check out the "config/local-bootstrap.sh.example" for examples
     if File.exists?("config/local-bootstrap.sh")
-        config.vm.provision :shell, :inline => "echo '   > > > running config/local_bootstrap.sh'"
-        config.vm.provision :shell, :path => "config/local-bootstrap.sh"
+        config.vm.provision :shell, :inline => "echo '   > > > running config/local_bootstrap.sh (as vagrant)' && sudo -i -u vagrant /vagrant/config/local-bootstrap.sh"
     end
 
     # For IDE support + vagrant-dspace
