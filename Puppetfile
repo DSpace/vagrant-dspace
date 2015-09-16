@@ -6,13 +6,13 @@ forge "https://forgeapi.puppetlabs.com"
 
 # Install Puppet Labs PostgreSQL module
 # https://github.com/puppetlabs/puppetlabs-postgresql/
-mod "puppetlabs-postgresql", "4.1.0"
+mod "puppetlabs-postgresql", "4.6.0"
 
 # Install Puppet Labs Standard Libraries module
 # https://github.com/puppetlabs/puppetlabs-stdlib
 # (required for puppetlabs-tomcat)
-mod "puppetlabs-stdlib", "4.5.1"
+mod "puppetlabs-stdlib", "4.9.0"
 
 # Install Puppet Labs Tomcat module
 # https://github.com/puppetlabs/puppetlabs-tomcat/
-mod "puppetlabs-tomcat", "1.2.0"
+mod "puppetlabs-tomcat", "1.3.2"
