@@ -1,62 +1,75 @@
 #!/bin/bash
 
-# local-bootstrap.sh.example is an example of a local bootstrap shell povisioner for Vagrant-DSpace. If you copy this file to local-bootstrap.sh, and modify it to match your needs, it will be run whenever you run vagrant-up.
+# local-bootstrap.sh.example is an example of a local bootstrap shell povisioner for Vagrant-DSpace.
+# If you copy this file to local-bootstrap.sh, and modify it to match your needs, it will be run whenever you run "vagrant up".
+#
+# A few notes on this process:
+# * "local-boostrap.sh" will always run AFTER DSpace is installed and Tomcat is started. So, you can use it to add test content to your DSpace (see example below)
+# * "local.boostrap.sh" always runs as the "vagrant" user
 
-# local-bootstrap.sh is a hacky little solution to customizing your own DSpace clone from github. You can use it to do such things as set an upstream remote, configure fetching of pull requests from upstream, and much more
+# TWEAKABLES
+# These variables are used in the example script below. Feel free to tweak if you wish to use this script as-is.
 
-# it is also a handy stop-gap measure for providing needed functionality for Vagrant DSpace (such as AIP auto-loading) without having to do a lot of puppet scripting. This works.
-
-
-# WORD of WARNING: don't forget this script will run as root, so be careful about files you create. Git config lines will need to be run either as the vagrant user.
-
-# You may have configured a different admin eperson in local.yaml, if so, you should use that admin user for the WHO variable below:
-WHO="dspacedemo+admin@gmail.com"
+# Your primary DSpace admin (set to your admin person from local.yaml)
+DSPACE_ADMIN="dspacedemo+admin@gmail.com"
+# Where DSpace AIP content is stored. Any AIPs in this location will be ingested automatically (see sample code below)
 CONTENT="/vagrant/content"
+# Home of the default 'vagrant' user
 HOME="/home/vagrant"
+# DSpace Home directory
 DSPACE_HOME="$HOME/dspace"
-DSPACE="$DSPACE_HOME/dspace"
+# DSpace Source directory
 DSPACESRC="$DSPACE_HOME-src"
+# Path to "dspace" commandline script
+DSPACECMD="$DSPACE_HOME/bin/dspace"
 
 ## START OFF BY CUSTOMIZING THE GIT CLONE ##
-cd $DSPACESRC
 # add the fingerprint for github
 echo "Adding the fingerprint for github.com, so we don't get nagged later..."
-sudo -i -u vagrant ssh -T -oStrictHostKeyChecking=no git@github.com
+ssh -T -oStrictHostKeyChecking=no git@github.com
 
 # set git to allways rebase when we pull (using sudo to run as the vagrant user, since this script runs as root)
-sudo -i -u vagrant git config --global --bool pull.rebase true
+git config --global --bool pull.rebase true
 
 # set git to always use pretty colors
-sudo -i -u vagrant git config --global color.ui always
+git config --global color.ui always
 
 # and don't even try to get smart about converting line endings, that just pisses me off
-sudo -i -u vagrant git config --global core.autocrlf input
+git config --global core.autocrlf input
 
 # and I don't need merge backups, really, I don't
-sudo -i -u vagrant git config --global --bool merge.keepbackups false
+git config --global --bool merge.keepbackups false
 
 echo "and now setting up my preferences for my working copy... adding an upstream remote, PR refs..." 
-
 # add an upstream remote
-sudo -s -u vagrant sh -c "cd $DSPACESRC && git remote add upstream git@github.com:DSpace/DSpace.git"
-
+cd $DSPACESRC && git remote add upstream git@github.com:DSpace/DSpace.git
 # enable fetching of pull requests from upstream (this may or may not be common practice, but it's handy, why not try it out?)
-sudo -s -u vagrant sh -c "cd $DSPACESRC && git config --add remote.upstream.fetch +refs/pull/*/head:refs/remotes/upstream/pr/*"
+cd $DSPACESRC && git config --add remote.upstream.fetch +refs/pull/*/head:refs/remotes/upstream/pr/*
+
 # now fetch everything so we're ready to go offline
 echo "getting ready for offline coding..."
-sudo -s -u vagrant sh -c "cd $DSPACESRC && git fetch --all"
+cd $DSPACESRC && git fetch --all
 
 # run mvn install so our maven cache in ~/.m2/repository is current
-sudo -s -u vagrant sh -c "cd $DSPACESRC && mvn install"
+# (NOTE: this will slow down the 'vagrant up' as it'll perform another full build of DSpace)
+#cd $DSPACESRC && mvn install
 
 # Git-smart is super helpful, especially for git newbies, and is worth installing just for smart-log
 echo "installing git-smart"
-sudo /opt/vagrant_ruby/bin/gem install git-smart
+sudo gem install git-smart
 
-# BASH inputrc customization 
+# dos2unix is useful for folks with Windows-hosts, as it lets you fix up line endings when needed
+#echo "installing dos2unix"
+#sudo apt-get install dos2unix -y
+
+# htop is a better version of 'top'
+#echo "installing htop"
+#sudo apt-get install htop -y
+
+## BASH inputrc customization
 if [ -f "/vagrant/config/dotfiles/inputrc" ]; then
     echo "setting up BASH inputrc file"
-    sudo -i -u vagrant cp /vagrant/config/dotfiles/inputrc /home/vagrant/.inputrc
+    cp /vagrant/config/dotfiles/inputrc /home/vagrant/.inputrc
 fi
 
 # Vim customization
@@ -64,15 +77,15 @@ fi
 # copy vimrc if it exists
 if [ -f "/vagrant/config/dotfiles/vimrc" ]; then
     echo "setting up .vimrc file"
-    sudo -i -u vagrant cp /vagrant/config/dotfiles/vimrc /home/vagrant/.vimrc
+    cp /vagrant/config/dotfiles/vimrc /home/vagrant/.vimrc
 fi
 
 # copy vim folder and its contents if they exists
 if [ -d "/vagrant/config/dotfiles/vim" ]; then
     echo "copying .vim settings folder"
-    sudo -i -u vagrant cp -r /vagrant/config/dotfiles/vim /home/vagrant/.vim
+    cp -r /vagrant/config/dotfiles/vim /home/vagrant/.vim
     echo "creating .vimbackups folder"
-    sudo -i -u vagrant mkdir /home/vagrant/.vimbackups
+    mkdir /home/vagrant/.vimbackups
 fi
 
 # MORE dotfiles
@@ -80,13 +93,13 @@ fi
 # copy GPG keys and trust files if they exist
 if [ -d "/vagrant/config/dotfiles/gnupg" ]; then
    echo "copying GPG keys and trust files..."
-   sudo -i -u vagrant cp -r /vagrant/config/dotfiles/gnupg /home/vagrant/.gnupg
+   cp -r /vagrant/config/dotfiles/gnupg /home/vagrant/.gnupg
 fi
 
 # copy maven settings.xml if it exists
 if [ -f "/vagrant/config/dotfiles/maven_settings.xml" ]; then
    echo "copying Maven settings.xml file..."
-   sudo -i -u vagrant cp /vagrant/config/dotfiles/maven_settings.xml /home/vagrant/.m2/settings.xml
+   cp /vagrant/config/dotfiles/maven_settings.xml /home/vagrant/.m2/settings.xml
 fi
 
 # NOTE: if you want more dotfiles installed, you'll need to specifically copy them, following
@@ -95,57 +108,57 @@ fi
 # files and directories if they exist (use the -f and -d tests).
 
 
-## now add content ##
+## Now Add DSpace Content ##
 
 # NOTE: this will only work if the SITE AIP file is named the same as the handle prefix
-# configured for this Vagrant-DSpace workspace (check vagrant.properties in dspace-src). By
-# default it's the same prefix as the demo.dspace.org server, as DSpace Committers have
+# configured for this Vagrant-DSpace workspace (check vagrant.properties in dspace-src),
+# e.g. SITE@10673-0.zip (if handle prefix is "10673").
+# By default it's the same prefix as the demo.dspace.org server, as DSpace Committers have
 # ready access to the AIP files used to populate demo.dspace.org, and we can use
 # Vagrant-DSpace to create more such AIPs. Demo's handle prefix is 10673.
 
-SITE=`echo $CONTENT/SITE@* | cut -f1 -d' '`
-if [ -n "$SITE" ]; then
-   echo "Recursively installing content from AIPs at $CONTENT (starting with $SITE AIP)" 
+SITE_AIP=`echo $CONTENT/SITE@* | cut -f1 -d' '`
+if [ -n "$SITE_AIP" ]; then
+    echo "Recursively installing content from AIPs at $CONTENT (starting with $SITE_AIP AIP)"
          
-          # let's get the handle from this site AIP
-	  SHFN="${SITE##*/}"
-	  SH=`echo $SHFN | cut -f2 -d'@'`
-	  SH=${SH/-/\/}
-          SH=`echo $SH | cut -f1 -d'.'`
+    # let's get the handle from this site AIP's name
+    AIP_NAME="${SITE_AIP##*/}"
+    HANDLE=`echo $AIP_NAME | cut -f2 -d'@'`
+    HANDLE=${HANDLE/-/\/}
+    HANDLE=`echo $HANDLE | cut -f1 -d'.'`
 
-          # --------------------------------------
-          # Stop Tomcat
-          # --------------------------------------
-          service tomcat7-vagrant stop
-          
-          echo "" 
+    # --------------------------------------
+    # Stop Tomcat
+    # --------------------------------------
+    sudo service tomcat7 stop
+    echo ""
 
-   cd $HOME
-   sudo -i -u vagrant $DSPACECMD packager  -u -r -a -f -t AIP -e $WHO -i $SH -o skipIfParentMissing=true -o createMetadataFields=true $SITE
-	# ----------------------------------------------
-	# Re-index content -- only necessary for DSpace 3.x and earlier
-	# ----------------------------------------------
+    # ----------------------------------------
+    # Import DSpace AIPs from /vagrant/content (starting with the one named "SITE@[handle].zip")
+    # ----------------------------------------
+    $DSPACECMD packager -u -r -a -f -t AIP -e $DSPACE_ADMIN -i $HANDLE -o skipIfParentMissing=true -o createMetadataFields=true $SITE_AIP
 
-	#echo "Reindexing all content in DSpace..."
-	#/home/vagrant/dspace/bin/dspace index-init
+    # ----------------------------------------------
+    # Re-index content -- only necessary for DSpace 3.x and earlier
+    # ----------------------------------------------
+    #echo "Reindexing all content in DSpace..."
+    #/home/vagrant/dspace/bin/dspace index-init
+    #echo ""
 
-	#echo ""
+    # --------------------------------------
+    # Start up Tomcat
+    # --------------------------------------
+    sudo service tomcat7 start
+    echo ""
 
-	# --------------------------------------
-	# Start up Tomcat
-	# --------------------------------------
-        service tomcat7-vagrant start
+    # --------------------------------------
+    # Step 8 : Update Discovery indexes
+    # --------------------------------------
+    echo "Rebuilding Discovery (Solr) Indexes..."
+    # Note: the '-b' option tells Discovery to perform a full reindex (wiping out the existing index first)
+    $DSPACECMD index-discovery -b
 
-	echo ""
-
-	# --------------------------------------
-	# Step 8 : Update Discovery indexes
-	# --------------------------------------
-	echo "Rebuilding Discovery (Solr) Indexes..."
-	# Note: the '-f' option tells Discovery to force a reindex of everything and remove docs which no longer exist
-	/home/vagrant/dspace/bin/dspace index-discovery -f
-
-	echo ""
-	echo ""
-	echo "SUCCESS! batch load of AIP content is now complete!"
+    echo ""
+    echo ""
+    echo "SUCCESS! batch load of AIP content is now complete!"
 fi
