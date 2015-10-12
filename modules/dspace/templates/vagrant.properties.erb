@@ -77,19 +77,18 @@ db.schema=public
 # Maximum number of DB connections in pool
 db.maxconnections = 30
 
-# Determine the number of statements that can be cached (set to 0 to disable caching)
-db.statementpool.cache = 50
+# Maximum time to wait before giving up if all connections in pool are busy (milliseconds)
+db.maxwait = 5000
+
+# Maximum number of idle connections in pool (-1 = unlimited)
+db.maxidle = -1
 
 #######
 # DEPRECATED DB Configurations
 # The following db.* configurations are only kept for backwards compatibility with DSpace <=5
 # (i.e. so that vagrant-dspace will still function for DSpace5-based branches).
-# These have all been removed in DSpace 6 as they are replaced with Hibernate configs (see hibernate.cfg.xml)
+# These have been removed in DSpace 6 as they are replaced with Hibernate configs (see hibernate.cfg.xml)
 #######
-# Maximum time to wait before giving up if all connections in pool are busy (milliseconds)
-db.maxwait = 5000
-# Maximum number of idle connections in pool (-1 = unlimited)
-db.maxidle = -1
 # Determine if prepared statement should be cached. (default is true)
 db.statementpool = true
 # Specify a name for the connection pool (useful if you have multiple applications sharing Tomcat's dbcp)
