@@ -262,6 +262,10 @@ Vagrant.configure("2") do |config|
         # Use VBoxManage to provide Virtual Machine with extra memory (default is only 300MB)
         vb.customize ["modifyvm", :id, "--memory", CONF['vm_memory']]
 
+        vb.memory = CONF['vm_memory']
+        vb.cpus = CONF['vb_cpus'] 
+
+
         if CONF['vb_max_cpu']
           # Use VBoxManage to ensure Virtual Machine only has access to a percentage of host CPU
           vb.customize ["modifyvm", :id, "--cpuexecutioncap", CONF['vm_max_cpu']]
