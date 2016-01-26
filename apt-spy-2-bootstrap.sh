@@ -47,7 +47,8 @@ if [ "$(gem search -i apt-spy2)" = "false" ]; then
   apt-spy2 fix --launchpad --commit --country=$COUNTRY
 else
   echo "... Setting 'apt' sources.list for closest mirror to country=$COUNTRY"
-  apt-spy2 fix --launchpad --commit --country=$COUNTRY
+  sudo apt-spy2 check
+  sudo apt-spy2 fix --launchpad --commit --country=$COUNTRY
 fi
 
 # apt-spy2 requires running an 'apt-get update' after doing a 'fix'
