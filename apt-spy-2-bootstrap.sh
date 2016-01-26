@@ -53,4 +53,4 @@ fi
 
 # apt-spy2 requires running an 'apt-get update' after doing a 'fix'
 echo "Re-running apt-get update after sources updated..."
-apt-get update >/dev/null
+sudo apt-get update >/dev/null
