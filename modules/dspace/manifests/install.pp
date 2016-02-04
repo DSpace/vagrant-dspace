@@ -17,7 +17,7 @@
 # - $install_dir        => Location where DSpace instance should be installed (defaults to the home directory of $owner at ~/dspace)
 # - $git_repo           => Git repository to pull DSpace source from. Defaults to DSpace/DSpace in GitHub
 # - $git_branch         => Git branch to build DSpace from. Defaults to "master".
-# - $mvn_params         => Any build params passed to Maven. Defaults to "-Denv=vagrant" which tells Maven to use the vagrant.properties file.
+# - $mvn_params         => Any build params passed to Maven. 
 # - $ant_installer_dir  => Full path of directory where the Ant installer is built to (via Maven).
 # - $admin_firstname    => First Name of the created default DSpace Administrator account.
 # - $admin_lastname     => Last Name of the created default DSpace Administrator account.
@@ -108,21 +108,19 @@ define dspace::install ($owner,
 
 ->
 
-   # Create a 'vagrant.properties' file which will be used to build the DSpace installer
-   # (INSTEAD OF the default 'build.properties' file that DSpace normally uses)
-   file { "${src_dir}/vagrant.properties":
+   # Create a 'local.cfg' file which will be used to build the DSpace installer
+   file { "${src_dir}/local.cfg":
      ensure  => file,
      owner   => $owner,
      group   => $group,
      mode    => 0644,
      backup  => ".puppet-bak",  # If replaced, backup old settings to .puppet-bak
-     content => template("dspace/vagrant.properties.erb"),
+     content => template("dspace/local.cfg.erb"),
    }
 
 ->
 
    # Build DSpace installer.
-   # (NOTE: by default, $mvn_params='-Denv=vagrant', which tells Maven to use the vagrant.properties file created above)
    exec { "Build DSpace installer in ${src_dir}":
      command   => "mvn package ${mvn_params}",
      cwd       => "${src_dir}", # Run command from this directory
