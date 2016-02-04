@@ -27,10 +27,6 @@ export JAVA_HOME="/usr/lib/jvm/default-java"
 #Base path of Maven
 export MAVEN_HOME="/usr/share/maven"
 
-# Initialize Maven Settings to build DSpace using the 'vagrant.properties' file(instead of default 'build.properties' file)
-# This ensures that you can simply run 'mvn package' from the command-line and Maven will default to using 'vagrant.properties'.
-export MAVEN_OPTS="-Denv=vagrant"
-
 # change the prompt to include the git branch name, which is insanely helpful
 # Also change the prompt to include flags to indicate dirty state (*), stash state ($),
 # and indicate the presence of untracked files (%)
