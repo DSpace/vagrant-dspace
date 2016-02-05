@@ -159,6 +159,10 @@ In the `config` folder, you will also find a file called `local-bootstrap.sh.exa
 
 local-bootstrap.sh is a "shell provisioner" for Vagrant, and our vagrantfile is [configured to run it](https://github.com/DSpace/vagrant-dspace/blob/master/Vagrantfile#L171) if it is present in the config folder. If you have a fork of Vagrant-DSpace for your own repository management, you may add another shell provisioner, to maintain your own workgroup's customs and configurations. You may find an example of this in the [Vagrant-MOspace](https://github.com/umlso/vagrant-mospace/blob/master/config/mospace-bootstrap.sh) repository.
 
+### apt-spy-2-bootstrap.sh - You can override the default apt-spy-2-bootstrap.sh script
+
+The default apt-spy-2-bootstraph.sh script can be copied to the config folder and modified to reflect your preferences. This can potentially speed up provisiong of new machines by allowing you to tweak the apt-spy2 commands to better fit your typical work conditions. We of course recommend using the default, especially if you do not know for sure where your travels may take you next. But, you are free to tinker with this script as you see fit.
+
 ### maven_settings.xml - Tips on tweaking Maven
 
 If you've copied the example `local-bootstrap.sh` file, you may create a `config/dotfiles` folder, and place a file called `maven_settings.xml` in it, that file will be copied to `/home/vagrant/.m2/settings.xml` every time the `local-bootstrap.sh` provisioner is run. This will allow you to further customize your Maven builds. One handy (though somewhat dangerous) thing to add to your `settings.xml` file is the following profile:
@@ -185,8 +189,8 @@ Vagrant Plugin Recommendations
 
 The following Vagrant plugins are not required, but they do make using Vagrant and vagrant-dspace more enjoyable.
 
-* Land Rush: https://github.com/phinze/landrush
 * Vagrant-Cachier: https://github.com/fgrehm/vagrant-cachier
+* Vagrnat-Hostsupdater: https://github.com/cogitatio/vagrant-hostsupdater
 * Vagrant-Proxyconf: https://github.com/tmatilai/vagrant-proxyconf/
 * Vagrant-VBox-Snapshot: https://github.com/dergachev/vagrant-vbox-snapshot/
 * Vagrant-Notify: https://github.com/fgrehm/vagrant-notify
