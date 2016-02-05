@@ -6,6 +6,9 @@
 # which is run during 'vagrant up'
 local-bootstrap.sh
 
+# Ignore any customized apt-spy-2-bootstrap.sh file
+apt-spy-2-bootstrap.sh
+
 # Ignore special 'dotfiles' folder, used to copy 
 # any local dotfiles to VM
 dotfiles
