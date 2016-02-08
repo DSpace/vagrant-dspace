@@ -135,5 +135,4 @@ catalina_base     : '/var/lib/tomcat7'
 # Options to pass to Tomcat
 # This IS customizable. Feel free to tweak memory settings, etc.
 # (Changes to this setting require a 'vagrant provision' to take effect)
-catalina_opts     : '-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx1024m -Xms1024m -XX:MaxPermSize=128m -XX:+UseConcMarkSweepGC'
-
+catalina_opts     : '-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true -Xmx1200m -Xms1200m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC -Djava.security.egd=file:/dev/./urandom'
