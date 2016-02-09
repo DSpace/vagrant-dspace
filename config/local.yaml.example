@@ -37,7 +37,12 @@ vm_memory  : 2048
 # Maximum amount of host CPU which VirtualBox can use (in %)
 # The example below would only let VirtualBox use up to 50% of host CPU
 # (Changes to this setting require a 'vagrant reload' to take effect)
-#vm_max_cpu : 50
+vm_max_cpu : 50
+
+# Number of CPUs to allow VirtualBox to use (2 or more help the VirtualBox VM stay responsive during
+# active development, by default we use 1 because we can't assume you have more
+# but if you do have more than one core, you should probably set this to 2)
+vb_cpus : 1
 
 # Local IP address which will refer to this VM
 # (Changes to this setting require a 'vagrant reload' to take effect)
@@ -113,4 +118,4 @@ mvn_params        : '-Denv=vagrant -P!dspace-lni,!dspace-rdf'
 # Options to pass to Tomcat
 # This IS customizable. Feel free to tweak memory settings, etc.
 # (Changes to this setting require a 'vagrant provision' to take effect)
-catalina_opts     : '-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx1024m -Xms1024m -XX:MaxPermSize=128m -XX:+UseConcMarkSweepGC'
+catalina_opts     : '-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true -Xmx1200m -Xms1200m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC -Djava.security.egd=file:/dev/./urandom'

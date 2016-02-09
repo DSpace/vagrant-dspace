@@ -20,14 +20,18 @@
 vm_name    : 'dspace-dev'
 
 # How much memory to provide to VirtualBox VM (in MB)
-# Provide 2GB of memory by default
+# Provide 3GB of memory by default
 # (Changes to this setting require a 'vagrant reload' to take effect)
-vm_memory  : 2048
+vm_memory  : 3072
 
 # Maximum amount of host CPU which VirtualBox VM can use (in %)
 # The example below would only let VM use up to 50% of host CPU
 # (Changes to this setting require a 'vagrant reload' to take effect)
 #vm_max_cpu : 50
+
+# Number of CPUs to allow VirtualBox to use (2 or more help the VirtualBox VM stay responsive during
+# active development)
+vb_cpus : 1
 
 # Local IP address which will refer to this VM
 # (Changes to this setting require a 'vagrant reload' to take effect)
@@ -102,12 +106,10 @@ dspace::java_version : '7'
 
 # Maven Defaults
 #
-# Always build/compile DSpace using "vagrant.properties"
-# instead of the normal "build.properties" file
 # IF you want to exclude particular webapps from building & installing, you can do so like:
-# mvn_params: '-Denv=vagrant -P!dspace-lni,!dspace-rdf'
+# mvn_params: '-P-dspace-jspui,-dspace-xmlui,-dspace-rdf,'
 # (This setting is only used during a 'vagrant up')
-mvn_params        : '-Denv=vagrant'
+mvn_params        : '-P-dspace-rdf'
 
 # Ant Defaults
 # NOTE: if you change 'git_branch' above, you MAY need to modify this 'ant_installer_dir'
@@ -131,5 +133,4 @@ catalina_base     : '/var/lib/tomcat7'
 # Options to pass to Tomcat
 # This IS customizable. Feel free to tweak memory settings, etc.
 # (Changes to this setting require a 'vagrant provision' to take effect)
-catalina_opts     : '-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx1024m -Xms1024m -XX:MaxPermSize=128m -XX:+UseConcMarkSweepGC'
-
+catalina_opts     : '-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true -Xmx1200m -Xms1200m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC -Djava.security.egd=file:/dev/./urandom'

@@ -188,8 +188,17 @@ Vagrant.configure("2") do |config|
 
     # Shell script to set apt sources.list to something appropriate (close to you, and actually up)
     # via apt-spy2 (https://github.com/lagged/apt-spy2)
-    config.vm.provision :shell, :inline => "echo '   > > > running apt-spy2 to locate a nearby mirror (for quicker installs). Do not worry if it shows an error, it will be OK, there is a fallback.'"
-    config.vm.provision :shell, :path => "apt-spy-2-bootstrap.sh"
+
+    # If a customized version of this script exists in the config folder, use that instead
+
+    if File.exists?("config/apt-spy-2-bootstrap.sh")
+        config.vm.provision :shell, :inline => "echo '   > > > running local apt-spy2 to locate a nearby mirror (for quicker installs). Do not worry if it shows an error, it will be OK, there is a fallback.'"
+        config.vm.provision :shell, :path => "config/apt-spy-2-bootstrap.sh"
+    else
+        config.vm.provision :shell, :inline => "echo '   > > > running default apt-spy2 to locate a nearby mirror (for quicker installs). Do not worry if it shows an error, it will be OK, there is a fallback.'"
+        config.vm.provision :shell, :path => "apt-spy-2-bootstrap.sh"
+    end
+
 
     # Shell script to initialize latest Puppet on VM & also install librarian-puppet (which manages our third party puppet modules)
     # This has to be done before the puppet provisioning so that the modules are available when puppet tries to parse its manifests.
@@ -261,6 +270,10 @@ Vagrant.configure("2") do |config|
 
         # Use VBoxManage to provide Virtual Machine with extra memory (default is only 300MB)
         vb.customize ["modifyvm", :id, "--memory", CONF['vm_memory']]
+
+        vb.memory = CONF['vm_memory']
+        vb.cpus = CONF['vb_cpus'] 
+
 
         if CONF['vb_max_cpu']
           # Use VBoxManage to ensure Virtual Machine only has access to a percentage of host CPU

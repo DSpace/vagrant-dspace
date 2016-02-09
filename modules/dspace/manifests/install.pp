@@ -108,8 +108,9 @@ define dspace::install ($owner,
 
 ->
 
-   # Create a 'vagrant.properties' file which will be used to build the DSpace installer
+   # Create a 'vagrant.properties' file which will be used by older versions of DSpace to build the DSpace installer
    # (INSTEAD OF the default 'build.properties' file that DSpace normally uses)
+   # kept for backwards compatibility, no longer needed for DSpace 6+
    file { "${src_dir}/vagrant.properties":
      ensure  => file,
      owner   => $owner,
@@ -117,6 +118,18 @@ define dspace::install ($owner,
      mode    => 0644,
      backup  => ".puppet-bak",  # If replaced, backup old settings to .puppet-bak
      content => template("dspace/vagrant.properties.erb"),
+   }
+
+->
+
+# Create a 'local.cfg' file which will be used by newer versions of DSpace (6+) to build the DSpace installer
+   file { "${src_dir}/local.cfg":
+     ensure  => file,
+     owner   => $owner,
+     group   => $group,
+     mode    => 0644,
+     backup  => ".puppet-bak",  # If replaced, backup old settings to .puppet-bak
+     content => template("dspace/local.cfg.erb"),
    }
 
 ->
