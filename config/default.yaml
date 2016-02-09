@@ -20,9 +20,9 @@
 vm_name    : 'dspace-dev'
 
 # How much memory to provide to VirtualBox VM (in MB)
-# Provide 4GB of memory by default
+# Provide 3GB of memory by default
 # (Changes to this setting require a 'vagrant reload' to take effect)
-vm_memory  : 4096
+vm_memory  : 3072
 
 # Maximum amount of host CPU which VirtualBox VM can use (in %)
 # The example below would only let VM use up to 50% of host CPU
@@ -106,12 +106,10 @@ dspace::java_version : '7'
 
 # Maven Defaults
 #
-# Always build/compile DSpace using "vagrant.properties"
-# instead of the normal "build.properties" file
 # IF you want to exclude particular webapps from building & installing, you can do so like:
-# mvn_params: '-P-dspace-lni,-dspace-rdf'
+# mvn_params: '-P-dspace-jspui,-dspace-xmlui,-dspace-rdf,'
 # (This setting is only used during a 'vagrant up')
-mvn_params        : ''
+mvn_params        : '-P-dspace-rdf'
 
 # Ant Defaults
 # NOTE: if you change 'git_branch' above, you MAY need to modify this 'ant_installer_dir'
