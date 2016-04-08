@@ -85,6 +85,22 @@ The `vagrant up` command will initialize a new VM based on the settings in the `
 Once complete, you'll have a fresh Ubuntu VM that you can SSH into by simply typing `vagrant ssh`. Since SSH Forwarding is enabled,
 that Ubuntu VM should have access to your local SSH keys, which allows you to immediately use Git/GitHub.
 
+***
+**NOTE:** sometimes when `vagrant up` finishes running, you will see a message like this:
+
+```
+Booting VM...
+SSH connection was refused! This usually happens if the VM failed to
+boot properly. Some steps to try to fix this: First, try reloading your
+VM with 'vagrant reload', since a simple restart sometimes fixes things.
+If that doesn't work, destroy your VM and recreate it with a 'vagrant destroy'
+followed by a 'vagrant up'. If that doesn't work, contact a Vagrant
+maintainer (support channels listed on the website) for more assistance.
+```
+
+This is normal, the VM just took a while longer to boot than Vagrant wanted to wait. Don't lose hope, you can still run `vagrant ssh` and very likely the machine will be ready for you. Especially if you've wandered off during the `vagrant up` command.
+***
+
 What will you get?
 ------------------
 
