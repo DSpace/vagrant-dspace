@@ -18,7 +18,7 @@ PUPPET_DIR=/etc/puppet/
 REPO_DEB_URL="http://apt.puppetlabs.com/puppetlabs-release-${DISTRIB_CODENAME}.deb"
 
 # Version of librarian-puppet to install
-LIBRARIAN_PUPPET_VERSION=2.2.1
+LIBRARIAN_PUPPET_VERSION=2.2.3
 
 #--------------------------------------------------------------------
 # NO TUNABLES BELOW THIS POINT
