@@ -36,7 +36,7 @@ export COUNTRY=`geoiplookup $CURRENTIP | awk -F: '{ print $2 }' | awk -F, '{ pri
 
 #If country code is empty or != 2 characters, then use "US" as a default
 if [ -z "$COUNTRY" ] || [ "${#COUNTRY}" -ne "2" ]; then
-   COUNTRY = "US"
+   COUNTRY="US"
 fi
 
 if [ "$(gem search -i apt-spy2)" = "false" ]; then
