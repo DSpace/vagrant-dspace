@@ -61,11 +61,12 @@ db_port    : 5432
 # (Changes to this setting require a 'vagrant destroy && vagrant up' to take effect)
 sync_src_to_host : false
 
-# Default Vagrant "box" to use. This should be an Ubuntu box (12.04 or 14.04 recommended)
+# Default Vagrant box to use. This should be an Ubuntu box (16.04 64bit recommended)
 # as 'vagrant-dspace' has not been tested on other OSes.
 # (Changes to these settings require a 'vagrant destroy && vagrant up' to take effect)
-vagrant_box     : 'dspace-trusty64'
-vagrant_box_url : 'http://github.com/DSpace/vagrantbox-ubuntu/releases/download/v2.0/dspace-trusty64.box'
+# Using "box-cutter/ubuntu1604" as the "ubuntu/xenial64" box is currently broken: http://stackoverflow.com/a/38078133/3750035
+vagrant_box     : 'box-cutter/ubuntu1604'
+vagrant_box_url : 'https://vagrantcloud.com/box-cutter/ubuntu1604'
 
 # Boot VM into GUI mode (login: vagrant, pwd: vagrant). Useful for debugging VM boot issues, etc.
 # By default this is disabled as it can be memory hungry, and SSH is usually all you need.
@@ -99,10 +100,10 @@ admin_language    : 'en'
 #------------------------------
 # DSpace Build/Install settings
 #------------------------------
-# Java version to install/use (valid values = 6 or 7)
+# Java version to install/use (8 is only version supported on Ubuntu 16.04)
 # NOTE: OpenJDK is always installed for vagrant-dspace
 # (This setting is only used during a "vagrant up")
-dspace::java_version : '7'
+dspace::java_version : '8'
 
 # Maven Defaults
 #
@@ -124,12 +125,12 @@ mvn_params        : '-P-dspace-rdf'
 # We use Ubuntu, so these are all Ubuntu defaults. Don't change them.
 # (Except where specified, these settings are only used during a 'vagrant up')
 # Tomcat Package to install
-tomcat_package    : 'tomcat7'
+tomcat_package    : 'tomcat8'
 # Name of default Tomcat service
-tomcat_service    : 'tomcat7'
+tomcat_service    : 'tomcat8'
 # Location of default Catalina Home/Base
-catalina_home     : '/usr/share/tomcat7'
-catalina_base     : '/var/lib/tomcat7'
+catalina_home     : '/usr/share/tomcat8'
+catalina_base     : '/var/lib/tomcat8'
 # Options to pass to Tomcat
 # This IS customizable. Feel free to tweak memory settings, etc.
 # (Changes to this setting require a 'vagrant provision' to take effect)
