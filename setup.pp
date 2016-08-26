@@ -89,3 +89,41 @@ dspace::install { "/home/${dspace::owner}/dspace" :
   require => DSpace::Postgresql_db[$dspace::db_name], # Must first have a database
   notify  => Service['tomcat'],                       # Tell Tomcat to reboot after install
 }
+
+#---------------------
+# Install PSI Probe
+#---------------------
+# For convenience in troubleshooting Tomcat, let's install Psi-probe
+# http://psi-probe.googlecode.com/
+$probe_version = "2.4.0.SP1"
+exec {"Download and install the PSI Probe v${probe_version} war":
+  command   => "wget --quiet --continue https://github.com/psi-probe/psi-probe/releases/download/${probe_version}/probe.war",
+  cwd       => "${dspace::catalina_base}/webapps",
+  creates   => "${dspace::catalina_base}/webapps/probe.war",
+  user      => "vagrant",
+  logoutput => true,
+  tries     => 3,                            # In case of a network hiccup, try this download 3 times
+  require   => File[$dspace::catalina_base], # CATALINA_BASE must exist before downloading
+}
+
+->
+
+# Add a context fragment file for Psi-probe, and restart tomcat
+file { "${dspace::catalina_base}/conf/Catalina/localhost/probe.xml" :
+  ensure  => file,
+  owner   => vagrant,
+  group   => vagrant,
+  content => template("dspace/probe.xml.erb"),
+  notify  => Service['tomcat'],
+}
+->
+
+# Add a "dspace" Tomcat User (password="dspace") who can login to PSI Probe
+# (NOTE: This line will only be added after <tomcat-users> if it doesn't already exist there)
+file_line { 'Add \'dspace\' Tomcat user for PSI Probe':
+  path    => "${dspace::catalina_base}/conf/tomcat-users.xml", # File to modify
+  after   => '<tomcat-users>',                         # Add content immediately after this line
+  line    => '<role rolename="manager"/><user username="dspace" password="dspace" roles="manager"/>', # Lines to add to file
+  notify  => Service['tomcat'],                        # If changes are made, notify Tomcat to restart
+}
+
