@@ -48,32 +48,44 @@ exec {"apt-get-update":
   refreshonly => true, # only run if notified
 }
 
-#--------------------------------------------------
-# Initialize base pre-requisites (Java, Maven, Ant)
-#--------------------------------------------------
-# Initialize the DSpace module in order to install base prerequisites.
-# These prerequisites are simply installed via the OS package manager
-# in the DSpace module's init.pp script
-include dspace
-
-
-#--------------------------------------------
-# Create a PostgreSQL database named 'dspace'
-#--------------------------------------------
-dspace::postgresql_db { 'dspace':
-  version           => '9.4',
-  postgres_password => 'postgres', # DB root password (for postgres superuser)
-  user              => 'dspace',   # DB owner
-  password          => 'dspace',   # DB owner password
-  port              => 5432,
+#------------------------------------------------------------
+# Initialize base pre-requisites and define global variables.
+#------------------------------------------------------------
+# Initialize the DSpace module. This actually installs Java/Ant/Maven,
+# and globally saves the versions of PostgreSQL and Tomcat we will install below.
+#
+# NOTE: ANY of these values (or any other parameter of init.pp) can be OVERRIDDEN
+# via hiera in your local.yaml file. Just specify the parameter like
+# "dspace::[param-name] : [param-value]" in local.yaml.
+class { 'dspace':
+  java_version       => '8',
+  postgresql_version => '9.5',
+  tomcat_package     => 'tomcat8',
+  owner              => 'vagrant',  # OS user who "owns" DSpace
+  db_name            => 'dspace',   # Name of database to use
+  db_owner           => 'dspace',   # DB owner account info
+  db_owner_passwd    => 'dspace',
+  db_admin_passwd    => 'postgres', # DB password for 'postgres' acct
 }
 
-#-------------------------------------------
-# Install Tomcat instance, and tell it to use
-# ~/dspace/webapps as the webapps location
-#-------------------------------------------
-dspace::tomcat_instance { '/home/vagrant/dspace/webapps' :
-  package => 'tomcat8',
-  owner   => 'vagrant',           # Owned by OS user 'vagrant'
-  port    => 8080,
+
+#----------------------------------------------------------------
+# Create the PostgreSQL database (based on above global settings)
+#----------------------------------------------------------------
+dspace::postgresql_db { $dspace::db_name :
+}
+
+#-----------------------------------------------------
+# Install Tomcat instance (based on above global settings)
+# Tell it to use owner's ~/dspace/webapps as the webapps location
+#-----------------------------------------------------
+dspace::tomcat_instance { "/home/${dspace::owner}/dspace/webapps" :
+}
+
+#---------------------------------------------------
+# Install DSpace in the owner's ~/dspace/ directory
+#---------------------------------------------------
+dspace::install { "/home/${dspace::owner}/dspace" :
+  require => DSpace::Postgresql_db[$dspace::db_name], # Must first have a database
+  notify  => Service['tomcat'],                       # Tell Tomcat to reboot after install
 }
