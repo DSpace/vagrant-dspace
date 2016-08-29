@@ -82,10 +82,27 @@ dspace::postgresql_db { $dspace::db_name :
 dspace::tomcat_instance { "/home/${dspace::owner}/dspace/webapps" :
 }
 
+#----------------------------------------------------
+# Determine the DSpace Git Repo to use (SSH vs HTTPS)
+#----------------------------------------------------
+# If the configured Git Repo is HTTPS, just use that. The user must want it that way.
+# If the configured Git Repo is SSH, check the "git_ssh_status" Fact to see if our SSH connection
+# to GitHub is working (=1). This "git_ssh_status" Fact is created in our Vagrantfile.
+# If SSH is not working (!=1), transform it to the HTTPS repo URL.
+$git_repo = $dspace::git_repo
+$final_git_repo = inline_template('<%= @git_repo.include?("https") ? @git_repo : @github_ssh_status.to_i==1 ? @git_repo : @git_repo.split(":")[1].prepend("https://github.com/") %>')
+
+# Notify which GitHub repo we are using
+notify { "GitHub Repo":
+  message => "Using DSpace GitHub Repo at ${final_git_repo}",
+  before  => Dspace::Install["/home/${dspace::owner}/dspace"],
+}
+
 #---------------------------------------------------
 # Install DSpace in the owner's ~/dspace/ directory
 #---------------------------------------------------
 dspace::install { "/home/${dspace::owner}/dspace" :
+  git_repo => $final_git_repo,
   require => DSpace::Postgresql_db[$dspace::db_name], # Must first have a database
   notify  => Service['tomcat'],                       # Tell Tomcat to reboot after install
 }
