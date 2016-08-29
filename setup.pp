@@ -55,12 +55,12 @@ exec {"apt-get-update":
 # and globally saves the versions of PostgreSQL and Tomcat we will install below.
 #
 # NOTE: ANY of these values (or any other parameter of init.pp) can be OVERRIDDEN
-# via hiera in your local.yaml file. Just specify the parameter like
+# via hiera in 'default.yaml' or your 'local.yaml'. Just specify the parameter like
 # "dspace::[param-name] : [param-value]" in local.yaml.
 class { 'dspace':
   java_version       => '8',
   postgresql_version => '9.5',
-  tomcat_package     => 'tomcat8',
+  tomcat_package     => 'tomcat7',
   owner              => 'vagrant',  # OS user who "owns" DSpace
   db_name            => 'dspace',   # Name of database to use
   db_owner           => 'dspace',   # DB owner account info

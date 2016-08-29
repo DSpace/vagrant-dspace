@@ -100,18 +100,20 @@ dspace::admin_language    : 'en'
 #------------------------------
 # DSpace Build/Install settings
 #------------------------------
-# Java version to install/use (8 is only version supported on Ubuntu 16.04)
+# Java version to install/use (Ubuntu 16.04 only supports version 8)
 # NOTE: OpenJDK is always installed for vagrant-dspace
 # (This setting is only used during a "vagrant up")
 #dspace::java_version : '8'
 
-# PostgreSQL version to install/use (9.5 is only version supported on Ubuntu 16.04)
+# PostgreSQL version to install/use (Ubuntu 16.04 only supports version 9.5)
 # (This setting is only used during a "vagrant up")
 #dspace::postgresql_version : '9.5'
 
-# Tomcat version to install/use (tomcat8 is only version supported on Ubuntu 16.04)
+# Tomcat version to install/use (Ubuntu 16.04 supports tomcat7 or tomcat8)
+# NOTE: Defaults to Tomcat 7 temporarily cause of https://jira.duraspace.org/browse/DS-3142
+# Tomcat 8.0.32 (currently ships with Ubuntu 16.04) has a bug that causes DSpace XMLUI to not work.
 # (This setting is only used during a "vagrant up")
-#dspace::tomcat_package : 'tomcat8'
+#dspace::tomcat_package : 'tomcat7'
 
 # PostgreSQL Defaults
 #

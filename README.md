@@ -40,9 +40,10 @@ How it Works
 
 * Spins up an Ubuntu 16.04 LTS virtual machine using Vagrant
 * Uses puppet-dspace module to install:
-    * Base prerequisities for DSpace development (Java 8, Maven, Ant, Git)
+    * Base prerequisities for DSpace development (Java, Maven, Ant, Git)
     * PostgreSQL 9.5 (via the [puppetlabs/postgresql](http://forge.puppetlabs.com/puppetlabs/postgresql) module)
-    * Tomcat 8 (via the [puppetlabs/tomcat](https://forge.puppetlabs.com/puppetlabs/tomcat))
+    * Tomcat 7 (via the [puppetlabs/tomcat](https://forge.puppetlabs.com/puppetlabs/tomcat))
+        * NOTE: currently using Tomcat 7 because of [DS-3142](https://jira.duraspace.org/browse/DS-3142) which is caused by Tomcat 8.0.32 (the 8.x version currently in use by Ubuntu 16.04)
     * DSpace (`master` by default)
 * Sets up SSH Forwarding, so that you can use your local SSH key(s) on the VM (for development with GitHub)
 * Syncs your local Git settings (name and email from local .gitconfig) to VM (for development with GitHub)
@@ -100,7 +101,7 @@ This is normal, the VM just took a while longer to boot than Vagrant wanted to w
 What will you get?
 ------------------
 
-* A running instance of [DSpace 'master'](https://github.com/DSpace/DSpace), on top of latest PostgreSQL and Tomcat 8 (and using Java OpenJDK 8 by default)
+* A running instance of [DSpace 'master'](https://github.com/DSpace/DSpace), on top of latest PostgreSQL and Tomcat (and using Java OpenJDK 8 by default)
    * You can visit this instance at `http://localhost:8080/xmlui/` or `http://localhost:8080/jspui/` from your local web browser
        * If you install and configure the [Landrush plugin](https://github.com/phinze/landrush) for Vagrant, you can instead visit http://dspace.vagrant.dev:8080/xmlui/ or http://dspace.vagrant.dev:8080/jspui/
    * An initial Administrator account is also auto-created (this account can be tweaked in a `config/local.yaml` file, see below)
@@ -108,7 +109,7 @@ What will you get?
 * DSpace GitHub cloned (at `~/dspace-src/`) and Java/Maven/Ant/Git installed.
    * If `sync_src_to_host=true` in your `config/local.yaml`, then this VM directory will also be synce to `[vagrant-dspace]/dspace-src` on your host machine.  
 * All "out of the box" DSpace webapps running out of `~/dspace/webapps/`. The full DSpace installation is at `~/dspace/`.
-* Tomcat 8 instance installed
+* Tomcat instance installed
    * Includes [PSI Probe](http://code.google.com/p/psi-probe/) running at `http://localhost:8080/probe/`
        * PSI Probe Login: 'dspace', Pwd: 'dspace'
 * Enough to get you started with developing/building/using DSpace (or debug issues with the DSpace build process, if any pop up)
@@ -128,7 +129,7 @@ Usage Tips
 Here's some common activities which you may wish to perform in `vagrant-dspace`:
 
 * **Restarting Tomcat**
-   * `sudo service tomcat8 restart`
+   * `sudo service tomcat7 restart`
 * **Restarting PostgreSQL**
    * `sudo service postgresql restart`
 * **Connecting to DSpace PostgreSQL database**
@@ -138,7 +139,7 @@ Here's some common activities which you may wish to perform in `vagrant-dspace`:
    * `mvn clean package` (Rebuild/Recompile DSpace)
    * `cd dspace/target/dspace-installer` (Move into the newly built installer directory)
    * `ant update`   (Redeploy changes to ~/dspace/)
-   * `sudo service tomcat8 restart` (Reboot Tomcat)
+   * `sudo service tomcat7 restart` (Reboot Tomcat)
 
 
 How to Tweak Things to your Liking?
