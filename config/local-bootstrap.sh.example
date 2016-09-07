@@ -22,11 +22,14 @@ DSPACE_HOME="$HOME/dspace"
 DSPACESRC="$DSPACE_HOME-src"
 # Path to "dspace" commandline script
 DSPACECMD="$DSPACE_HOME/bin/dspace"
+# Tomcat service name
+TOMCAT_SERVICE="tomcat7"
 
 ## START OFF BY CUSTOMIZING THE GIT CLONE ##
 # add the fingerprint for github
-echo "Adding the fingerprint for github.com, so we don't get nagged later..."
-ssh -T -oStrictHostKeyChecking=no git@github.com
+# WARNING: Doesn't work on Windows as SSH Forwarding doesn't work in provisioning
+#echo "Adding the fingerprint for github.com, so we don't get nagged later..."
+#ssh -T -oStrictHostKeyChecking=no git@github.com
 
 # set git to allways rebase when we pull (using sudo to run as the vagrant user, since this script runs as root)
 git config --global --bool pull.rebase true
@@ -40,15 +43,16 @@ git config --global core.autocrlf input
 # and I don't need merge backups, really, I don't
 git config --global --bool merge.keepbackups false
 
-echo "and now setting up my preferences for my working copy... adding an upstream remote, PR refs..." 
+echo "and now setting up my preferences for my working copy... adding an upstream remote, PR refs..."
 # add an upstream remote
 cd $DSPACESRC && git remote add upstream git@github.com:DSpace/DSpace.git
 # enable fetching of pull requests from upstream (this may or may not be common practice, but it's handy, why not try it out?)
-cd $DSPACESRC && git config --add remote.upstream.fetch +refs/pull/*/head:refs/remotes/upstream/pr/*
+#cd $DSPACESRC && git config --add remote.upstream.fetch +refs/pull/*/head:refs/remotes/upstream/pr/*
 
 # now fetch everything so we're ready to go offline
-echo "getting ready for offline coding..."
-cd $DSPACESRC && git fetch --all
+# WARNING: Doesn't work on Windows as SSH Forwarding doesn't work in provisioning
+#echo "getting ready for offline coding..."
+#cd $DSPACESRC && git fetch --all
 
 # run mvn install so our maven cache in ~/.m2/repository is current
 # (NOTE: this will slow down the 'vagrant up' as it'll perform another full build of DSpace)
@@ -56,15 +60,15 @@ cd $DSPACESRC && git fetch --all
 
 # Git-smart is super helpful, especially for git newbies, and is worth installing just for smart-log
 echo "installing git-smart"
-sudo gem install git-smart
+sudo gem install git-smart > /dev/null
 
 # dos2unix is useful for folks with Windows-hosts, as it lets you fix up line endings when needed
 #echo "installing dos2unix"
-#sudo apt-get install dos2unix -y
+#sudo apt-get install dos2unix -y > /dev/null
 
 # htop is a better version of 'top'
 #echo "installing htop"
-#sudo apt-get install htop -y
+#sudo apt-get install htop -y > /dev/null
 
 ## BASH inputrc customization
 if [ -f "/vagrant/config/dotfiles/inputrc" ]; then
@@ -120,7 +124,7 @@ fi
 SITE_AIP=`echo $CONTENT/SITE@* | cut -f1 -d' '`
 if [ -n "$SITE_AIP" ]; then
     echo "Recursively installing content from AIPs at $CONTENT (starting with $SITE_AIP AIP)"
-         
+
     # let's get the handle from this site AIP's name
     AIP_NAME="${SITE_AIP##*/}"
     HANDLE=`echo $AIP_NAME | cut -f2 -d'@'`
@@ -130,7 +134,7 @@ if [ -n "$SITE_AIP" ]; then
     # --------------------------------------
     # Stop Tomcat
     # --------------------------------------
-    sudo service tomcat7 stop
+    sudo service $TOMCAT_SERVICE stop
     echo ""
 
     # ----------------------------------------
@@ -148,7 +152,7 @@ if [ -n "$SITE_AIP" ]; then
     # --------------------------------------
     # Start up Tomcat
     # --------------------------------------
-    sudo service tomcat7 start
+    sudo service $TOMCAT_SERVICE start
     echo ""
 
     # --------------------------------------

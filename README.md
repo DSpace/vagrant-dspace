@@ -11,7 +11,7 @@ Some example use cases for 'vagrant-dspace':
 * Lets you quickly setup a DSpace development environment on a Virtual Machine. You'd need to install your IDE of choice, but besides that, everything else is installed for you.
 * Vagrant VMs are "throwaway". Can easily destroy the VM and recreate at will for testing purposes or as needs arise (e.g. `vagrant destroy; vagrant up`)
 
-This work began as a collaborative project between [tdonohue](https://github.com/tdonohue/) and [hardyoyo](https://github.com/hardyoyo/), 
+This work began as a collaborative project between [tdonohue](https://github.com/tdonohue/) and [hardyoyo](https://github.com/hardyoyo/),
 but has now been more broadly accepted.
 
 _BIG WARNING: THIS IS STILL A WORK IN PROGRESS. YOUR MILEAGE MAY VARY. NEVER USE THIS IN PRODUCTION._
@@ -27,7 +27,7 @@ Table of Contents
 5. [Usage Tips - How to perform common activities in this environment](#usage-tips)
 6. [How to Tweak Things to your Liking? - Tips on customizing the 'vagrant-dspace' install process](#how-to-tweak-things-to-your-liking)
 7. [Vagrant Plugin Recommendations - Other plugins you may wish to consider installing](#vagrant-plugin-recommendations)
-8. [Don't Miss These Really Cool Things You Can Do with Vagrant](#dont-miss-these-really-cool-things-you-can-do-with-vagrant) 
+8. [Don't Miss These Really Cool Things You Can Do with Vagrant](#dont-miss-these-really-cool-things-you-can-do-with-vagrant)
 9. [What's Next?](#whats-next)
 10. [Tools We Use To Make This All Work](#tools-we-use-to-make-this-all-work)
 11. [Reporting Bugs / Requesting Enhancements](#reporting-bugs--requesting-enhancements)
@@ -38,32 +38,32 @@ How it Works
 
 'vagrant-dspace' does all of the following for you:
 
-* Spins up an Ubuntu 14.04.1 LTS VM using Vagrant
-* Installs some of the basic prerequisites for DSpace Development (namely: Git, Java, Maven)
-* Clones DSpace source from GitHub to `~/dspace-src/` (under the default 'vagrant' user account)
-* Installs/Configures PostgreSQL
-   * We install [puppetlabs/postgresql](http://forge.puppetlabs.com/puppetlabs/postgresql) (via [librarian-puppet](http://librarian-puppet.com/)),
-     and then use that Puppet module to setup PostgreSQL
-* Installs Tomcat (running as the 'vagrant' user acct)
-   * We install [puppetlabs/tomcat](https://forge.puppetlabs.com/puppetlabs/tomcat) (via [librarian-puppet](http://librarian-puppet.com/)),
-     and then use that Puppet module to setup Tomcat
-* Installs DSpace to `~/dspace/` (under the default 'vagrant' user account).
-   * Makes DSpace available via Tomcat (e.g. http://localhost:8080/xmlui/)
+* Spins up an Ubuntu 16.04 LTS virtual machine using Vagrant
+* Uses puppet-dspace module to install:
+    * Base prerequisities for DSpace development (Java, Maven, Ant, Git)
+    * PostgreSQL 9.5 (via the [puppetlabs/postgresql](http://forge.puppetlabs.com/puppetlabs/postgresql) module)
+    * Tomcat 7 (via the [puppetlabs/tomcat](https://forge.puppetlabs.com/puppetlabs/tomcat))
+        * NOTE: currently using Tomcat 7 because of [DS-3142](https://jira.duraspace.org/browse/DS-3142) which is caused by Tomcat 8.0.32 (the 8.x version currently in use by Ubuntu 16.04)
+    * DSpace (`master` by default)
 * Sets up SSH Forwarding, so that you can use your local SSH key(s) on the VM (for development with GitHub)
 * Syncs your local Git settings (name and email from local .gitconfig) to VM (for development with GitHub)
-* Optionally sets up "sync folder", so that `~/dspace-src` on the VM is synced to `[vagrant-dspace]/dspace-src` on your host machine. This allows for IDE-based development. But, it's disabled by default.
+* Optionally sets up "sync folder", so that `~/dspace-src` on the VM is synced to `[vagrant-dspace]/dspace-src` on your host machine. This allows for IDE-based development. But, it's disabled by default (as it has slow performance)
+
+Most of the magic happens in our [`Vagrantfile`](https://github.com/DSpace/vagrant-dspace/blob/master/Vagrantfile) which tells vagrant how to setup the VM.
+
+However, the Puppet modules are all installed using [librarian-puppet](http://librarian-puppet.com/), see our [`Puppetfile`](https://github.com/DSpace/vagrant-dspace/blob/master/Puppetfile).
 
 **If you want to help, please do.** We'd prefer solutions using [Puppet](https://puppetlabs.com/).
 
 Requirements
 ------------
 
-* [Vagrant](http://vagrantup.com/) version 1.6.0 or above.
+* [Vagrant](http://vagrantup.com/) version 1.8.3 or above.
 * [VirtualBox](https://www.virtualbox.org/)
 * (Optional) A GitHub account with an associated SSH key. This is NOT required, but if you plan to do development on 'vagrant-dspace' and/or create Pull Requests, it is recommended. If you have a local SSH agent running, Vagrant will attempt to automatically forward your local SSH key(s) to the VM, so that you will be able to immediately interact with GitHub via SSH on the VM.
    * WARNING: If you are on Windows, Vagrant SSH forwarding does not currently work properly. Instead we recommend creating a GitHub-specific SSH Key (at `~/.ssh/github_rsa`) which you also connect to your GitHub Account. There are a few easy ways to create this key:
-      *  Install [GitHub for Windows](http://windows.github.com/) - this will automatically generate a new `~/.ssh/github_rsa` key.
-      * OR, manually generate a new `~/.ssh/github_rsa` key and associate it with your GitHub Account. [GitHub has detailed instructions on how to do this.](https://help.github.com/articles/generating-ssh-keys)
+      *  Install [GitHub Desktop](http://desktop.github.com/) - this will automatically generate a new `~/.ssh/github_rsa` key.
+      * OR, manually generate a new `~/.ssh/github_rsa` key and associate it with your GitHub Account. [GitHub has detailed instructions on how to do this.](https://help.github.com/articles/generating-an-ssh-key/)
    * SIDENOTE: Mac OSX / Linux users do NOT need this, as Vagrant's SSH Key Forwarding works properly from Mac OSX & Linux. There's just a bug in using Vagrant + Windows.
 
 Getting Started
@@ -79,11 +79,8 @@ Getting Started
    * There may be times that vagrant will appear to "stall" for several minutes (especially during the Maven build of DSpace). But, don't worry.
 6. Once complete, visit `http://localhost:8080/xmlui/` or `http://localhost:8080/jspui/` in your local web browser to see if it worked! _More info below on what to expect._
    * If you already have something running locally on port 8080, vagrant-dspace will attempt to use the next available port between 8081 and 8100. The default port is also configurable by creating a `config/local.yaml` (see below for more details)
-   
-The `vagrant up` command will initialize a new VM based on the settings in the `Vagrantfile` in that directory.  
 
-Once complete, you'll have a fresh Ubuntu VM that you can SSH into by simply typing `vagrant ssh`. Since SSH Forwarding is enabled,
-that Ubuntu VM should have access to your local SSH keys, which allows you to immediately use Git/GitHub.
+Once complete, you'll have a fresh Ubuntu VM that you can SSH into by simply typing `vagrant ssh`. Since SSH Forwarding is enabled, that Ubuntu VM should have access to your local SSH keys, which allows you to immediately use Git/GitHub.
 
 ***
 **NOTE:** sometimes when `vagrant up` finishes running, you will see a message like this:
@@ -104,26 +101,26 @@ This is normal, the VM just took a while longer to boot than Vagrant wanted to w
 What will you get?
 ------------------
 
-* A running instance of [DSpace 'master'](https://github.com/DSpace/DSpace), on top of latest PostgreSQL and Tomcat 7 (and using Java OpenJDK 7 by default)
-   * You can visit this instance at `http://localhost:8080/xmlui/` or `http://localhost:8080/jspui/` from your local web browser 
+* A running instance of [DSpace 'master'](https://github.com/DSpace/DSpace), on top of latest PostgreSQL and Tomcat (and using Java OpenJDK 8 by default)
+   * You can visit this instance at `http://localhost:8080/xmlui/` or `http://localhost:8080/jspui/` from your local web browser
        * If you install and configure the [Landrush plugin](https://github.com/phinze/landrush) for Vagrant, you can instead visit http://dspace.vagrant.dev:8080/xmlui/ or http://dspace.vagrant.dev:8080/jspui/
    * An initial Administrator account is also auto-created (this account can be tweaked in a `config/local.yaml` file, see below)
        * Default Login: `dspacedemo+admin@gmail.com` , Default Pwd: 'vagrant'
 * DSpace GitHub cloned (at `~/dspace-src/`) and Java/Maven/Ant/Git installed.
    * If `sync_src_to_host=true` in your `config/local.yaml`, then this VM directory will also be synce to `[vagrant-dspace]/dspace-src` on your host machine.  
 * All "out of the box" DSpace webapps running out of `~/dspace/webapps/`. The full DSpace installation is at `~/dspace/`.
-* Tomcat 7 instance installed
+* Tomcat instance installed
    * Includes [PSI Probe](http://code.google.com/p/psi-probe/) running at `http://localhost:8080/probe/`
-       * PSI Probe Login: 'dspace', Pwd: 'vagrant'
+       * PSI Probe Login: 'dspace', Pwd: 'dspace'
 * Enough to get you started with developing/building/using DSpace (or debug issues with the DSpace build process, if any pop up)
    * Though you may wish to install your IDE of choice.
 * A very handy playground for testing multiple-machine configurations of DSpace, and software that might utilize DSpace as a service
 
-If you want to destroy the VM at anytime (and start fresh again), just run `vagrant destroy`. 
+If you want to destroy the VM at anytime (and start fresh again), just run `vagrant destroy`.
 No worries, you can always recreate a new VM from scratch with another `vagrant up`.
 
-As you develop with 'vagrant-dspace', from time to time you may want to run a `vagrant destroy` cycle (followed by a fresh `vagrant up`), just to confirm that the Vagrant setup is still doing exactly what you want it to do. 
-This cleans out any old experiments and starts fresh with a new base image. If you're just using vagrant-dspace for dspace development, this isn't advice for you. 
+As you develop with 'vagrant-dspace', from time to time you may want to run a `vagrant destroy` cycle (followed by a fresh `vagrant up`), just to confirm that the Vagrant setup is still doing exactly what you want it to do.
+This cleans out any old experiments and starts fresh with a new base image. If you're just using vagrant-dspace for dspace development, this isn't advice for you.
 But, if you're working on contributing back to vagrant-dspace, do try this from time to time, just to sanity-check your Vagrant and Puppet scripts.
 
 Usage Tips
@@ -132,7 +129,7 @@ Usage Tips
 Here's some common activities which you may wish to perform in `vagrant-dspace`:
 
 * **Restarting Tomcat**
-   * `sudo service tomcat7 restart` 
+   * `sudo service tomcat7 restart`
 * **Restarting PostgreSQL**
    * `sudo service postgresql restart`
 * **Connecting to DSpace PostgreSQL database**
@@ -159,25 +156,28 @@ If you look at the `config` folder, there are a few files you'll be interested i
 * `port` - Local port this VM should use for Tomcat (port 8080 by default)
 * `db_port` - Local port where VM's PostgreSQL database will be accessible (port 5432 by default). This lets you manage the VM database locally via tools like pgAdminIII, and debug code in your local IDE while using the VM database for "test" data.
 * `sync_src_to_host` - Whether or not to auto-sync the `~/dspace-src/` folder on the VM to the `[vagrant-dspace]/dspace-src/` folder on your host machine. By default this is false as the sync folder currently is often slow. But, if you want to work in a local IDE, you probably will want this to be set to "true".
-* `git_repo` - it would be a good idea to point this to your own fork of DSpace. By default this is a GitHub SSH URL. But, if vagrant-dspace is unable to connect to GitHub via SSH, this will be dynamically changed to a GitHub HTTPS URL.
-* `git_branch` - if you're constantly working on another brach than master, you can change it here
-* `admin_firstname` - you may want to change this to something more memorable than the demo DSpace user
-* `admin_lastname` - ditto
-* `admin_email` - likewise
-* `admin_passwd` - you probably have a preferred password
-* `admin_language` - and you may have a language preference, you can set it here
-* `mvn_params` - add other maven prameters here (this is added to the Vagrant user's profile, so these options are always on whenever you run mvn as the Vagrant user)
-* `catalina_opt` - the default CATALINA_OPTS setting for Tomcat. This allows you to tweak the amount of memory available to Tomcat (1GB by default)
+* `dspace::git_repo` - it would be a good idea to point this to your own fork of DSpace. By default this is a GitHub SSH URL. But, if vagrant-dspace is unable to connect to GitHub via SSH, this will be dynamically changed to a GitHub HTTPS URL.
+* `dspace::git_branch` - if you're constantly working on another brach than master, you can change it here
+* `dspace::admin_firstname` - you may want to change this to something more memorable than the demo DSpace user
+* `dspace::admin_lastname` - ditto
+* `dspace::admin_email` - likewise
+* `dspace::admin_passwd` - you probably have a preferred password
+* `dspace::admin_language` - and you may have a language preference, you can set it here
+* `dspace::mvn_params` - add other maven prameters here (this is added to the Vagrant user's profile, so these options are always on whenever you run mvn as the Vagrant user)
+* `dspace::handle_prefix` - Handle prefix to use for the DSpace in your VM (Default=`123456789`). This is handy to set if you want to auto-load content using `local-bootstrap.sh` (see below).
+* `dspace::catalina_opts` - the default CATALINA_OPTS setting for Tomcat. This allows you to tweak the amount of memory available to Tomcat (1GB by default)
 
 ### local-bootstrap.sh - You can script your own tweaks/customizations!
 
-In the `config` folder, you will also find a file called `local-bootstrap.sh.example`. If you copy that file to `local-bootstrap.sh` and edit it to your liking (it is well-commented) you'll be able to customize your git clone folder to your liking (turning on the color.ui, always pull using rebase, set an upstream github repository, add the ability to fetch pull requests from upstream), as well as automatically batch-load content (an example using AIPs is included, but you're welcome to script whatever you need here... if you come up with something interesting, please consider sharing it with the community). 
+In the `config` folder, you will also find a file called `local-bootstrap.sh.example`. If you copy that file to `local-bootstrap.sh` and edit it to your liking (it is well-commented) you'll be able to customize your git clone folder to your liking (turning on the color.ui, always pull using rebase, set an upstream github repository, add the ability to fetch pull requests from upstream), as well as automatically batch-load content (an example using AIPs is included, but you're welcome to script whatever you need here... if you come up with something interesting, please consider sharing it with the community).
 
-local-bootstrap.sh is a "shell provisioner" for Vagrant, and our vagrantfile is [configured to run it](https://github.com/DSpace/vagrant-dspace/blob/master/Vagrantfile#L171) if it is present in the config folder. If you have a fork of Vagrant-DSpace for your own repository management, you may add another shell provisioner, to maintain your own workgroup's customs and configurations. You may find an example of this in the [Vagrant-MOspace](https://github.com/umlso/vagrant-mospace/blob/master/config/mospace-bootstrap.sh) repository.
+`local-bootstrap.sh` is a "shell provisioner" for Vagrant, and our [`Vagrantfile`](https://github.com/DSpace/vagrant-dspace/blob/master/Vagrantfile) is configured to run it, if it is present in the `config` folder. If you have a fork of vagrant-dSpace for your own repository management, you may add another shell provisioner, to maintain your own workgroup's customs and configurations. You may find an example of this in the [Vagrant-MOspace](https://github.com/umlso/vagrant-mospace/blob/master/config/mospace-bootstrap.sh) repository.
 
 ### apt-spy-2-bootstrap.sh - You can override the default apt-spy-2-bootstrap.sh script
 
-The default apt-spy-2-bootstraph.sh script can be copied to the config folder and modified to reflect your preferences. This can potentially speed up provisiong of new machines by allowing you to tweak the apt-spy2 commands to better fit your typical work conditions. We of course recommend using the default, especially if you do not know for sure where your travels may take you next. But, you are free to tinker with this script as you see fit.
+Apt-spy2 is used to locate a nearby apt repository mirror, which should help speed up the startup of your VM (as packages should download more quickly).
+
+The default `apt-spy-2-bootstraph.sh` script can be copied to the `config` folder and modified to reflect your preferences. This can potentially speed up provisiong of new machines by allowing you to tweak the `apt-spy2` commands to better fit your typical work conditions. We of course recommend using the default, especially if you do not know for sure where your travels may take you next. But, you are free to tinker with this script as you see fit.
 
 ### maven_settings.xml - Tips on tweaking Maven
 
@@ -198,18 +198,20 @@ NOTE: any file in `config/dotfiles` is ignored by Git, so you won't accidentally
 
 ### vim and .vimrc - Tips on using/tweaking VIM
 
-Another optional `config/dotfiles` folder which is copied (if it exists) by the example `local-bootstrap.sh` shell provisioner is `config/dotfiles/vimrc` (/home/vagrant/.vimrc) and `config/dotfiles/vim` (/home/vagrant/.vim). Populating these will allow you to customize (Vim)[http://www.vim.org/] to your heart's content. 
+Another optional `config/dotfiles` folder which is copied (if it exists) by the example `local-bootstrap.sh` shell provisioner is `config/dotfiles/vimrc` (/home/vagrant/.vimrc) and `config/dotfiles/vim` (/home/vagrant/.vim). Populating these will allow you to customize (Vim)[http://www.vim.org/] to your heart's content.
 
 Vagrant Plugin Recommendations
 -------------------------------
 
 The following Vagrant plugins are not required, but they do make using Vagrant and vagrant-dspace more enjoyable.
 
-* Vagrant-Cachier: https://github.com/fgrehm/vagrant-cachier
-* Vagrnat-Hostsupdater: https://github.com/cogitatio/vagrant-hostsupdater
-* Vagrant-Proxyconf: https://github.com/tmatilai/vagrant-proxyconf/
-* Vagrant-VBox-Snapshot: https://github.com/dergachev/vagrant-vbox-snapshot/
-* Vagrant-Notify: https://github.com/fgrehm/vagrant-notify
+* [Vagrant-VBGuest](https://github.com/dotless-de/vagrant-vbguest) - *Highly Recommended for VirtualBox* as it keeps VirtualBox Guest Additions up to date
+  * `vagrant plugin install vagrant-vbguest`
+* [Vagrant-Cachier](https://github.com/fgrehm/vagrant-cachier) - Caches packages between VMs. (Project now unmaintained, see URL)
+* [Vagrant-Hostsupdater](https://github.com/cogitatio/vagrant-hostsupdater)
+* [Vagrant-Proxyconf](https://github.com/tmatilai/vagrant-proxyconf/)
+* [Vagrant-VBox-Snapshot](https://github.com/dergachev/vagrant-vbox-snapshot/)
+* [Vagrant-Notify](https://github.com/fgrehm/vagrant-notify)
 
 Don't miss these really cool things you can do with Vagrant
 -----------------------------------------------------------
@@ -221,22 +223,15 @@ What's Next?
 Here are a few things we'd like to explore in future version of vagrant-dspace:
 
 * use a CentOS base machine, and make all Puppet provisioning modules compatible with a Yum-based package manager. The current vagrant-dspace project relies on a package only available on Debian-based systems. We'd really like to avoid that dependency in the future.
-* Oracle database version (Hardy is busy working on this already, [contact him](https://github.com/hardyoyo/) if you'd like to help).
-* [Multi-machine](http://docs.vagrantup.com/v2/multi-machine/index.html) configuration, to demonstrate proper configuration of multi-machine installations of DSpace. One possibility would be to set up a seperate Elastic Search or Solr box, and send usage statistics to that external box. Another possibility would be to explore using an alternate UI based on the REST-API. We recommend that you use the Land Rush Vagrant plugin if you're serrious about exploring a multi-machine Vagrant setup.
-
-Tools we use to make this all work
-----------------------------------
-
-* [Vagrant](http://vagrantup.com) (obviously)
-* [Puppet](http://puppetlabs.com) - To actually clone, build, configure & install DSpace from GitHub
-* [Librarian-Puppet](https://github.com/rodjek/librarian-puppet) - Used to install the external Puppet Modules which setup Tomcat & PostgreSQL
+* Oracle database version?
+* [Multi-machine](http://docs.vagrantup.com/v2/multi-machine/index.html) configuration, to demonstrate proper configuration of multi-machine installations of DSpace. One possibility would be to set up a separate Elastic Search or Solr box, and send usage statistics to that external box. Another possibility would be to explore using an alternate UI based on the REST-API. We recommend that you use the Land Rush Vagrant plugin if you're serrious about exploring a multi-machine Vagrant setup.
 
 Reporting Bugs / Requesting Enhancements
 ----------------------------------------
 
 Bugs / Issues or requests for enhancements can be reported via the [DSpace Issue Tracker](https://jira.duraspace.org/browse/DS). _Please select the "vagrant-dspace" component when creating your ticket in the issue tracker._
 
-We also encourage you to submit Pull Requests with any recommended changes/fixes. As it is, the 'vagrant-dspace' project is really just a labor of love, and we can use help in making it better.
+We also encourage you to submit Pull Requests with any recommended changes/fixes. As it is, the `vagrant-dspace` project is really just a labor of love, and we can use help in making it better.
 
 License
 --------

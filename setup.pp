@@ -8,7 +8,7 @@
 # 5. Installs DSpace via our custom "dspace" Puppet Module
 #
 # Tested on:
-# - Ubuntu 14.04
+# - Ubuntu 16.04
 
 # Global default to requiring all packages be installed & apt-update to be run first
 Package {
@@ -48,192 +48,63 @@ exec {"apt-get-update":
   refreshonly => true, # only run if notified
 }
 
-#--------------------------------------------------
-# Initialize base pre-requisites (Java, Maven, Ant)
-#--------------------------------------------------
-# Initialize the DSpace module in order to install base prerequisites.
-# These prerequisites are simply installed via the OS package manager
-# in the DSpace module's init.pp script
-include dspace
-
-#------------------------
-# Install PostgreSQL
-#------------------------
-# Init PostgreSQL module
-# (We use https://github.com/puppetlabs/puppetlabs-postgresql/)
-# DSpace requires UTF-8 encoding in PostgreSQL
-# DSpace also requires version 9.4 or above. We'll use 9.4
-class { 'postgresql::globals':
-  encoding => 'UTF-8',
-  # Setup the official Postgresql apt repos (in sources).
-  # Necessary to install a newer version of Postgres than what is in apt by default
-  manage_package_repo => true,
-  version  => '9.4',
+#------------------------------------------------------------
+# Initialize base pre-requisites and define global variables.
+#------------------------------------------------------------
+# Initialize the DSpace module. This actually installs Java/Ant/Maven,
+# and globally saves the versions of PostgreSQL and Tomcat we will install below.
+#
+# NOTE: ANY of these values (or any other parameter of init.pp) can be OVERRIDDEN
+# via hiera in 'default.yaml' or your 'local.yaml'. Just specify the parameter like
+# "dspace::[param-name] : [param-value]" in local.yaml.
+class { 'dspace':
+  java_version       => '8',
+  postgresql_version => '9.5',
+  tomcat_package     => 'tomcat7',
+  owner              => 'vagrant',  # OS user who "owns" DSpace
+  db_name            => 'dspace',   # Name of database to use
+  db_owner           => 'dspace',   # DB owner account info
+  db_owner_passwd    => 'dspace',
+  db_admin_passwd    => 'postgres', # DB password for 'postgres' acct
 }
 
-->
 
-# Setup/Configure PostgreSQL server
-class { 'postgresql::server':
-  ip_mask_deny_postgres_user => '0.0.0.0/32',  # allows 'postgres' user to connect from any IP
-  ip_mask_allow_all_users    => '0.0.0.0/0',   # allow other users to connect from any IP
-  listen_addresses           => '*',           # accept connections from any IP/machine
-  postgres_password          => 'dspace',      # set password for "postgres"
+#----------------------------------------------------------------
+# Create the PostgreSQL database (based on above global settings)
+#----------------------------------------------------------------
+dspace::postgresql_db { $dspace::db_name :
 }
 
-# Ensure the PostgreSQL contrib package is installed
-# (includes various extensions, like pgcrypto which is required by DSpace)
-class { 'postgresql::server::contrib': }
-
-# Create a 'dspace' database & 'dspace' user account (which owns the database)
-postgresql::server::db { 'dspace':
-  user     => 'dspace',
-  password => 'dspace'
+#-----------------------------------------------------
+# Install Tomcat instance (based on above global settings)
+# Tell it to use owner's ~/dspace/webapps as the webapps location
+#-----------------------------------------------------
+dspace::tomcat_instance { "/home/${dspace::owner}/dspace/webapps" :
 }
 
-# Activate the 'pgcrypto' extension on our 'dspace' database
-# This is REQUIRED by DSpace 6 and above
-postgresql::server::extension { 'pgcrypto':
-  database => 'dspace',
-}
-
-#-----------------------
-# Install Tomcat
-#-----------------------
-# Lookup Tomcat installation settings from Hiera
-# These settings should all be specified in default.yaml
-$tomcat_package = hiera('tomcat_package')
-$tomcat_service = hiera('tomcat_service')
-$catalina_home  = hiera('catalina_home')
-$catalina_base  = hiera('catalina_base')
-$catalina_opts  = hiera('catalina_opts')
-
-# Init Tomcat module
-# (We use https://github.com/puppetlabs/puppetlabs-tomcat/)
-class {'tomcat':
-  install_from_source => false,           # Do NOT install from source, we'll use package manager
-  catalina_home       => $catalina_home,
-  manage_user         => false,           # Don't let Tomcat module manage which user/group to start with, package does this already
-  manage_group        => false,
-  require             => Class['dspace'], # Require DSpace was initialized, so that Java is installed
-}
-
-->
-
-# Create a new Tomcat instance & install from package manager
-tomcat::instance { 'default':
-  package_name    => $tomcat_package,  # Name of the tomcat package to install
-  package_ensure  => installed,        # Ensure package is installed
-}
-
-->
-
-# Override the default Tomcat <Host name='localhost'> entry
-# and point it at the DSpace webapps directory (so that it loads all DSpace webapps)
-tomcat::config::server::host { 'localhost':
-  app_base              => '/home/vagrant/dspace/webapps', # Tell Tomcat to load webapps from this directory
-  host_ensure           => present,
-  catalina_base         => $catalina_base,                 # Tomcat install this pertains to
-  additional_attributes => {                               # Additional Tomcat <Host> attributes
-    'autoDeploy' => 'true',
-    'unpackWARs' => 'true',
-                           },
-  notify                => Service['tomcat'],              # If changes are made, notify Tomcat to restart
-}
-
-->
-
-# Temporarily stop Tomcat, so that we can modify which user it runs as
-# (We cannot tweak the Tomcat run-as user while it is running)
-exec { 'Stop default Tomcat temporarily':
-  command => "service ${tomcat_service} stop",
-}
-
-->
-
-# Modify the Tomcat "defaults" file to make Tomcat run as the 'vagrant' user
-# NOTE: This seems to be the ONLY way to do this in Ubuntu, which is disappointing
-file_line { 'Update Tomcat to run as vagrant user':
-  path   => "/etc/default/${tomcat_service}", # File to modify
-  line   => "TOMCAT7_USER=vagrant",           # Line to add to file
-  match  => "^TOMCAT7_USER=.*$",              # Regex for line to replace (if found)
-  notify => Service['tomcat'],                # If changes are made, notify Tomcat to restart
-}
-
-->
-
-# Modify the Tomcat "defaults" file to set custom JAVA_OPTS based on the "catalina_opts"
-# config in hiera. Again, seems to be the only way to easily do this in Ubuntu.
-file_line { 'Update Tomcat run options':
-  path   => "/etc/default/${tomcat_service}", # File to modify
-  line   => "JAVA_OPTS=\"${catalina_opts}\"", # Line to add to file
-  match  => "^JAVA_OPTS=.*$",                 # Regex for line to replace (if found)
-  notify => Service['tomcat'],                # If changes are made, notify Tomcat to restart
-}
-
-->
-
-# In order for Tomcat to function properly, the entire CATALINA_BASE directory
-# and all subdirectories need to be owned by 'vagrant'
-file { $catalina_base:
-  ensure  => directory,
-  owner   => vagrant,   # Change owner to 'vagrant'
-  recurse => true,      # Also change owner of subdirectories/files
-  links   => follow,    # Follow any links to and change ownership there too
-}
-
-->
-
-# This service is auto-created by package manager when installing Tomcat
-# But, we just want to make sure it is running & starts on boot
-service {'tomcat':
-  name   => $tomcat_service,
-  enable => 'true',
-  ensure => 'running',
-}
-
-#---------------------
-# Install DSpace
-#---------------------
-# Lookup DSpace installation settings from Hiera
-# These settings should all be specified in default.yaml
-$git_repo          = hiera('git_repo')
-$git_branch        = hiera('git_branch')
-$ant_installer_dir = hiera('ant_installer_dir', '/home/vagrant/dspace-src/dspace/target/dspace-installer')  # Default value, if unspecified in hiera
-$mvn_params        = hiera('mvn_params')
-$admin_firstname   = hiera('admin_firstname')
-$admin_lastname    = hiera('admin_lastname')
-$admin_email       = hiera('admin_email')
-$admin_passwd      = hiera('admin_passwd')
-$admin_language    = hiera('admin_language')
-
-# Check which Git Repo URL to use (SSH vs HTTPS)
+#----------------------------------------------------
+# Determine the DSpace Git Repo to use (SSH vs HTTPS)
+#----------------------------------------------------
 # If the configured Git Repo is HTTPS, just use that. The user must want it that way.
 # If the configured Git Repo is SSH, check the "git_ssh_status" Fact to see if our SSH connection
-# to GitHub is working (=1). If it is not working (!=1), transform it to the HTTPS repo URL.
+# to GitHub is working (=1). This "git_ssh_status" Fact is created in our Vagrantfile.
+# If SSH is not working (!=1), transform it to the HTTPS repo URL.
+$git_repo = $dspace::git_repo
 $final_git_repo = inline_template('<%= @git_repo.include?("https") ? @git_repo : @github_ssh_status.to_i==1 ? @git_repo : @git_repo.split(":")[1].prepend("https://github.com/") %>')
 
 # Notify which GitHub repo we are using
-notify { "GitHub Repo": 
-  message => "Using DSpace GitHub Repo at ${final_git_repo}"
+notify { "GitHub Repo":
+  message => "Using DSpace GitHub Repo at ${final_git_repo}",
+  before  => Dspace::Install["/home/${dspace::owner}/dspace"],
 }
 
-# Kickoff a DSpace installation for the 'vagrant' default user,
-# using the specified GitHub repository & branch.
-dspace::install { 'vagrant-dspace':
-  owner             => vagrant,                          # DSpace should be owned by the default vagrant user
-  version           => '6.0-SNAPSHOT',
-  git_repo          => $final_git_repo,
-  git_branch        => $git_branch,
-  mvn_params        => $mvn_params,
-  ant_installer_dir => $ant_installer_dir,
-  admin_firstname   => $admin_firstname,
-  admin_lastname    => $admin_lastname,
-  admin_email       => $admin_email,
-  admin_passwd      => $admin_passwd,
-  admin_language    => $admin_language,
-  require           => Postgresql::Server::Db['dspace'], # Require that PostgreSQL is setup
-  notify            => Service['tomcat'],
+#---------------------------------------------------
+# Install DSpace in the owner's ~/dspace/ directory
+#---------------------------------------------------
+dspace::install { "/home/${dspace::owner}/dspace" :
+  git_repo => $final_git_repo,
+  require => DSpace::Postgresql_db[$dspace::db_name], # Must first have a database
+  notify  => Service['tomcat'],                       # Tell Tomcat to reboot after install
 }
 
 #---------------------
@@ -241,35 +112,35 @@ dspace::install { 'vagrant-dspace':
 #---------------------
 # For convenience in troubleshooting Tomcat, let's install Psi-probe
 # http://psi-probe.googlecode.com/
-$probe_version = "2.3.3"
+$probe_version = "2.4.0.SP1"
 exec {"Download and install the PSI Probe v${probe_version} war":
-  command   => "wget --quiet --continue https://psi-probe.googlecode.com/files/probe-${probe_version}.zip && unzip -u probe-${probe_version}.zip && rm probe-${probe_version}.zip",
-  cwd       => "${catalina_base}/webapps",
-  creates   => "${catalina_base}/webapps/probe.war",
+  command   => "wget --quiet --continue https://github.com/psi-probe/psi-probe/releases/download/${probe_version}/probe.war",
+  cwd       => "${dspace::catalina_base}/webapps",
+  creates   => "${dspace::catalina_base}/webapps/probe.war",
   user      => "vagrant",
   logoutput => true,
-  tries     => 3,                     # In case of a network hiccup, try this download 3 times
-  require   => File[$catalina_base],  # CATALINA_BASE must exist before downloading
+  tries     => 3,                            # In case of a network hiccup, try this download 3 times
+  require   => File[$dspace::catalina_base], # CATALINA_BASE must exist before downloading
 }
 
 ->
 
 # Add a context fragment file for Psi-probe, and restart tomcat
-file { "${catalina_base}/conf/Catalina/localhost/probe.xml" :
+file { "${dspace::catalina_base}/conf/Catalina/localhost/probe.xml" :
   ensure  => file,
   owner   => vagrant,
   group   => vagrant,
   content => template("dspace/probe.xml.erb"),
   notify  => Service['tomcat'],
 }
-
 ->
 
-# Add a "dspace" Tomcat User (password="vagrant") who can login to PSI Probe
+# Add a "dspace" Tomcat User (password="dspace") who can login to PSI Probe
 # (NOTE: This line will only be added after <tomcat-users> if it doesn't already exist there)
 file_line { 'Add \'dspace\' Tomcat user for PSI Probe':
-  path    => "${catalina_base}/conf/tomcat-users.xml", # File to modify
+  path    => "${dspace::catalina_base}/conf/tomcat-users.xml", # File to modify
   after   => '<tomcat-users>',                         # Add content immediately after this line
-  line    => '<role rolename="manager"/><user username="dspace" password="vagrant" roles="manager"/>', # Lines to add to file
+  line    => '<role rolename="manager"/><user username="dspace" password="dspace" roles="manager"/>', # Lines to add to file
   notify  => Service['tomcat'],                        # If changes are made, notify Tomcat to restart
 }
+

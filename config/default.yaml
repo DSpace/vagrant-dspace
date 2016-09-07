@@ -61,11 +61,12 @@ db_port    : 5432
 # (Changes to this setting require a 'vagrant destroy && vagrant up' to take effect)
 sync_src_to_host : false
 
-# Default Vagrant "box" to use. This should be an Ubuntu box (12.04 or 14.04 recommended)
+# Default Vagrant box to use. This should be an Ubuntu box (16.04 64bit recommended)
 # as 'vagrant-dspace' has not been tested on other OSes.
 # (Changes to these settings require a 'vagrant destroy && vagrant up' to take effect)
-vagrant_box     : 'dspace-trusty64'
-vagrant_box_url : 'http://github.com/DSpace/vagrantbox-ubuntu/releases/download/v2.0/dspace-trusty64.box'
+# Using "box-cutter/ubuntu1604" as the "ubuntu/xenial64" box is currently broken: http://stackoverflow.com/a/38078133/3750035
+vagrant_box     : 'box-cutter/ubuntu1604'
+vagrant_box_url : 'https://vagrantcloud.com/box-cutter/ubuntu1604'
 
 # Boot VM into GUI mode (login: vagrant, pwd: vagrant). Useful for debugging VM boot issues, etc.
 # By default this is disabled as it can be memory hungry, and SSH is usually all you need.
@@ -81,8 +82,8 @@ vm_gui_mode     : false
 # it will be dynamically changed into the HTTPS GitHub URL (https://github.com/[user]/[proj])
 # You may also change "git_repo" to an HTTPS URL in order to force HTTPS at all times.
 # (Changes to these settings require a 'vagrant destroy && vagrant up' to take effect)
-git_repo          : 'git@github.com:DSpace/DSpace.git'
-git_branch        : 'master'
+#dspace::git_repo   : 'git@github.com:DSpace/DSpace.git'
+#dspace::git_branch : 'master'
 
 #-------------------------------
 # DSpace Administrative Account
@@ -90,47 +91,55 @@ git_branch        : 'master'
 # Initial Admin account to auto-create for DSpace
 # After DSpace starts, you will be able to immediately login using the specified "admin_email" and "admin_passwd"
 # (Changes to these settings require a 'vagrant provision' to take effect)
-admin_firstname   : 'DSpaceDemo'
-admin_lastname    : 'Admin'
-admin_email       : 'dspacedemo+admin@gmail.com'
-admin_passwd      : 'vagrant'
-admin_language    : 'en'
+dspace::admin_firstname   : 'DSpaceDemo'
+dspace::admin_lastname    : 'Admin'
+dspace::admin_email       : 'dspacedemo+admin@gmail.com'
+dspace::admin_passwd      : 'vagrant'
+dspace::admin_language    : 'en'
 
 #------------------------------
 # DSpace Build/Install settings
 #------------------------------
-# Java version to install/use (valid values = 6 or 7)
+# Java version to install/use (Ubuntu 16.04 only supports version 8)
 # NOTE: OpenJDK is always installed for vagrant-dspace
 # (This setting is only used during a "vagrant up")
-dspace::java_version : '7'
+#dspace::java_version : '8'
+
+# PostgreSQL version to install/use (Ubuntu 16.04 only supports version 9.5)
+# (This setting is only used during a "vagrant up")
+#dspace::postgresql_version : '9.5'
+
+# Tomcat version to install/use (Ubuntu 16.04 supports tomcat7 or tomcat8)
+# NOTE: Defaults to Tomcat 7 temporarily cause of https://jira.duraspace.org/browse/DS-3142
+# Tomcat 8.0.32 (currently ships with Ubuntu 16.04) has a bug that causes DSpace XMLUI to not work.
+# (This setting is only used during a "vagrant up")
+#dspace::tomcat_package : 'tomcat7'
+
+# PostgreSQL Defaults
+#
+# Optionally override the default passwords for 'dspace' or 'postgres' database users.
+# 'postgres' account password
+#dspace::db_admin_passwd : 'postgres'
+# 'dspace' account password
+#dspace::db_owner_passwd : 'dspace'
 
 # Maven Defaults
 #
 # IF you want to exclude particular webapps from building & installing, you can do so like:
 # mvn_params: '-P-dspace-jspui,-dspace-xmlui,-dspace-rdf,'
 # (This setting is only used during a 'vagrant up')
-mvn_params        : '-P-dspace-rdf'
+dspace::mvn_params     : '-P-dspace-rdf'
 
 # Ant Defaults
+#
 # NOTE: if you change 'git_branch' above, you MAY need to modify this 'ant_installer_dir'
-# setting. It must be set to the directory where the Ant-based installer ends up, after
-# 'mvn package' is run.
+# setting. It must be set to the name of the directory where the Ant-based installer ends up
+# after 'mvn package' is run.
 # By default this is commented out, as it is always the same location for DSpace 5 or above.
 # (This setting is only used during a 'vagrant up')
-#ant_installer_dir : '/home/vagrant/dspace-src/dspace/target/dspace-installer'
+#dspace::installer_dir_name : 'dspace-installer'
 
-# Tomcat Defaults
-#
-# We use Ubuntu, so these are all Ubuntu defaults. Don't change them.
-# (Except where specified, these settings are only used during a 'vagrant up')
-# Tomcat Package to install
-tomcat_package    : 'tomcat7'
-# Name of default Tomcat service
-tomcat_service    : 'tomcat7'
-# Location of default Catalina Home/Base
-catalina_home     : '/usr/share/tomcat7'
-catalina_base     : '/var/lib/tomcat7'
 # Options to pass to Tomcat
 # This IS customizable. Feel free to tweak memory settings, etc.
 # (Changes to this setting require a 'vagrant provision' to take effect)
-catalina_opts     : '-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true -Xmx1200m -Xms1200m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC -Djava.security.egd=file:/dev/./urandom'
+dspace::catalina_opts  : '-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true -Xmx1200m -Xms1200m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC -Djava.security.egd=file:/dev/./urandom'

@@ -14,16 +14,14 @@ echo "  This may take a while..."
 
 # Ensure dependencies are installed (These are needed to dynamically determine your country code).
 # * ruby >= 2.0 is needed for apt-spy2
+# * ruby-dev needed to build "native extensions" for apt-spy2
 # * zlib1g-dev (zlib) is needed to build apt-spy2 from "native extensions" (needed to install "nokogiri" prerequisite)
 # * dnsutils ensures 'dig' is installed (to get IP address)
 # * geoip-bin ensures 'geoiplookup' is installed (lets us look up country code via IP)
-sudo apt-get install -y ruby2.0 zlib1g-dev dnsutils geoip-bin >/dev/null
+sudo apt-get install -y ruby ruby-dev zlib1g-dev dnsutils geoip-bin >/dev/null
 
-# Install/Update RubyGems for the provider
-echo "Installing RubyGems..."
-if [ $DISTRIB_CODENAME != "trusty" ]; then
-  sudo apt-get install -y rubygems >/dev/null
-fi
+# Update RubyGems for the provider
+echo "Updating RubyGems..."
 gem install --no-ri --no-rdoc rubygems-update
 update_rubygems >/dev/null
 

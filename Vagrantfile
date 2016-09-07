@@ -33,8 +33,9 @@ end
 # At this point, all our configs can be referenced as CONF['key'], e.g. CONF['vb_name']
 
 ####################################
-# Currently, we require Vagrant 1.6.0 or above.
-Vagrant.require_version ">= 1.6.0"
+# To be able to set hostname on Ubuntu 16.04. we need to have vagrant at least
+# of version 1.8.3 See also: https://github.com/mitchellh/vagrant/issues/7288
+Vagrant.require_version ">= 1.8.3"
 
 # Actual Vagrant configs
 Vagrant.configure("2") do |config|
@@ -79,7 +80,7 @@ Vagrant.configure("2") do |config|
     # If a port collision occurs (e.g. port 8080 on local machine is in use),
     # then tell Vagrant to use the next available port between 8081 and 8100
     config.vm.usable_port_range = 8081..8100
-
+	
     # BEGIN Landrush (https://github.com/phinze/landrush) configuration
     # This section will only be triggered if you have installed "landrush"
     #     vagrant plugin install landrush
@@ -125,7 +126,7 @@ Vagrant.configure("2") do |config|
     # This also means we need to run 'dpkg-reconfigure' to avoid "unable to re-open stdin" errors (see http://serverfault.com/a/500778)
     # For now, we have a hardcoded locale of "en_US.UTF-8"
     locale = "en_US.UTF-8"
-    config.vm.provision :shell, :inline => "echo 'Setting locale to UTF-8 (#{locale})...' && locale | grep 'LANG=#{locale}' > /dev/null || update-locale --reset LANG=#{locale} && dpkg-reconfigure locales"
+    config.vm.provision :shell, :inline => "echo 'Setting locale to UTF-8 (#{locale})...' && locale | grep 'LANG=#{locale}' > /dev/null || update-locale --reset LANG=#{locale} && dpkg-reconfigure -f noninteractive locales"
 
     # Turn off annoying console bells/beeps in Ubuntu (only if not already turned off in /etc/inputrc)
     config.vm.provision :shell, :inline => "echo 'Turning off console beeps...' && grep '^set bell-style none' /etc/inputrc || echo 'set bell-style none' >> /etc/inputrc"
@@ -223,7 +224,7 @@ Vagrant.configure("2") do |config|
     config.vm.provision :puppet do |puppet|
         puppet.manifests_path = "."
         puppet.manifest_file = "setup.pp"
-        puppet.options = "--verbose"
+        puppet.options = "--verbose --debug"
     end
 
     #-------------------------------------
@@ -298,5 +299,5 @@ Vagrant.configure("2") do |config|
     end
 
     # Message to display to user after 'vagrant up' completes
-    config.vm.post_up_message = "Setup of 'vagrant-dspace' is now COMPLETE! DSpace should now be available at:\n\nhttp://localhost:#{CONF['port']}/xmlui/\nLOGIN: '#{CONF['admin_email']}', PASSWORD: '#{CONF['admin_passwd']}'\n\nThe DSpace database is accessible via local port #{CONF['db_port']}.\nYou can SSH into the new VM via 'vagrant ssh'"
+    config.vm.post_up_message = "Setup of 'vagrant-dspace' is now COMPLETE! DSpace should now be available at:\n\nhttp://localhost:#{CONF['port']}/xmlui/\nLOGIN: '#{CONF['dspace::admin_email']}', PASSWORD: '#{CONF['dspace::admin_passwd']}'\n\nThe DSpace database is accessible via local port #{CONF['db_port']}.\nYou can SSH into the new VM via 'vagrant ssh'"
 end
