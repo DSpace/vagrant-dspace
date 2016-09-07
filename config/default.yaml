@@ -22,7 +22,7 @@ vm_name    : 'dspace-dev'
 # How much memory to provide to VirtualBox VM (in MB)
 # Provide 3GB of memory by default
 # (Changes to this setting require a 'vagrant reload' to take effect)
-vm_memory  : 3072
+vm_memory  : 2048
 
 # Maximum amount of host CPU which VirtualBox VM can use (in %)
 # The example below would only let VM use up to 50% of host CPU
