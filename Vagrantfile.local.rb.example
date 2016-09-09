@@ -1,0 +1,42 @@
+
+# This function is going to be called at the start of the configuration of the VM
+# The parameter config can be used to change the configuration as if the code was inside the Vagrantfile
+# You can also access the static methods of the Vagrant class
+
+def dspace_config_initialization(config)
+
+	# Automatically install necessary plugins
+	required_plugins = %w(vagrant-hosts-provisioner vagrant-proxyconf vagrant-vbguest)
+
+	plugins_to_install = required_plugins.select { |plugin| not Vagrant.has_plugin? plugin }
+	if not plugins_to_install.empty?
+	  puts "Installing plugins: #{plugins_to_install.join(' ')}"
+	  if system "vagrant plugin install #{plugins_to_install.join(' ')}"
+		exec "vagrant #{ARGV.join(' ')}"
+	  else
+		abort "Installation of one or more plugins has failed. Aborting."
+	  end
+	end
+
+	# Configure the forward proxy
+	config.proxy.http = "http://proxy.domain.com:80/"
+	config.proxy.https = "http://proxy.domain.com:80/"
+	config.proxy.no_proxy = "localhost,127.0.0.1,.domain.com"
+
+	# Create hosts file entry for the dspace machine
+	config.vm.provision :hostsupdate, run: 'always' do |host|
+   		host.hostname = 'dspace.desenv.domain.com'
+   		host.manage_guest = true
+   		host.manage_host = true
+	end
+
+	# Auto update disabled due to a bug where the vagrant-vbguest plugin doesn't
+	# reboot after installing a new version
+	config.vbguest.auto_update = false
+
+	# We might have more than one VM running at the same time, and we still need
+	# to SSH to them, so we need a permanent port for each.
+	config.vm.network "forwarded_port", guest: 22, host: 2222, id: "ssh", disabled: true
+	config.vm.network "forwarded_port", guest: 22, host: 2231, auto_correct: true
+
+end

@@ -3,9 +3,9 @@
 
 ####################################
 # Vagrantfile for DSpace Development
-# 
+#
 # WARNING: THIS IS A WORK IN PROGRESS.
-#  
+#
 # DO NOT USE IN PRODUCTION. THIS IS FOR DEVELOPMENT/TESTING PURPOSES ONLY.
 #
 # ONLY TESTED with VirtualBox provider. Your mileage may vary with other providers
@@ -13,7 +13,7 @@
 
 #=====================================================================
 # Load settings from our YAML configs (/config/*.yaml)
-# 
+#
 # This bit of "magic" is possible cause a Vagrantfile is just Ruby! :)
 # It reads some basic configs from our 'default.yaml' and 'local.yaml'
 # in order to decide how to start up the Vagrant VM.
@@ -23,6 +23,7 @@ require "yaml"
 # Load up our config files
 # First, load 'config/default.yaml'
 CONF = YAML.load(File.open("config/default.yaml", File::RDONLY).read)
+LOCAL_VAGRANT_FILE = 'Vagrantfile.local.rb'
 
 # Next, load local overrides from 'config/local.yaml'
 # If it doesn't exist, no worries. We'll just use the defaults
@@ -37,8 +38,19 @@ end
 # of version 1.8.3 See also: https://github.com/mitchellh/vagrant/issues/7288
 Vagrant.require_version ">= 1.8.3"
 
+has_local_vagrantfile=false
+if File.exists?(LOCAL_VAGRANT_FILE)
+	has_local_vagrantfile=true
+	load LOCAL_VAGRANT_FILE
+end
+
 # Actual Vagrant configs
 Vagrant.configure("2") do |config|
+
+	if has_local_vagrantfile == true
+		dspace_config_initialization(config)
+	end
+
     # All Vagrant configuration is done here. The most common configuration
     # options are documented and commented below. For a complete reference,
     # please see the online documentation at vagrantup.com.
@@ -142,8 +154,8 @@ Vagrant.configure("2") do |config|
     config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
 
     # THIS NEXT PART IS TOTAL HACK (only necessary for running Vagrant on Windows)
-    # Windows currently doesn't support SSH Forwarding when running Vagrant's "Provisioning scripts" 
-    # (e.g. all the "config.vm.provision" commands below). Although running "vagrant ssh" (from Windows commandline) 
+    # Windows currently doesn't support SSH Forwarding when running Vagrant's "Provisioning scripts"
+    # (e.g. all the "config.vm.provision" commands below). Although running "vagrant ssh" (from Windows commandline)
     # will work for SSH Forwarding once the VM has started up, "config.vm.provision" commands in this Vagrantfile DO NOT.
     # Supposedly there's a bug in 'net-ssh' gem (used by Vagrant) which causes SSH forwarding to fail on Windows only
     # See: https://github.com/mitchellh/vagrant/issues/1735
@@ -151,8 +163,8 @@ Vagrant.configure("2") do |config|
     # See also underlying 'net-ssh' bug: https://github.com/net-ssh/net-ssh/issues/55
     #
     # Therefore, we have to "hack it" and manually sync our SSH keys to the Vagrant VM & copy them over to the 'root' user account
-    # (as 'root' is the account that runs all Vagrant "config.vm.provision" scripts below). This all means 'root' should be able 
-    # to connect to GitHub as YOU! Once this Windows bug is fixed, we should be able to just remove these lines and everything 
+    # (as 'root' is the account that runs all Vagrant "config.vm.provision" scripts below). This all means 'root' should be able
+    # to connect to GitHub as YOU! Once this Windows bug is fixed, we should be able to just remove these lines and everything
     # should work via the "config.ssh.forward_agent=true" setting.
     # ONLY do this hack/workaround if the local OS is Windows.
     if Vagrant::Util::Platform.windows?
@@ -166,7 +178,7 @@ Vagrant.configure("2") do |config|
         else
             # Else, throw a Vagrant Error. Cannot successfully startup on Windows without a GitHub SSH Key!
             raise Vagrant::Errors::VagrantError, "\n\nERROR: GitHub SSH Key not found at ~/.ssh/github_rsa (required for 'vagrant-dspace' on Windows).\nYou can generate this key manually OR by installing GitHub for Windows (http://windows.github.com/)\n\n"
-        end   
+        end
     end
 
     # Create a '/etc/sudoers.d/root_ssh_agent' file which ensures sudo keeps any SSH_AUTH_SOCK settings
@@ -178,7 +190,7 @@ Vagrant.configure("2") do |config|
     end
 
     # Check if a test SSH connection to GitHub succeeds or fails (on every vagrant up)
-    # This sets a Puppet Fact named "github_ssh_status" on the VM. 
+    # This sets a Puppet Fact named "github_ssh_status" on the VM.
     # That fact is then used by 'setup.pp' to determine whether to connect to a Git Repo via SSH or HTTPS (see setup.pp)
     config.vm.provision :shell, :inline => "echo 'Testing SSH connection to GitHub on VM...' && mkdir -p /etc/facter/facts.d/ && ssh -T -q -oStrictHostKeyChecking=no git@github.com; echo github_ssh_status=$? > /etc/facter/facts.d/github_ssh.txt", run: "always"
 
@@ -208,7 +220,7 @@ Vagrant.configure("2") do |config|
     # Copy our 'hiera.yaml' file over to the global Puppet directory (/etc/puppet) on VM
     # This lets us run 'puppet apply' manually on the VM for any minor updates or tests
     config.vm.provision :shell, :inline => "cp /vagrant/hiera.yaml /etc/puppet"
-   
+
     # display the local.yaml file, if it exists, to give us a chance to back out
     # before waiting for this vagrant up to complete
     if File.exists?("config/local.yaml")
@@ -273,7 +285,7 @@ Vagrant.configure("2") do |config|
         vb.customize ["modifyvm", :id, "--memory", CONF['vm_memory']]
 
         vb.memory = CONF['vm_memory']
-        vb.cpus = CONF['vb_cpus'] 
+        vb.cpus = CONF['vb_cpus']
 
 
         if CONF['vb_max_cpu']
