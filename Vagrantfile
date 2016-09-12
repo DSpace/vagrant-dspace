@@ -3,9 +3,9 @@
 
 ####################################
 # Vagrantfile for DSpace Development
-# 
+#
 # WARNING: THIS IS A WORK IN PROGRESS.
-#  
+#
 # DO NOT USE IN PRODUCTION. THIS IS FOR DEVELOPMENT/TESTING PURPOSES ONLY.
 #
 # ONLY TESTED with VirtualBox provider. Your mileage may vary with other providers
@@ -13,7 +13,7 @@
 
 #=====================================================================
 # Load settings from our YAML configs (/config/*.yaml)
-# 
+#
 # This bit of "magic" is possible cause a Vagrantfile is just Ruby! :)
 # It reads some basic configs from our 'default.yaml' and 'local.yaml'
 # in order to decide how to start up the Vagrant VM.
@@ -80,12 +80,14 @@ Vagrant.configure("2") do |config|
     # If a port collision occurs (e.g. port 8080 on local machine is in use),
     # then tell Vagrant to use the next available port between 8081 and 8100
     config.vm.usable_port_range = 8081..8100
-	
+
     # BEGIN Landrush (https://github.com/phinze/landrush) configuration
     # This section will only be triggered if you have installed "landrush"
     #     vagrant plugin install landrush
     if Vagrant.has_plugin?('landrush')
         config.landrush.enable
+        config.landrush.tld = 'vagrant.dev'
+
         # let's use the Google free DNS
         config.landrush.upstream '8.8.8.8'
         config.landrush.guest_redirect_dns = false
@@ -166,7 +168,7 @@ Vagrant.configure("2") do |config|
         else
             # Else, throw a Vagrant Error. Cannot successfully startup on Windows without a GitHub SSH Key!
             raise Vagrant::Errors::VagrantError, "\n\nERROR: GitHub SSH Key not found at ~/.ssh/github_rsa (required for 'vagrant-dspace' on Windows).\nYou can generate this key manually OR by installing GitHub for Windows (http://windows.github.com/)\n\n"
-        end   
+        end
     end
 
     # Create a '/etc/sudoers.d/root_ssh_agent' file which ensures sudo keeps any SSH_AUTH_SOCK settings
@@ -186,6 +188,19 @@ Vagrant.configure("2") do |config|
     # Provisioning Scripts
     #    These scripts run in the order in which they appear, and setup the virtual machine (VM) for us.
     #------------------------
+
+    # Shell script to set up swap space for this VM
+
+    if File.exists?("config/increase-swap.sh")
+        config.vm.provision :shell, :inline => "echo '   > > > running local increase-swap.sh to ensure enough memory is available, via a swap file.'"
+        config.vm.provision :shell, :path => "config/increase-swap.sh"
+    else
+        config.vm.provision :shell, :inline => "echo '   > > > running default increase-swap.sh scripte to ensure enough memory is available, via a swap file.'"
+        config.vm.provision :shell, :path => "increase-swap.sh"
+    end
+
+
+
 
     # Shell script to set apt sources.list to something appropriate (close to you, and actually up)
     # via apt-spy2 (https://github.com/lagged/apt-spy2)
@@ -208,7 +223,7 @@ Vagrant.configure("2") do |config|
     # Copy our 'hiera.yaml' file over to the global Puppet directory (/etc/puppet) on VM
     # This lets us run 'puppet apply' manually on the VM for any minor updates or tests
     config.vm.provision :shell, :inline => "cp /vagrant/hiera.yaml /etc/puppet"
-   
+
     # display the local.yaml file, if it exists, to give us a chance to back out
     # before waiting for this vagrant up to complete
     if File.exists?("config/local.yaml")
@@ -272,9 +287,9 @@ Vagrant.configure("2") do |config|
         # Use VBoxManage to provide Virtual Machine with extra memory (default is only 300MB)
         vb.customize ["modifyvm", :id, "--memory", CONF['vm_memory']]
 
+        # use the configured settings for memory and cpus (look in default.yaml or local.yaml to set these values)
         vb.memory = CONF['vm_memory']
-        vb.cpus = CONF['vb_cpus'] 
-
+        vb.cpus = CONF['vb_cpus']
 
         if CONF['vb_max_cpu']
           # Use VBoxManage to ensure Virtual Machine only has access to a percentage of host CPU
