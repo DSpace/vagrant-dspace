@@ -68,6 +68,12 @@ class { 'dspace':
   db_admin_passwd    => 'postgres', # DB password for 'postgres' acct
 }
 
+#----------------------------------------------------------------
+# Create the DSpace owner and populate any of the owner's configs
+#----------------------------------------------------------------
+dspace::owner { $dspace::owner :
+}
+
 
 #----------------------------------------------------------------
 # Create the PostgreSQL database (based on above global settings)
