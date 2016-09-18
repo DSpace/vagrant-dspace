@@ -6,19 +6,12 @@ Setting up [Vagrant](http://vagrantup.com) on Windows can be a challenge, especi
 Table of Contents
 -----------------
 
-1. [Requirements - The prerequisites you need](#requirements)
-2. [Getting Started - How to install and run 'vagrant-dspace'](#getting-started)
-
-
-3. [What will you get? - What does the end result look like?](#what-will-you-get)
-5. [Usage Tips - How to perform common activities in this environment](#usage-tips)
-6. [How to Tweak Things to your Liking? - Tips on customizing the 'vagrant-dspace' install process](#how-to-tweak-things-to-your-liking)
-7. [Vagrant Plugin Recommendations - Other plugins you may wish to consider installing](#vagrant-plugin-recommendations)
-8. [Don't Miss These Really Cool Things You Can Do with Vagrant](#dont-miss-these-really-cool-things-you-can-do-with-vagrant)
-9. [What's Next?](#whats-next)
-10. [Tools We Use To Make This All Work](#tools-we-use-to-make-this-all-work)
-11. [Reporting Bugs / Requesting Enhancements](#reporting-bugs--requesting-enhancements)
-12. [License](#license)
+1. [Step 1: Be sure your computer will allow you to run VirtualBox](#step-1-be-sure-your-computer-will-allow-you-to-run-virtualbox)
+2. [Step 2: Install the Requirements](#step-2-install-the-requirements)
+3. [Step 3: Set up a GitHub account](#step-3-set-up-a-github-account)
+4. [Step 4: Download and install GitHub Desktop](#step-4-download-and-install-github-desktop)
+5. [Step 5: Create an SSH key for GitHub Desktop, and configure it for your GitHub account](#step-5-create-an-ssh-key-for-github-desktop-and-configure-it-for-your-github-account)
+6. [Step 6: Fork Vagrant-DSpace and DSpace to your new GitHub account](#step-6-fork-vagrant-dspace-and-dspace-to-your-new-github-account)
 
 Step 1: Be sure your computer will allow you to run VirtualBox
 ------------
@@ -46,12 +39,19 @@ Step 5: Create an SSH key for GitHub in GitHub Desktop and configure it for your
 
 Step 6: Fork Vagrant-DSpace and DSpace to your new GitHub account
 ------------
-* [](https://help.github.com/articles/fork-a-repo/)
+* [read how to fork a repository](https://help.github.com/articles/fork-a-repo/)
+* [fork Vagrant-DSpace](https://github.com/dspace/vagrant-dspace)
+* [fork DSpace](https://github.com/dspace/dspace)
 
 Step 7: configure a .bashrc file for Git BASH
------------
-* An example is provided in the docs folder, just copy `docs/example-bashrc` to `~/.bashrc`. It should not require tweaking, but do verify its content, don't run it blindly.
-* the example .bshrc file will ensure that when you start the Git BASH shell in GitHub Desktop, the SSH Key Agent will start, and will have the `~/.ssh/github_rsa` key loaded and ready
+----------
+* An example is provided in the docs folder, just copy `docs/example-bashrc` to `~/.bashrc`. It should not require tweaking, but do verify its content, _don't run it blindly_.
+* the example .bashrc file will ensure that when you start the Git BASH shell in GitHub Desktop, the SSH Key Agent will start, and will have the `~/.ssh/github_rsa` key loaded and ready
+
+
+Step 8: clone your fork of Vagrant-DSpace using GitHub Deskktop
+----------
+
 
 Getting Started
 --------------------------
