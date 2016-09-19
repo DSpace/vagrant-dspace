@@ -66,7 +66,7 @@ Step 7: Configure a .bashrc file for Git Bash
 * You probably have realized that you don't yet have a copy of the `docs/example-bashrc` file cloned to your machine, because cloning Vagrant-DSpace to your machine is the next step. You should be able to download just the file using the following commands in a Git Bash shell:
 
 1. Start a Git Bash Shell by double-clicking the Git Shell shortcut icon on your desktop. Alternately, you can right-click on your desktop, or any Windows Explorer window, and select the "Git Bash here" option.
-2. Enter `cd ~ && wget https://raw.githubusercontent.com/DSpace/vagrant-dspace/master/docs/example-bashrc .bashrc`
+2. Enter `cd ~ && curl https://raw.githubusercontent.com/DSpace/vagrant-dspace/master/docs/example-bashrc -o .bashrc`
 3. Verify the content of the .bashrc file that you just downloaded. Open the file with your favorite code editor, or even Windows Notepad. Git Bash comes with a version of Vim installed, you can use that if you're comfortable with Vim.
 
 Step 8: Install some Vagrant plugins
