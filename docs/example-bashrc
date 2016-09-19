@@ -1,0 +1,10 @@
+# example-bashrc file for use with GitHub Desktop on Windows
+
+# how to use: just copy this file to ~/.bashrc
+
+# start the SSH Key agent
+eval "$(ssh-agent -s)"
+
+# add my key to the SSH Key agent
+ssh-add ~/.ssh/github_rsa
+

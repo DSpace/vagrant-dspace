@@ -70,6 +70,8 @@ Requirements
 Getting Started
 --------------------------
 
+NOTE: [detailed step-by-step installation instructions for setting up Vagrant-DSpace on Windows](https://github.com/DSpace/vagrant-dspace/blob/master/docs/WINDOWS_INSTRUCTIONS.md) can be found in the `docs` folder.
+
 1. Install all required software (see above). Linux users take note: the versions of Vagrant and Virtualbox in your distribution's package manager are probably not current enough. Download and manually install the most recent version from [Vagrant](http://vagrantup.com) and [VirtualBox](https://www.virtualbox.org/). It will be OK. Both of these projects move quickly, and the distro managers have a hard time keeping up.
 2. Clone a copy of 'vagrant-dspace' to your local computer (via Git)
    * `git clone git@github.com:DSpace/vagrant-dspace.git`
