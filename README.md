@@ -39,7 +39,7 @@ How it Works
 'vagrant-dspace' does all of the following for you:
 
 * Spins up an Ubuntu 16.04 LTS virtual machine using Vagrant
-* Uses puppet-dspace module to install:
+* Uses [puppet-dspace](https://github.com/DSpace/puppet-dspace) module to install:
     * Base prerequisities for DSpace development (Java, Maven, Ant, Git)
     * PostgreSQL 9.5 (via the [puppetlabs/postgresql](http://forge.puppetlabs.com/puppetlabs/postgresql) module)
     * Tomcat 7 (via the [puppetlabs/tomcat](https://forge.puppetlabs.com/puppetlabs/tomcat))
