@@ -17,5 +17,5 @@ mod "puppetlabs-postgresql", "4.8.0"
 mod "puppetlabs-tomcat", "1.5.0"
 
 # Custom Module to install DSpace
-mod "tdonohue/dspace",
-   :git => "https://github.com/tdonohue/puppet-dspace.git"
+mod "DSpace/dspace",
+   :git => "https://github.com/DSpace/puppet-dspace.git"
