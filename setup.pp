@@ -72,6 +72,7 @@ class { 'dspace':
 # Create the DSpace owner and populate any of the owner's configs
 #----------------------------------------------------------------
 dspace::owner { $dspace::owner :
+  authorized_keys_source => false , # Vagrant handles this for us, thanks
 }
 
 
