@@ -100,7 +100,7 @@ if [ "$(gem search -i librarian-puppet)" = "false" ]; then
   gem install --no-ri --no-rdoc librarian-puppet --version $LIBRARIAN_PUPPET_VERSION >/dev/null
   echo "librarian-puppet installed!"
   echo "Installing third-party Puppet modules (via librarian-puppet)..."
-  cd $PUPPET_DIR && librarian-puppet install --clean
+  cd $PUPPET_DIR && librarian-puppet install --no-use-v1-api --clean
 else
   echo "Updating third-party Puppet modules (via librarian-puppet)..."
   cd $PUPPET_DIR && librarian-puppet update
