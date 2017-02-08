@@ -61,11 +61,7 @@ Requirements
 * [Virtualization support must be enabled](http://www.howtogeek.com/213795/how-to-enable-intel-vt-x-in-your-computers-bios-or-uefi-firmware/), if you have a BIOS-based computer (aka a PC).
 * [Vagrant](http://vagrantup.com/) version 1.8.3 or above.
 * [VirtualBox](https://www.virtualbox.org/)
-* (Optional) A GitHub account with an associated SSH key. This is NOT required, but if you plan to do development on 'vagrant-dspace' and/or create Pull Requests, it is recommended. If you have a local SSH agent running, Vagrant will attempt to automatically forward your local SSH key(s) to the VM, so that you will be able to immediately interact with GitHub via SSH on the VM.
-   * WARNING: If you are on Windows, Vagrant SSH forwarding does not currently work properly. Instead we recommend creating a GitHub-specific SSH Key (at `~/.ssh/github_rsa`) which you also connect to your GitHub Account. There are a few easy ways to create this key:
-      *  Install [GitHub Desktop](http://desktop.github.com/) - this will automatically generate a new `~/.ssh/github_rsa` key.
-      * OR, manually generate a new `~/.ssh/github_rsa` key and associate it with your GitHub Account. [GitHub has detailed instructions on how to do this.](https://help.github.com/articles/generating-an-ssh-key/)
-   * SIDENOTE: Mac OSX / Linux users do NOT need this, as Vagrant's SSH Key Forwarding works properly from Mac OSX & Linux. There's just a bug in using Vagrant + Windows.
+* (Optional) A GitHub account with an associated SSH key. This is NOT required, but if you plan to do development on 'vagrant-dspace' and/or create Pull Requests, it is recommended. If you have a local SSH agent running (or [Pageant/PuTTY](http://www.putty.org/) on Windows), Vagrant will attempt to automatically forward your local SSH key(s) to the VM, so that you will be able to immediately interact with GitHub via SSH on the VM.
  * (Optional) if you are using an SSH key, we recommend that you use an RSA key. The base OS we use, Ubuntu 16.04LTS, uses OpenSSH 7.0, which [*disallows* DSA keys by default](http://viryagroup.com/what-we-do/our-blog-posts/hosting-and-linux-server-managment-blog/ssh-keys-failing-in-ubuntu-16-04-xenial-with-permission-denied-publickey). You can of course work around this, but OpenSSH made this choice for a reason, you will probably be happier in the long run if you switch to an RSA key.
 
 

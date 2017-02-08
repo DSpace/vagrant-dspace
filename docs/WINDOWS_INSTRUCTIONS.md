@@ -8,15 +8,14 @@ Table of Contents
 
 1. [Step 1: Be sure your computer will allow you to run VirtualBox](#step-1-be-sure-your-computer-will-allow-you-to-run-virtualbox)
 2. [Step 2: Install Vagrant and Virtualbox](#step-2-install-vagrant-and-virtualbox)
-3. [Step 3: Set up a GitHub account](#step-3-set-up-a-github-account)
-4. [Step 4: Download and install GitHub Desktop](#step-4-download-and-install-github-desktop)
-5. [Step 5: Create an SSH key for GitHub Desktop, and configure it for your GitHub account](#step-6-create-an-ssh-key-for-github-desktop-and-configure-it-for-your-github-account)
-6. [Step 6: Fork Vagrant-DSpace and DSpace to your new GitHub account](#step-7-fork-vagrant-dspace-and-dspace-to-your-new-github-account)
-7. [Step 7: Configure a .bashrc file for Git BASH](#step-8-configure-a-bashrc-file-for-git-bash)
-8. [Step 8: Install some Vagrant plugins](#step-5-install-some-vagrant-plugins)
-9. [Step 9: Clone your fork of Vagrant-DSpace using GitHub Desktop](#step-9-clone-your-fork-of-vagrant-dspace-using-github-desktop)
-10. [Step 10: Customize your Vagrant-DSpace](#step-10-customize-your-vagrant-dspace)
-11. [Step 11: Vagrant Up! ](#step-11-vagrant-up)
+3. [Step 3: Set up a GitHub account with SSH access](#step-3-set-up-a-github-account-with-ssh-access)
+4. [Step 4: Setup PuTTY / Pageant for SSH Forwarding](#step-4-set-putty-pageant-for-ssh-forwarding)
+6. [Step 5: Fork Vagrant-DSpace and DSpace to your new GitHub account](#step-5-fork-vagrant-dspace-and-dspace-to-your-new-github-account)
+7. [Step 6: Configure a .bashrc file for Git BASH](#step-6-configure-a-bashrc-file-for-git-bash)
+8. [Step 7: Install some Vagrant plugins](#step-7-install-some-vagrant-plugins)
+9. [Step 8: Clone your fork of Vagrant-DSpace using GitHub Desktop](#step-8-clone-your-fork-of-vagrant-dspace-using-github-desktop)
+10. [Step 9: Customize your Vagrant-DSpace](#step-9-customize-your-vagrant-dspace)
+11. [Step 10: Vagrant Up! ](#step-10-vagrant-up)
 12. [Congratulations!](#congratulations)
 13. [Reporting Bugs / Requesting Enhancements](#reporting-bugs--requesting-enhancements)
 14. [License](#license)
@@ -34,31 +33,38 @@ You know the drill, this part is pretty easy: download the installer, click on t
 * [Vagrant](http://vagrantup.com/) version 1.8.3 or above.
 * [VirtualBox](https://www.virtualbox.org/)
 
-Step 3: Set up a GitHub account
+Step 3: Set up a GitHub account with SSH access
 ------------
+While this step is OPTIONAL, it is recommended if you plan to do any DSpace development (even minor bug fixes or help testing code).
+* [A GitHub account](https://help.github.com/articles/signing-up-for-a-new-github-account/) After you get your GitHub account, you may wish to [explore the social features of GitHub](https://help.github.com/articles/be-social/). In particular, you should follow other developers you know or work with. This includes all developers and contributors for projects with which you work. If you ever find a project on GitHub that you think is interesting, you should star it. This will help you find it later, and also helps other people find interesting projects. Likewise, you should check out the projects other people you know have starred. You'll find amazing things.
+* Optionally install [GitHub Desktop](https://desktop.github.com/). It just makes working with GitHub easier.
+* Create an SSH key and configure it for your GitHub account (if you plan to do any development)
+    * [generate a key](https://help.github.com/articles/generating-an-ssh-key/) : GitHub Desktop will generate this key by default as part of the install process, but do verify that it exists.
+    * [add this key to your GitHub account](https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/)
 
-* [A GitHub account](https://help.github.com/articles/signing-up-for-a-new-github-account/)
-The README says this is optional, but it's not for these instructions. You need a GitHub account. OPTIONAL: after you get your GitHub account, you should [explore the social features of GitHub](https://help.github.com/articles/be-social/). In particular, you should follow other developers you know or work with. This includes all developers and contributors for projects with which you work. If you ever find a project on GitHub that you think is interesting, you should star it. This will help you find it later, and also helps other people find interesting projects. Likewise, you should check out the projects other people you know have starred. You'll find amazing things.
+Step 4: Setup PuTTY / Pageant for SSH Forwarding
+-------------
 
-Step 4: Download and install GitHub Desktop
-------------
+If you have GitHub SSH setup, you will WANT SSH forwarding enabled. This lets you be immediately identified with GitHub anytime you wish to add a new commit, etc.
 
-* [GitHub Deskktop](https://desktop.github.com/)
+Unfortunately, currently Vagrant has a bug where it only performs SSH Forwarding on Windows IF YOU HAVE PAGEANT running. This bug is in the net-ssh library, and supposedly is [fixed in net-ssh version 4.0.0](https://github.com/net-ssh/net-ssh/issues/192). Once Vagrant updates its dependencies, you may be able to REPLACE this step with using `ssh-agent` on Windows
 
-Step 5: Create an SSH key for GitHub in GitHub Desktop and configure it for your GitHub account
-------------
+* Install [PuTTY](http://www.putty.org/)
+  * This will install PuTTY and all its utilities to your `Program Files` under a `PuTTY` folder. Pageant (`pageant.exe`) will be included in that directory.
+* Run PuTTY Key Generator (`puttygen.exe`). You will need to generate a PuTTY version of your GitHub SSH key (as PuTTY has its own key format)
+  * Select "Conversions" -> "Import Key"
+  * Select your GitHub key (e.g. `[HOME]/.ssh/github_rsa`), and save it as a PPK file of the same name
+* Run Pageant (`pageant.exe`), and add that new PPK key to its list. Pageant may open in your notification area. [This WinSCP guide shows how to add keys to Pageant](https://winscp.net/eng/docs/ui_pageant).
+* WARNING: Pageant MUST BE RUNNING for SSH forwarding to work properly. You will likely want to set it up to startup whenever you start Windows. The WinSCP guide provides (above) provides instructions for that, or [this blog post](https://sites.google.com/a/martianpackets.com/martianpackets/Home/puttytips--runpageantonwindowsstartup).
 
-* [generate a key](https://help.github.com/articles/generating-an-ssh-key/) GitHub Desktop will generate this key by default as part of the install process, but do verify that it exists.
-* [add this key to your GitHub account](https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/)
-
-Step 6: Fork Vagrant-DSpace and DSpace to your new GitHub account
+Step 5: Fork Vagrant-DSpace and DSpace to your new GitHub account
 ------------
 
 * [read how to fork a repository](https://help.github.com/articles/fork-a-repo/)
 * [fork Vagrant-DSpace](https://github.com/dspace/vagrant-dspace)
 * [fork DSpace](https://github.com/dspace/dspace)
 
-Step 7: Configure a .bashrc file for Git Bash
+Step 6: Configure a .bashrc file for Git Bash
 ------------
 
 * An example is provided in the docs folder, just copy `docs/example-bashrc` to `~/.bashrc`. It should not require tweaking, but do verify its content, _don't run it blindly_.
@@ -69,7 +75,7 @@ Step 7: Configure a .bashrc file for Git Bash
 2. Enter `cd ~ && curl https://raw.githubusercontent.com/DSpace/vagrant-dspace/master/docs/example-bashrc -o .bashrc`
 3. Verify the content of the .bashrc file that you just downloaded. Open the file with your favorite code editor, or even Windows Notepad. Git Bash comes with a version of Vim installed, you can use that if you're comfortable with Vim.
 
-Step 8: Install some Vagrant plugins
+Step 7: Install some Vagrant plugins
 ------------
 
 Since you already have a Git Bash Shell window open (from the previous step) let's just install some useful Vagrant plugins, by typing the following at your Git Bash Shell command line prompt:
@@ -80,16 +86,16 @@ vagrant plugin install vagrant-cachier
 vagrant plugin install vagrant-vbguest
 vagrant plugin install vagrant-vbox-snapshot
 ```
-It's OK to exit this Git Bash Sehll window, after you are done installing Vagrant Plugins, by entering `exit` at your Git Bash Shell command line prompt. 
+It's OK to exit this Git Bash Sehll window, after you are done installing Vagrant Plugins, by entering `exit` at your Git Bash Shell command line prompt.
 
-Step 9: Clone your fork of Vagrant-DSpace using GitHub Deskktop
+Step 8: Clone your fork of Vagrant-DSpace using GitHub Deskktop
 ------------
 
 1. If it's not already running, start GitHub Desktop by double-clicking the GitHub shortcut icon on your desktop, or launch GitHub from the Start menu.
 2. Click the plus/+ icon in the top left menu
 3. Select "Clone", enter the Git URL for your fork of Vagrant-DSpace (created in Step 7 above). This URL will look something like: `git@github.com:yourgithubusername/vagrant-dspace.git`. An easy way to find this URL is to navigate to your fork on the GitHub site: `https://github.com/yourgithubusername/vagrant-dspace` and then click the green "Clone or download" button, using the Clone with SSH option.  
 
-Step 10: customize your Vagrant-DSpace
+Step 9: Customize your Vagrant-DSpace
 ------------
 
 1. in the `config` folder of Vagrant-DSpace, copy the `local.yaml.example` file to `local.yaml`, and then open the `local.yaml` file in your favorite code editor.
@@ -100,7 +106,7 @@ Step 10: customize your Vagrant-DSpace
 
 For a more complete description of the local.yaml file, and all the other configuration options available to you, consult the [How to Tweak Things to your Liking](https://github.com/DSpace/vagrant-dspace/blob/master/README.md#how-to-tweak-things-to-your-liking) section of the README.
 
-Step 11: Vagrant Up!
+Step 10: Vagrant Up!
 ------------
 
 1. If it's not already running, start GitHub Desktop by double-clicking the GitHub shortcut icon on your desktop, or launch GitHub from the Start menu.
