@@ -155,7 +155,7 @@ Vagrant.configure("2") do |config|
     end
 
     # Check if a test SSH connection to GitHub succeeds or fails (on every vagrant up)
-    # This sets a Puppet Fact named "github_ssh_status" on the VM. 
+    # This sets a Puppet Fact named "github_ssh_status" on the VM.
     # That fact is then used by 'setup.pp' to determine whether to connect to a Git Repo via SSH or HTTPS (see setup.pp)
     config.vm.provision :shell, :inline => "echo 'Testing SSH connection to GitHub on VM...' && mkdir -p /etc/facter/facts.d/ && ssh -T -q -oStrictHostKeyChecking=no git@github.com; echo github_ssh_status=$? > /etc/facter/facts.d/github_ssh.txt", run: "always"
 
@@ -212,6 +212,8 @@ Vagrant.configure("2") do |config|
     config.vm.provision :puppet do |puppet|
         puppet.manifests_path = "."
         puppet.manifest_file = "setup.pp"
+        # NOTE: If you are hitting issues/errors with Puppet provisioning,
+        # adding "--debug" to the 'puppet.options' will provide debug logs.
         puppet.options = "--verbose"
     end
 
