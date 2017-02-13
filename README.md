@@ -29,9 +29,8 @@ Table of Contents
 7. [Vagrant Plugin Recommendations - Other plugins you may wish to consider installing](#vagrant-plugin-recommendations)
 8. [Don't Miss These Really Cool Things You Can Do with Vagrant](#dont-miss-these-really-cool-things-you-can-do-with-vagrant)
 9. [What's Next?](#whats-next)
-10. [Tools We Use To Make This All Work](#tools-we-use-to-make-this-all-work)
-11. [Reporting Bugs / Requesting Enhancements](#reporting-bugs--requesting-enhancements)
-12. [License](#license)
+10. [Reporting Bugs / Requesting Enhancements](#reporting-bugs--requesting-enhancements)
+11. [License](#license)
 
 How it Works
 ------------
@@ -61,14 +60,14 @@ Requirements
 * [Virtualization support must be enabled](http://www.howtogeek.com/213795/how-to-enable-intel-vt-x-in-your-computers-bios-or-uefi-firmware/), if you have a BIOS-based computer (aka a PC).
 * [Vagrant](http://vagrantup.com/) version 1.8.3 or above.
 * [VirtualBox](https://www.virtualbox.org/)
-* (Optional) A GitHub account with an associated SSH key. This is NOT required, but if you plan to do development on 'vagrant-dspace' and/or create Pull Requests, it is recommended. If you have a local SSH agent running (or [Pageant/PuTTY](http://www.putty.org/) on Windows), Vagrant will attempt to automatically forward your local SSH key(s) to the VM, so that you will be able to immediately interact with GitHub via SSH on the VM.
- * (Optional) if you are using an SSH key, we recommend that you use an RSA key. The base OS we use, Ubuntu 16.04LTS, uses OpenSSH 7.0, which [*disallows* DSA keys by default](http://viryagroup.com/what-we-do/our-blog-posts/hosting-and-linux-server-managment-blog/ssh-keys-failing-in-ubuntu-16-04-xenial-with-permission-denied-publickey). You can of course work around this, but OpenSSH made this choice for a reason, you will probably be happier in the long run if you switch to an RSA key.
+* (Optional) A GitHub account with an associated SSH key. This is NOT required, but if you plan to do development on 'vagrant-dspace' and/or create Pull Requests, it is recommended. If you have a local [SSH agent](https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/) running (or [Pageant/PuTTY](http://www.putty.org/) on Windows), Vagrant will attempt to automatically forward your local SSH key(s) to the VM, so that you will be able to immediately interact with GitHub via SSH on the VM.
+ * *WARNING:* If you are using an SSH key, we highly recommend that you use an RSA key. The base OS we use, Ubuntu 16.04LTS, uses OpenSSH 7.0, which [*disallows* DSA keys by default](http://viryagroup.com/what-we-do/our-blog-posts/hosting-and-linux-server-managment-blog/ssh-keys-failing-in-ubuntu-16-04-xenial-with-permission-denied-publickey). You can of course work around this, but OpenSSH made this choice for a reason, you will probably be happier in the long run if you switch to an RSA key.
 
 
 Getting Started
 --------------------------
 
-NOTE: [detailed step-by-step installation instructions for setting up Vagrant-DSpace on Windows](https://github.com/DSpace/vagrant-dspace/blob/master/docs/WINDOWS_INSTRUCTIONS.md) can be found in the `docs` folder.
+**WINDOWS INSTRUCTIONS:** [detailed step-by-step installation instructions for setting up Vagrant-DSpace on Windows](https://github.com/DSpace/vagrant-dspace/blob/master/docs/WINDOWS_INSTRUCTIONS.md) can be found in the `docs` folder.
 
 1. Install all required software (see above). Linux users take note: the versions of Vagrant and Virtualbox in your distribution's package manager are probably not current enough. Download and manually install the most recent version from [Vagrant](http://vagrantup.com) and [VirtualBox](https://www.virtualbox.org/). It will be OK. Both of these projects move quickly, and the distro managers have a hard time keeping up.
 2. Clone a copy of 'vagrant-dspace' to your local computer (via Git)
