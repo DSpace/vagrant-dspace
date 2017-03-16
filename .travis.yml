@@ -1,0 +1,13 @@
+sudo: required
+
+language: ruby
+rvm:
+  - "1.9.3"
+
+script:
+# check the syntax of the Vagrantfile with ruby... Vagrantfiles are Ruby, so they should validate with the Ruby interpreter
+- ruby -c Vagrantfile
+# check the syntax of our standard YAML files (if you add a yaml file, you should
+# add it here to ensure it is valid)
+- ruby -ryaml -e "YAML.parse(File.open('config/default.yaml'))"
+- ruby -ryaml -e "YAML.parse(File.open('config/local.yaml.example'))"
