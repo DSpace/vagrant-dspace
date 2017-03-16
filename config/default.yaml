@@ -85,6 +85,9 @@ vm_gui_mode     : false
 #dspace::git_repo   : 'git@github.com:DSpace/DSpace.git'
 #dspace::git_branch : 'master'
 
+# since the DSpace master branch currently has no UI in it, we will set the git_branch to dspace-6_x
+dspace::git_branch : 'dspace-6_x'
+
 #-------------------------------
 # DSpace Administrative Account
 #-------------------------------
