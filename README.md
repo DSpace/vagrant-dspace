@@ -1,4 +1,4 @@
-Vagrant + DSpace = vagrant-dspace
+Vagrant + DSpace = vagrant-dspace [![Build Status](https://secure.travis-ci.org/dspace/vagrant-dspace.png?branch=master)](https://travis-ci.org/dspace/vagrant-dspace)
 =================================
 
 [Vagrant](http://vagrantup.com) can be used to spin up a temporary Virtual Machine (VM) in a variety of providers ([VirtualBox](http://www.virtualbox.org), [VMWare](http://www.vmware.com/), [Amazon AWS](http://aws.amazon.com/), etc).
