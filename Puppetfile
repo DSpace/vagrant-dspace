@@ -6,7 +6,7 @@ forge "https://forgeapi.puppetlabs.com"
 
 # Install PuppetLabs Standard Libraries (includes various useful puppet methods)
 # See: https://github.com/puppetlabs/puppetlabs-stdlib
-mod "puppetlabs-stdlib", "4.12.0"
+mod "puppetlabs-stdlib", "4.16.0"
 
 # Install Puppet Labs PostgreSQL module
 # https://github.com/puppetlabs/puppetlabs-postgresql/
