@@ -39,6 +39,15 @@ Vagrant.require_version ">= 1.8.3"
 
 # Actual Vagrant configs
 Vagrant.configure("2") do |config|
+  
+  # Load code to evalute from local Vagrantfile
+  # Permits to adapt the vagrant configuration to your local environment
+  # If it doesn't exist, nothing is executed.
+  if File.exists?("Vagrantfile.local")
+	  external = File.read "Vagrantfile.local"
+	  eval external
+	end
+  
     # All Vagrant configuration is done here. The most common configuration
     # options are documented and commented below. For a complete reference,
     # please see the online documentation at vagrantup.com.
