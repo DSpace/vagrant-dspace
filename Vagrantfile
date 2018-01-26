@@ -81,16 +81,16 @@ Vagrant.configure("2") do |config|
     # Create a forwarded port mapping which allows access to a specific port
     # within the machine from a port on the host machine. In the example below,
     # accessing "localhost:[port]" will access port 8080 on the VM.
-    #config.vm.network :forwarded_port, guest: 8080, host: CONF['port'],
-    #  auto_correct: true
+    config.vm.network :forwarded_port, guest: 8080, host: CONF['port'],
+      auto_correct: true
 
     # Forward PostgreSQL database port (5432) to local machine port (for DB & pgAdmin3 access)
-    # config.vm.network :forwarded_port, guest: 5432, host: CONF['db_port'],
-    #   auto_correct: true
+    config.vm.network :forwarded_port, guest: 5432, host: CONF['db_port'],
+      auto_correct: true
 
     # If a port collision occurs (e.g. port 8080 on local machine is in use),
     # then tell Vagrant to use the next available port between 8081 and 8100
-    # config.vm.usable_port_range = 8081..8100
+    config.vm.usable_port_range = 8081..8100
 
     # BEGIN Landrush (https://github.com/phinze/landrush) configuration
     # This section will only be triggered if you have installed "landrush"
