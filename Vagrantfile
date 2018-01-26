@@ -59,10 +59,18 @@ Vagrant.configure("2") do |config|
     config.vm.define "vagrant-dspace"
 
     # Hostname for virtual machine
-    config.vm.hostname = "dspace.vagrant.dev"
+    config.vm.hostname = "dspace.vagrant.test"
 
     # How long to wait for machine to boot (in seconds)
     config.vm.boot_timeout = 500
+
+    #-----------------------------
+    # HD Settings
+    #-----------------------------
+    # if we have the disksize plugin, request a specific disk size
+    if Vagrant.has_plugin?('vagrant-disksize')
+        config.disksize.size = '50GB'
+    end
 
     #-----------------------------
     # Network Settings
@@ -73,23 +81,23 @@ Vagrant.configure("2") do |config|
     # Create a forwarded port mapping which allows access to a specific port
     # within the machine from a port on the host machine. In the example below,
     # accessing "localhost:[port]" will access port 8080 on the VM.
-    config.vm.network :forwarded_port, guest: 8080, host: CONF['port'],
-      auto_correct: true
+    #config.vm.network :forwarded_port, guest: 8080, host: CONF['port'],
+    #  auto_correct: true
 
     # Forward PostgreSQL database port (5432) to local machine port (for DB & pgAdmin3 access)
-    config.vm.network :forwarded_port, guest: 5432, host: CONF['db_port'],
-      auto_correct: true
+    # config.vm.network :forwarded_port, guest: 5432, host: CONF['db_port'],
+    #   auto_correct: true
 
     # If a port collision occurs (e.g. port 8080 on local machine is in use),
     # then tell Vagrant to use the next available port between 8081 and 8100
-    config.vm.usable_port_range = 8081..8100
+    # config.vm.usable_port_range = 8081..8100
 
     # BEGIN Landrush (https://github.com/phinze/landrush) configuration
     # This section will only be triggered if you have installed "landrush"
     #     vagrant plugin install landrush
     if Vagrant.has_plugin?('landrush')
         config.landrush.enable
-        config.landrush.tld = 'vagrant.dev'
+        config.landrush.tld = 'vagrant.test'
 
         # let's use the Google free DNS
         config.landrush.upstream '8.8.8.8'
@@ -120,7 +128,7 @@ Vagrant.configure("2") do |config|
        }
 
        # set the permissions for .m2 so we can use Maven properly
-       config.vm.provision :shell, :inline => "chown vagrant:vagrant /home/vagrant/.m2"
+       config.vm.provision :shell, :name => "set Maven .m2 permissions", :inline => "chown vagrant:vagrant /home/vagrant/.m2"
     end
     # END Vagrant-Cachier configuration
 
@@ -131,10 +139,10 @@ Vagrant.configure("2") do |config|
     # This also means we need to run 'dpkg-reconfigure' to avoid "unable to re-open stdin" errors (see http://serverfault.com/a/500778)
     # For now, we have a hardcoded locale of "en_US.UTF-8"
     locale = "en_US.UTF-8"
-    config.vm.provision :shell, :inline => "echo 'Setting locale to UTF-8 (#{locale})...' && locale | grep 'LANG=#{locale}' > /dev/null || update-locale --reset LANG=#{locale} && dpkg-reconfigure -f noninteractive locales"
+    config.vm.provision :shell, :name => "set locale to UTF-8", :inline => "echo 'Setting locale to UTF-8 (#{locale})...' && locale | grep 'LANG=#{locale}' > /dev/null || update-locale --reset LANG=#{locale} && dpkg-reconfigure -f noninteractive locales"
 
     # Turn off annoying console bells/beeps in Ubuntu (only if not already turned off in /etc/inputrc)
-    config.vm.provision :shell, :inline => "echo 'Turning off console beeps...' && grep '^set bell-style none' /etc/inputrc || echo 'set bell-style none' >> /etc/inputrc"
+    config.vm.provision :shell, :name => "disable console beep", :inline => "echo 'Turning off console beeps...' && grep '^set bell-style none' /etc/inputrc || echo 'set bell-style none' >> /etc/inputrc"
 
     #------------------------
     # Enable SSH Forwarding
@@ -152,12 +160,13 @@ Vagrant.configure("2") do |config|
     config.vm.provision :shell do |shell|
         shell.inline = "touch $1 && chmod 0440 $1 && echo $2 > $1"
         shell.args = %q{/etc/sudoers.d/root_ssh_agent "Defaults    env_keep += \"SSH_AUTH_SOCK\""}
+        shell.name = "creating /etc/sudores.d/root_ssh_agent"
     end
 
     # Check if a test SSH connection to GitHub succeeds or fails (on every vagrant up)
     # This sets a Puppet Fact named "github_ssh_status" on the VM.
     # That fact is then used by 'setup.pp' to determine whether to connect to a Git Repo via SSH or HTTPS (see setup.pp)
-    config.vm.provision :shell, :inline => "echo 'Testing SSH connection to GitHub on VM...' && mkdir -p /etc/facter/facts.d/ && ssh -T -q -oStrictHostKeyChecking=no git@github.com; echo github_ssh_status=$? > /etc/facter/facts.d/github_ssh.txt", run: "always"
+    config.vm.provision :shell, :name => "testing SSH connection to GitHub on VM", :inline => "echo 'Testing SSH connection to GitHub on VM...' && mkdir -p /etc/facter/facts.d/ && ssh -T -q -oStrictHostKeyChecking=no git@github.com; echo github_ssh_status=$? > /etc/facter/facts.d/github_ssh.txt", run: "always"
 
     #------------------------
     # Provisioning Scripts
@@ -167,11 +176,11 @@ Vagrant.configure("2") do |config|
     # Shell script to set up swap space for this VM
 
     if File.exists?("config/increase-swap.sh")
-        config.vm.provision :shell, :inline => "echo '   > > > running local increase-swap.sh to ensure enough memory is available, via a swap file.'"
-        config.vm.provision :shell, :path => "config/increase-swap.sh"
+        config.vm.provision :shell, :name => "creating a swap file", :inline => "echo '   > > > running local increase-swap.sh to ensure enough memory is available, via a swap file.'"
+        config.vm.provision :shell, :name => "creating a swap file with a local increase-swap.sh script", :path => "config/increase-swap.sh"
     else
-        config.vm.provision :shell, :inline => "echo '   > > > running default increase-swap.sh scripte to ensure enough memory is available, via a swap file.'"
-        config.vm.provision :shell, :path => "increase-swap.sh"
+        config.vm.provision :shell, :name => "creating a swap file", :inline => "echo '   > > > running default increase-swap.sh scripte to ensure enough memory is available, via a swap file.'"
+        config.vm.provision :shell, :name => "creating a swap file with the default increase-swap.sh script", :path => "increase-swap.sh"
     end
 
 
@@ -181,32 +190,32 @@ Vagrant.configure("2") do |config|
     # If a customized version of this script exists in the config folder, use that instead
 
     if File.exists?("config/apt-spy-2-bootstrap.sh")
-        config.vm.provision :shell, :inline => "echo '   > > > running local apt-spy2 to locate a nearby mirror (for quicker installs). Do not worry if it shows an error, it will be OK, there is a fallback.'"
-        config.vm.provision :shell, :path => "config/apt-spy-2-bootstrap.sh"
+        config.vm.provision :shell, :name => "apt-spy-2, locating a nearby mirror", :inline => "echo '   > > > running local apt-spy2 to locate a nearby mirror (for quicker installs). Do not worry if it shows an error, it will be OK, there is a fallback.'"
+        config.vm.provision :shell, :name => "apt-spy-2, running custom apt-spy-2-bootstrap", :path => "config/apt-spy-2-bootstrap.sh"
     else
-        config.vm.provision :shell, :inline => "echo '   > > > running default apt-spy2 to locate a nearby mirror (for quicker installs). Do not worry if it shows an error, it will be OK, there is a fallback.'"
-        config.vm.provision :shell, :path => "apt-spy-2-bootstrap.sh"
+        config.vm.provision :shell, :name => "apt-spy2, locating a nearby mirror", :inline => "echo '   > > > running default apt-spy2 to locate a nearby mirror (for quicker installs). Do not worry if it shows an error, it will be OK, there is a fallback.'"
+        config.vm.provision :shell, :name => "apt-spy2, running default apt-spy-2-bootstrap", :path => "apt-spy-2-bootstrap.sh"
     end
 
 
     # Shell script to initialize latest Puppet on VM & also install librarian-puppet (which manages our third party puppet modules)
     # This has to be done before the puppet provisioning so that the modules are available when puppet tries to parse its manifests.
-    config.vm.provision :shell, :path => "puppet-bootstrap-ubuntu.sh"
+    config.vm.provision :shell, :name => "running puppet-bootstrap", :path => "puppet-bootstrap-ubuntu.sh"
 
     # Copy our 'hiera.yaml' file over to the global Puppet directory (/etc/puppet) on VM
     # This lets us run 'puppet apply' manually on the VM for any minor updates or tests
-    config.vm.provision :shell, :inline => "cp /vagrant/hiera.yaml /etc/puppet"
+    config.vm.provision :shell, :name =>"copying hiera.yaml", :inline => "cp /vagrant/hiera.yaml /etc/puppet"
 
     # display the local.yaml file, if it exists, to give us a chance to back out
     # before waiting for this vagrant up to complete
     if File.exists?("config/local.yaml")
-        config.vm.provision :shell, :inline => "echo '   > > > using the following local.yaml data, if this is not correct, control-c now...'"
-        config.vm.provision :shell, :inline => "echo '---BEGIN local.yaml ---' && cat /vagrant/config/local.yaml && echo '--- END local.yaml -----'"
+        config.vm.provision :shell, :name=>"echoing local.yaml", :inline => "echo '   > > > using the following local.yaml data, if this is not correct, control-c now...'"
+        config.vm.provision :shell, :name=>"echoing local.yaml for review", :inline => "echo '---BEGIN local.yaml ---' && cat /vagrant/config/local.yaml && echo '--- END local.yaml -----'"
     end
 
     # Call our Puppet initialization script
-    config.vm.provision :shell, :inline => "echo '   > > > Beginning Puppet provisioning, this may take a while (and will appear to hang during DSpace Install step)...'"
-    config.vm.provision :shell, :inline => "echo '   > > > PATIENCE! Console output is only shown after each step completes...'"
+    config.vm.provision :shell, :name=>"starting Puppet provisioning", :inline => "echo '   > > > Beginning Puppet provisioning, this may take a while (and will appear to hang during DSpace Install step)...'"
+    config.vm.provision :shell, :name=>"please be patient", :inline => "echo '   > > > PATIENCE! Console output is only shown after each step completes...'"
 
     # Actually run Puppet to setup the server, install all prerequisites and install DSpace
     config.vm.provision :puppet do |puppet|
@@ -279,13 +288,19 @@ Vagrant.configure("2") do |config|
         # be enabled by default depending on what version of VirtualBox is used.
         # Borrowed from https://github.com/purple52/librarian-puppet-vagrant/
         vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
+
+        # this is how to add a USB webcam to a Virtualbox VM... doesn't quite work, so commented out for now
+        # vb.customize ['modifyvm', :id, '--usb', 'on']
+        # #vb.customize ['usbfilter', 'add', '0', '--target', :id, '--name', 'WebCamExternal', '--vendorid', '0x046d', '--productid', '0x0826']
+        # vb.customize ['usbfilter', 'add', '1', '--target', :id, '--name', 'WebCamInternal', '--vendorid', '0x04f2', '--productid', '0xb5a7']
+
     end
 
     # if we're running with vagrant-notify, send a notification that we're done, in case we've wandered off
     # https://github.com/fgrehm/vagrant-notify
     # NOTE: Currently this plugin only works on Linux or OSX hosts
     if Vagrant.has_plugin?('vagrant-notify')
-        config.vm.provision :shell, :inline => "notify-send --urgency=critical 'Vagrant-DSpace is up! Get back to work! :-)'", run: "always"
+        config.vm.provision :shell, :inline => "notify-send --urgency=critical -t 20000 'Vagrant-DSpace is up! Get back to work! :-)'", run: "always"
     end
 
     # Message to display to user after 'vagrant up' completes
