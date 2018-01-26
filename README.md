@@ -202,6 +202,12 @@ Another optional `config/dotfiles` folder which is copied (if it exists) by the 
 
 Vagrant Plugin Recommendations
 -------------------------------
+Vagrant has a robust community of plugin developers, and some of the plugins are quite nice. [Installing a Vagrant plugin](https://www.vagrantup.com/docs/plugins/usage.html) is simple.
+
+The following Vagrant plugin is *required*, if you use the default [ubuntu/xenial](https://app.vagrantup.com/ubuntu/boxes/xenial64) base box (in other words, if you don't change the default, you'll *need* this plugin).
+
+* [Vagrant-Disksize](https://github.com/sprotheroe/vagrant-disksize) - may not be required if you use another base box, but we've tested it and confirmed it works with the ubuntu/xenial base box.
+
 
 The following Vagrant plugins are not required, but they do make using Vagrant and vagrant-dspace more enjoyable.
 
