@@ -64,9 +64,8 @@ sync_src_to_host : false
 # Default Vagrant box to use. This should be an Ubuntu box (16.04 64bit recommended)
 # as 'vagrant-dspace' has not been tested on other OSes.
 # (Changes to these settings require a 'vagrant destroy && vagrant up' to take effect)
-# Using "box-cutter/ubuntu1604" as the "ubuntu/xenial64" box is currently broken: http://stackoverflow.com/a/38078133/3750035
-vagrant_box     : 'box-cutter/ubuntu1604'
-vagrant_box_url : 'https://vagrantcloud.com/box-cutter/ubuntu1604'
+vagrant_box     : 'ubuntu/xenial64'
+vagrant_box_url : 'https://app.vagrantup.com/ubuntu/boxes/xenial64'
 
 # Boot VM into GUI mode (login: vagrant, pwd: vagrant). Useful for debugging VM boot issues, etc.
 # By default this is disabled as it can be memory hungry, and SSH is usually all you need.
